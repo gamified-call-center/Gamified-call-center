@@ -18,7 +18,7 @@ export default function Boosts({ boosts }: BoostsProps) {
   const activeBoosts = boosts.filter((b) => b.active);
 
   return (
-    <div className="h-full bg-slate-800/40 backdrop-blur-xl rounded-3xl border border-white/10 p-6">
+    <div className="h-full bg-slate-800/40 backdrop-blur-xl rounded-[10px] border border-white/10 p-6">
       <h3 className="text-lg font-bold text-white mb-4">Active Boosts</h3>
 
       {activeBoosts.length === 0 ? (

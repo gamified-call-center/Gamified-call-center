@@ -31,7 +31,7 @@ export default function DataTable({
   rowCls,
 }: DataTableProps) {
   return (
-    <div className="w-full overflow-x-auto no-scrollbar rounded-2xl border border-white/10 bg-slate-800/40 backdrop-blur-xl shadow-xl">
+    <div className="w-full overflow-x-auto no-scrollbar rounded-xl border border-white/10 bg-slate-800/40 backdrop-blur-xl shadow-xl">
       <table
         className={twMerge(
           "w-full table-auto border-collapse",

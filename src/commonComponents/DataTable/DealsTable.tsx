@@ -44,7 +44,7 @@ const DealsTable: React.FC<DealsTableProps> = ({ deals }) => {
       <h1 className="text-2xl font-bold text-white mb-6">Deals</h1>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-3xl divide-y divide-white/10">
+        <table className="min-w-full bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-[10px] divide-y divide-white/10">
           <thead className="bg-slate-900/50">
             <tr>
               {["Deal #", "Full Name", "#Applicants", "Career", "Closed Date", "Agent", "Created By", "Actions"].map((col) => (
@@ -88,7 +88,7 @@ const DealsTable: React.FC<DealsTableProps> = ({ deals }) => {
       {/* Modal */}
       {isModalOpen && selectedDeal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-xl z-50 p-4">
-          <div className="bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-3xl w-full max-w-3xl p-6 overflow-y-auto max-h-[80vh] relative">
+          <div className="bg-slate-800/40 backdrop-blur-xl border border-white/10 rounded-[10px] w-full max-w-3xl p-6 overflow-y-auto max-h-[80vh] relative">
             <button
               className="absolute top-4 right-4 text-slate-400 hover:text-white"
               onClick={handleCloseModal}

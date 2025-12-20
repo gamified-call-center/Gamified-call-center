@@ -44,7 +44,7 @@ export default function LiveDealsFeed({ deals }: LiveDealsFeedProps) {
   const duplicatedDeals = [...deals, ...deals];
 
   return (
-    <div className="bg-slate-800/40 backdrop-blur-xl rounded-3xl border border-white/10 overflow-hidden">
+    <div className="bg-slate-800/40 backdrop-blur-xl rounded-[10px] border border-white/10 overflow-hidden">
       <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="relative">
