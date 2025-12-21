@@ -25,7 +25,7 @@ const SECTIONS = [
     title: "MENU",
     items: [
       { label: "Dashboard", href: "/aca/dashboard", icon: LayoutDashboard },
-      { label: "Agents", href: "/agents", icon: Users },
+      { label: "Agents", href: "/aca/agents", icon: Users },
       { label: "Deals", href: "/aca/deals", icon: Briefcase },
     ],
   },
@@ -164,13 +164,16 @@ export default function Sidebar({
         ))}
       </div>
 
-      {/* User Profile */}
-      <div className="p-4 border-t border-white/10 bg-gradient-to-br from-blue-900/20 to-purple-900/20">
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full blur opacity-30" />
-            <div className="relative h-11 w-11 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg">
-              KR
+        {/* Bottom user card */}
+        <div className="mt-auto px-5 pb-6">
+          <div
+            className={clsx(
+              "rounded-xl bg-[#256e90] border border-white/10 p-3 flex items-center gap-3",
+              collapsed && "justify-center"
+            )}
+          >
+            <div className="h-10 w-10 rounded-full bg-linear-to-br  from-emerald-400/80 to-blue-500/80 flex items-center justify-center text-white font-semibold text-sm">
+              {user.initials ?? "JD"}
             </div>
             {/* Online Status */}
             <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#1e293b]" />
