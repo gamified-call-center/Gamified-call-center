@@ -18,7 +18,7 @@ export default function Topbar({
 
   return (
     <header
-      className="fixed top-0 right-0 h-16 bg-white border-b border-black/10 z-40 transition-[left] duration-200"
+      className="fixed top-0 right-0 h-16 bg-white border-b border-black/10 z-30 transition-[left] duration-200"
       style={{
         left: 0, // mobile default
       }}

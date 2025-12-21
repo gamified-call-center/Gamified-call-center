@@ -21,7 +21,7 @@ export default function DashboardHeader({
   const pct = Math.max(0, Math.min(100, Math.round((profile.currentXp / profile.xpToNextLevel) * 100)));
 
   return (
-    <div className="relative overflow-hidden rounded-[10px] border  border-white/10 bg-[#9BB4C0]">
+    <div className="bg-red-600 relative overflow-hidden rounded-[10px] border  border-white/10 bg-[#9BB4C0]">
       <div className={`absolute inset-0 bg-linear-to-r ${appGlow(app)}`} />
       <div className="relative p-5 md:p-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
