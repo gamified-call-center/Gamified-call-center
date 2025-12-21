@@ -16,12 +16,12 @@ export default function ProgressSection({
   const progressPercentage = (currentXp / xpToNextLevel) * 100;
 
   return (
-    <div className="bg-slate-800/40 backdrop-blur-xl rounded-3xl border border-white/10 p-6 lg:p-8 w-full">
+    <div className="bg-slate-800/40 backdrop-blur-xl rounded-[10px] border border-white/10 p-6 lg:p-8 w-full">
       <div className="flex flex-col sm:flex-row justify-between gap-y-4">
         {/* Level  */}
         <div className="flex items-center gap-4">
           <div className="relative">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-amber-500 via-yellow-500 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/50">
+            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-amber-500 via-yellow-500 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/50">
               <Trophy size={32} className="text-white" />
             </div>
             <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-slate-900 border-2 border-amber-500 flex items-center justify-center">
@@ -55,7 +55,7 @@ export default function ProgressSection({
         </div>
         {/* Daily Streak */}
         <div className="flex ">
-          <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30 rounded-2xl px-6 py-4 flex items-center gap-3">
+          <div className="bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30 rounded-xl px-6 py-4 flex items-center gap-3">
             <div className="relative">
               <Flame size={32} className="text-orange-400" />
               <div className="absolute inset-0 animate-pulse">

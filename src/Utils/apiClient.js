@@ -1,7 +1,14 @@
-import fetch from "isomorphic-unfetch";
-// @ts-ignore
 import merge from "lodash/merge";
 import { getSession } from "next-auth/react";
+
+const base_url = process.env.NEXT_PUBLIC_LOCAL_API_ENDPOINT;
+
+const strapi_url = process.env.NEXT_PUBLIC_STRAPI_API;
+const URLS = {
+  blogs: `${base_url}blog`,
+  otp: `${base_url}otp`,
+  user: `${base_url}users`,
+};
 
 export function encodeQueryData(data = {}) {
   const params = new URLSearchParams();
@@ -27,10 +34,6 @@ export function tryParseJSON(json) {
   }
 }
 
-const URLS = {
-  s3bucket: "https://gamified-call-center.s3.amazonaws.com/",
-};
-
 const getResponseBody = (response) => {
   const contentType = response.headers.get("content-type");
   return contentType && contentType.indexOf("json") >= 0
@@ -49,11 +52,9 @@ ResponseError.prototype = Error.prototype;
 export const retrieveToken = async (ctx = undefined) => {
   if (ctx?.req) {
     const session = await getSession(ctx);
-    // @ts-ignore
     return session?.accessToken || "";
   } else {
     const session = await getSession();
-    // @ts-ignore
     return session?.accessToken || "";
   }
 };
@@ -118,7 +119,6 @@ const request = async ({
 const _request = request;
 
 const get = (url, params, auth = false, ctx = undefined) => {
-  // @ts-ignore
   return _request({
     method: "GET",
     url,
@@ -138,7 +138,6 @@ const post = (url, params, auth = false, type) => {
 };
 
 const put = (url, params, auth = false) => {
-  // @ts-ignore
   return _request({
     method: "PUT",
     url,
@@ -148,7 +147,6 @@ const put = (url, params, auth = false) => {
 };
 
 const patch = (url, params, auth = false) => {
-  // @ts-ignore
   return _request({
     method: "PATCH",
     url,
@@ -158,7 +156,6 @@ const patch = (url, params, auth = false) => {
 };
 
 const _delete = (url, params, auth = false) => {
-  // @ts-ignore
   return _request({
     method: "DELETE",
     url,
