@@ -46,3 +46,23 @@ export const LANGUAGE_OPTIONS: SelectOption[] = [
   { label: "Spanish", value: "ES" },
   { label: "Other", value: "OTHER" },
 ];
+
+
+export const DEFAULT_ROLE_OPTIONS: SelectOption[] = [
+  { label: "Agent", value: "Agent" },
+  { label: "Agent Lead", value: "AgentLead" },
+  { label: "Manager", value: "Manager" },
+];
+
+export const DEFAULT_ACCESS_OPTIONS: SelectOption[] = [
+  { label: "Training", value: "Training" },
+  { label: "Full Access", value: "FullAccess" },
+  
+];
+
+export const DEFAULT_APPS_OPTIONS: SelectOption[] = [
+  { label: "ACA", value: "ACA" },
+  { label: "Medicare", value: "Medicare" },
+  { label: "Taxation", value: "Taxation" },
+  { label: "Launchpad", value: "Launchpad" },
+];

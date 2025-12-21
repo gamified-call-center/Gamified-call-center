@@ -23,6 +23,21 @@ const config: Config = {
       borderRadius: {
         xl: "1rem",
       },
+      keyframes: {
+        loaderProgress: {
+          "0%": { transform: "translateX(-60%)" },
+          "50%": { transform: "translateX(0%)" },
+          "100%": { transform: "translateX(60%)" },
+        },
+        loaderFill: {
+          "0%, 100%": { clipPath: "inset(100% 0 0 0)" },
+          "50%": { clipPath: "inset(0% 0 0 0)" },
+        },
+      },
+       animation: {
+        loaderProgress: "loaderProgress 2s ease-in-out infinite",
+        loaderFill: "loaderFill 2.2s ease-in-out infinite",
+      },
     },
   },
   plugins: [],
