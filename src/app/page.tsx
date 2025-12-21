@@ -8,7 +8,7 @@ export default function Home() {
       </h1>
 
       <Link
-        href="/dashboard"
+        href="/aca/dashboard"
         className="px-6 py-3 bg-blue-600 text-white rounded-lg"
       >
         Go to Dashboard

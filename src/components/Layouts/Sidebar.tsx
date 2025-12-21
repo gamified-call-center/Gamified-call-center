@@ -29,7 +29,7 @@ const SECTIONS: NavSection[] = [
   {
     title: "MENU",
     items: [
-      { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      { label: "Dashboard", href: "/aca/dashboard", icon: LayoutDashboard },
       { label: "Agents", href: "/agents", icon: Users },
       { label: "Deals", href: "/aca/deals", icon: Briefcase },
     ],
@@ -37,13 +37,13 @@ const SECTIONS: NavSection[] = [
   {
     title: "REPORTS",
     items: [
-      { label: "Leader Board", href: "/leaderboard", icon: Trophy },
+      { label: "Leader Board", href: "/aca/leaderboard", icon: Trophy },
       { label: "Chat History", href: "/chat-history", icon: MessageSquareText },
     ],
   },
   {
     title: "LEARNING",
-    items: [{ label: "Training", href: "/training", icon: GraduationCap, badge: "New" }],
+    items: [{ label: "Training", href: "/aca/training", icon: GraduationCap, badge: "New" }],
   },
 ];
 
