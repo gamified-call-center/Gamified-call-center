@@ -41,7 +41,7 @@ function AdminShell({
       <div className="flex-1 flex flex-col md:ml-70 ml-0">
         <Topbar title={title} onOpenSidebar={() => setMobileOpen(true)} />
 
-        <main className="flex-1 overflow-y-auto scrollbar-hide px-2  py-2">
+        <main className="flex-1 overflow-y-auto scrollbar-hide px-2 py-10">
           {children}
         </main>
       </div>
