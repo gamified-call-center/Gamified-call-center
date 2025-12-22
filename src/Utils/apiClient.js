@@ -8,6 +8,7 @@ const URLS = {
   blogs: `${base_url}blog`,
   otp: `${base_url}otp`,
   user: `${base_url}users`,
+  s3bucket:"s3bucket",
 };
 
 export function encodeQueryData(data = {}) {

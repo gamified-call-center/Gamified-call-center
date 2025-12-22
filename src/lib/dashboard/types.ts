@@ -69,6 +69,17 @@ export type LiveActivityItem = {
   app: AppKey;
 };
 
+export type PerformanceMetric = {
+  id: string;
+  userId: string;
+  date: string;              // YYYY-MM-DD
+  calls: number;
+  deals: number;
+  conversations: number;
+  createdAt: string;         // ISO timestamp
+};
+
+
 export type DashboardPayload = {
   app: AppKey;
   range: TimeRangeKey;
@@ -85,4 +96,5 @@ export type DashboardPayload = {
   boosts: Boost[];
   leaderboard: LeaderboardEntry[];
   activity: LiveActivityItem[];
+  performance: PerformanceMetric[];
 };

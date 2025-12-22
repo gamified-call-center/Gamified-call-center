@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
 import clsx from "clsx";
 import {
   LayoutDashboard,
@@ -12,20 +11,16 @@ import {
   MessageSquareText,
   GraduationCap,
   X,
+  ChevronRight,
+  Shield,
   Sparkles,
-  ChevronsLeft,
-  ChevronsRight,
+  Zap,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-type NavItem = {
-  label: string;
-  href: string;
-  icon: any;
-  badge?: string;
-};
-type NavSection = { title: string; items: NavItem[] };
+const SIDEBAR_WIDTH = 280;
 
-const SECTIONS: NavSection[] = [
+const SECTIONS = [
   {
     title: "MENU",
     items: [
@@ -43,306 +38,199 @@ const SECTIONS: NavSection[] = [
   },
   {
     title: "LEARNING",
-    items: [{ label: "Training", href: "/aca/training", icon: GraduationCap, badge: "New" }],
+    items: [
+      { label: "Training", href: "/aca/training", icon: GraduationCap, badge: "New" },
+    ],
   },
 ];
 
-const MIN_SIDEBAR = 240;
-const MAX_SIDEBAR = 360;
-const COLLAPSED_SIDEBAR = 76;
-
-type SidebarProps = {
-  width: number; // resizable
-  collapsed: boolean;
-  onToggleCollapsed: () => void;
-  onWidthChange: (w: number) => void;
-
-  mobileOpen: boolean;
-  onCloseMobile: () => void;
-
-  user?: { name: string; role?: string; initials?: string };
-  xp?: { level: number; current: number; next: number };
-  rewards?: { points: number };
-};
-
 export default function Sidebar({
-  width,
-  collapsed,
-  onToggleCollapsed,
-  onWidthChange,
   mobileOpen,
   onCloseMobile,
-  user = { name: "Kishor Reddy", role: "Director", initials: "JD" },
-  xp = { level: 5, current: 300, next: 500 },
-  rewards = { points: 120 },
-}: SidebarProps) {
+}: {
+  mobileOpen: boolean;
+  onCloseMobile: () => void;
+}) {
   const pathname = usePathname();
 
-  // close mobile on route change
-  useEffect(() => {
-    onCloseMobile();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
-
-  const xpPct = Math.min(100, Math.round((xp.current / xp.next) * 100));
-  const effectiveWidth = collapsed ? COLLAPSED_SIDEBAR : width;
-
-  // drag resize
-  const [dragging, setDragging] = useState(false);
-  const startXRef = useRef(0);
-  const startWRef = useRef(width);
-
-  const startDrag = (clientX: number) => {
-    if (collapsed) return;
-    setDragging(true);
-    startXRef.current = clientX;
-    startWRef.current = width;
-
-    document.body.style.cursor = "col-resize";
-    document.body.style.userSelect = "none";
-
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", stopDrag);
-    window.addEventListener("touchmove", onTouchMove, { passive: false } as any);
-    window.addEventListener("touchend", stopDrag);
-  };
-
-  const onMouseMove = (e: MouseEvent) => {
-    const dx = e.clientX - startXRef.current;
-    const next = startWRef.current + dx;
-    onWidthChange(Math.max(MIN_SIDEBAR, Math.min(MAX_SIDEBAR, next)));
-  };
-
-  const onTouchMove = (e: TouchEvent) => {
-    e.preventDefault();
-    const t = e.touches?.[0];
-    if (!t) return;
-    const dx = t.clientX - startXRef.current;
-    const next = startWRef.current + dx;
-    onWidthChange(Math.max(MIN_SIDEBAR, Math.min(MAX_SIDEBAR, next)));
-  };
-
-  const stopDrag = () => {
-    setDragging(false);
-    document.body.style.cursor = "";
-    document.body.style.userSelect = "";
-
-    window.removeEventListener("mousemove", onMouseMove);
-    window.removeEventListener("mouseup", stopDrag);
-    window.removeEventListener("touchmove", onTouchMove as any);
-    window.removeEventListener("touchend", stopDrag);
-  };
-
-  useEffect(() => () => stopDrag(), []);
-
-  const SidebarContent = useMemo(() => {
-    const NavLink = ({ item }: { item: NavItem }) => {
-      const Icon = item.icon;
-      const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-
-      return (
-        <Link
-          href={item.href}
-          className={clsx(
-            "group flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 transition",
-            isActive ? "bg-white/10 text-white" : "text-white/75 hover:bg-white/[0.07] hover:text-white"
-          )}
-          title={collapsed ? item.label : undefined}
-        >
-          <div className="flex items-center gap-3 min-w-0">
-            <span
-              className={clsx(
-                "grid place-items-center h-9 w-9 rounded-lg transition",
-                isActive ? "bg-white/10" : "bg-white/5 group-hover:bg-white/[0.07]"
-              )}
-            >
-              <Icon className="h-4.5 w-4.5" />
-            </span>
-
-            {!collapsed && <span className="font-semibold text-[14px] truncate">{item.label}</span>}
-          </div>
-
-          {!collapsed && (
-            <div className="flex items-center gap-2">
-              {item.badge ? (
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-200 border border-emerald-400/20">
-                  {item.badge}
-                </span>
-              ) : null}
-
-              <span
-                className={clsx(
-                  "h-2 w-2 rounded-full transition",
-                  isActive ? "bg-emerald-400" : "bg-transparent group-hover:bg-white/20"
-                )}
-              />
-            </div>
-          )}
-        </Link>
-      );
-    };
+  const NavItem = ({ item }: any) => {
+    const Icon = item.icon;
+    const active = pathname === item.href || pathname.startsWith(item.href);
+    const isNew = item.badge === "New";
 
     return (
-      <div className="h-full flex flex-col">
-        {/* Header */}
-        <div className="px-5 pt-6 pb-5 border-b border-white/10">
-          <div className={clsx("flex items-center gap-3", collapsed && "justify-center")}>
-            <div className="h-10 w-10 rounded-xl bg-white/10 border border-white/10" />
-            {!collapsed && (
-              <div className="leading-tight">
-                <div className="text-white font-semibold text-[18px]">Think</div>
-                <div className="text-white/70 text-[12px] -mt-0.5">Insurance First</div>
-              </div>
-            )}
-          </div>
-
-          {/* Collapse toggle */}
-          <div className={clsx("mt-4 flex", collapsed ? "justify-center" : "justify-end")}>
-            <button
-              onClick={onToggleCollapsed}
-              className="h-9 w-9 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 grid place-items-center"
-              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-              title={collapsed ? "Expand" : "Collapse"}
-            >
-              {collapsed ? (
-                <ChevronsRight className="h-5 w-5 text-white/80" />
-              ) : (
-                <ChevronsLeft className="h-5 w-5 text-white/80" />
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* XP card */}
-        {!collapsed && (
-          <div className="px-5 pt-4">
-            <div className="rounded-xl bg-[#477891] border border-white/10 p-4">
-              <div className="flex items-center justify-between">
-                <div className="text-white/90 text-xs font-semibold tracking-wider">AGENT PROGRESS</div>
-                <span className="inline-flex items-center gap-1 text-[12px] text-emerald-200">
-                  <Sparkles className="h-4 w-4" />
-                  Lv {xp.level}
-                </span>
-              </div>
-
-              <div className="mt-3">
-                <div className="flex items-center justify-between text-[12px] text-white/70">
-                  <span>
-                    XP {xp.current}/{xp.next}
-                  </span>
-                  <span className="text-emerald-200 font-semibold">{xpPct}%</span>
-                </div>
-
-                <div className="mt-2 h-2 rounded-full bg-white/10 overflow-hidden">
-                  <div className="h-full bg-emerald-400/80 rounded-full" style={{ width: `${xpPct}%` }} />
-                </div>
-
-                <div className="mt-3 flex items-center justify-between">
-                  <div className="text-[12px] text-white/70">Rewards</div>
-                  <div className="text-[12px] font-semibold text-white">{rewards.points} pts</div>
-                </div>
-              </div>
-            </div>
-          </div>
+      <Link
+        href={item.href}
+        onClick={onCloseMobile}
+        className={clsx(
+          "group relative flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 mx-2",
+          active
+            ? "bg-gradient-to-r from-blue-500/15 via-blue-500/10 to-transparent text-white shadow-lg"
+            : "text-white/70 hover:bg-white/5 hover:text-white hover:shadow-md"
+        )}
+      >
+        {/* Active Indicator */}
+        {active && (
+          <motion.div
+            layoutId="active-sidebar"
+            className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-blue-400 to-cyan-400 rounded-r-full"
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          />
         )}
 
-        {/* Sections */}
-        <div className="mt-4 px-5">
-          {SECTIONS.map((sec) => (
-            <div key={sec.title} className="mb-4">
-              {!collapsed && (
-                <div className="px-1 pb-2 text-[11px] tracking-widest text-white/50 font-bold">
-                  {sec.title}
-                </div>
-              )}
-              <div className="space-y-1">
-                {sec.items.map((item) => (
-                  <NavLink key={item.href} item={item} />
-                ))}
-              </div>
-            </div>
-          ))}
+        {/* Icon Container */}
+        <div className={clsx(
+          "relative p-2.5 rounded-lg transition-all duration-200",
+          active 
+            ? "bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg" 
+            : "bg-white/5 group-hover:bg-white/10"
+        )}>
+          <Icon className={clsx(
+            "h-4.5 w-4.5 transition-colors",
+            active ? "text-white" : "text-white/70 group-hover:text-white"
+          )} />
+          
+          {/* New Badge Dot */}
+          {isNew && (
+            <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full border border-[#131313]" />
+          )}
         </div>
 
-        {/* Bottom user card */}
-        <div className="mt-auto px-5 pb-6">
-          <div
-            className={clsx(
-              "rounded-xl bg-[#256e90] border border-white/10 p-3 flex items-center gap-3",
-              collapsed && "justify-center"
-            )}
-          >
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-400/80 to-blue-500/80 flex items-center justify-center text-white font-semibold text-sm">
-              {user.initials ?? "JD"}
+        {/* Label */}
+        <span className="text-sm font-medium truncate flex-1">{item.label}</span>
+
+        {/* Badge */}
+        {item.badge && (
+          <span className="ml-2 px-2.5 py-0.5 text-[10px] font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full shadow-sm">
+            {item.badge}
+          </span>
+        )}
+
+        {/* Chevron for active item */}
+        {active && (
+          <ChevronRight className="h-4 w-4 text-blue-400 ml-auto" />
+        )}
+      </Link>
+    );
+  };
+
+  const Content = (
+    <div className="h-full flex flex-col bg-gradient-to-b from-[#0f172a] via-[#1e293b] to-[#0f172a] border-r border-white/10">
+      {/* Header */}
+      <div className="p-6 border-b border-white/10">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl blur opacity-30" />
+            <div className="relative h-12 w-12 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg">
+              <Shield className="h-6 w-6 text-white" />
             </div>
-            {!collapsed && (
-              <div className="min-w-0">
-                <div className="text-white font-semibold text-sm truncate">{user.name}</div>
-                <div className="text-white/60 text-xs truncate">{user.role ?? "Agent"}</div>
-              </div>
-            )}
+          </div>
+          <div>
+            <div className="text-white font-bold text-xl bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+              ThinkFirst
+            </div>
+            <div className="text-white/50 text-xs">Insurance Platform</div>
+          </div>
+        </div>
+
+        {/* Stats Badge */}
+        <div className="mt-4 p-3 rounded-xl bg-gradient-to-br from-blue-900/30 to-purple-900/30 border border-white/10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+              <span className="text-xs text-white/70">Active</span>
+            </div>
+            <div className="flex items-center gap-1 text-emerald-300 text-xs font-bold">
+              <Sparkles className="h-3 w-3" />
+              <span>Premium</span>
+            </div>
           </div>
         </div>
       </div>
-    );
-  }, [collapsed, onToggleCollapsed, pathname, rewards.points, user.initials, user.name, user.role, xp.current, xp.level, xp.next, xpPct]);
+
+      {/* Navigation - Add custom scrollbar class for desktop */}
+      <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6 custom-scrollbar scrollbar-hide">
+        {SECTIONS.map((section) => (
+          <div key={section.title}>
+            <div className="text-[10px] text-white/40 font-bold tracking-widest mb-3 px-3">
+              {section.title}
+            </div>
+            <div className="space-y-1.5">
+              {section.items.map((item) => (
+                <NavItem key={item.href} item={item} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* User Profile */}
+      <div className="p-4 border-t border-white/10 bg-gradient-to-br from-blue-900/20 to-purple-900/20">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full blur opacity-30" />
+            <div className="relative h-11 w-11 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg">
+              KR
+            </div>
+            {/* Online Status */}
+            <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#1e293b]" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-semibold text-white truncate">Kishor Reddy</div>
+            <div className="text-[11px] text-white/50 truncate">Director</div>
+          </div>
+          <button className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors duration-200">
+            <Zap className="h-4 w-4 text-white/60" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <>
-      {/* Desktop sidebar */}
-      <aside
-        className="hidden md:block fixed left-0 top-0 h-screen z-50 bg-[#131313] backdrop-blur-xl border-r border-white/10"
-        style={{ width: effectiveWidth }}
+      {/* Desktop Sidebar */}
+      <motion.aside
+        initial={{ x: -100 }}
+        animate={{ x: 0 }}
+        transition={{ type: "spring", damping: 25 }}
+        className="hidden md:block fixed left-0 top-0 h-screen z-40 shadow-2xl shadow-black/50"
+        style={{ width: SIDEBAR_WIDTH }}
       >
-        {SidebarContent}
+        {Content}
+      </motion.aside>
 
-        {/* Drag handle (desktop only) */}
-        {!collapsed && (
-          <div
-            className={clsx(
-              "absolute top-0 right-0 h-full w-2 cursor-col-resize",
-              "hover:bg-white/10",
-              dragging && "bg-white/10"
-            )}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              startDrag(e.clientX);
-            }}
-            onTouchStart={(e) => {
-              const t = e.touches?.[0];
-              if (!t) return;
-              startDrag(t.clientX);
-            }}
-            aria-label="Resize sidebar"
-            title="Drag to resize"
-          />
-        )}
-      </aside>
-
-      {/* Mobile drawer */}
-      {mobileOpen && (
-        <>
-          <div
-            className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-60"
-            onClick={onCloseMobile}
-          />
-          <aside
-            className="md:hidden fixed left-0 top-0 h-screen z-70 bg-[#131313] border-r border-white/10"
-            style={{ width: Math.min(320, Math.max(260, width)) }}
-          >
-            <div className="absolute top-3 right-3">
+      {/* Mobile Overlay */}
+      <AnimatePresence>
+        {mobileOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onCloseMobile}
+              className="md:hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50"
+            />
+            
+            <motion.aside
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25 }}
+              className="md:hidden fixed left-0 top-0 h-screen z-50 w-full max-w-[280px] shadow-2xl"
+            >
+              {/* Mobile Close Button */}
               <button
                 onClick={onCloseMobile}
-                className="h-10 w-10 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 grid place-items-center"
-                aria-label="Close sidebar"
+                className="absolute top-4 right-4 z-50 p-2.5 rounded-xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 hover:bg-white/20 backdrop-blur-sm"
               >
-                <X className="h-5 w-5 text-white/80" />
+                <X className="h-5 w-5 text-white" />
               </button>
-            </div>
-            {SidebarContent}
-          </aside>
-        </>
-      )}
+              {Content}
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }
