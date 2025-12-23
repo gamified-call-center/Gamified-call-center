@@ -63,17 +63,16 @@ export default function Sidebar({
         href={item.href}
         onClick={onCloseMobile}
         className={clsx(
-          "group relative flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 mx-2",
+          "group relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 mx-2",
           active
             ? "bg-gradient-to-r from-blue-500/15 via-blue-500/10 to-transparent text-white shadow-lg"
-            : "text-white/70 hover:bg-white/5 hover:text-white hover:shadow-md"
+            : "text-white hover:bg-white/5 hover:text-white hover:shadow-md"
         )}
       >
-        {/* Active Indicator */}
         {active && (
           <motion.div
             layoutId="active-sidebar"
-            className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-blue-400 to-cyan-400 rounded-r-full"
+            className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-linear-to-b from-blue-400 to-cyan-400 rounded-r-full"
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           />
         )}
@@ -115,7 +114,7 @@ export default function Sidebar({
   };
  
   const Content = (
-    <div className="h-full flex flex-col bg-gradient-to-b from-[#0f172a] via-[#1e293b] to-[#0f172a] border-r border-white/10">
+    <div className="h-full flex flex-col bg-gradient-to-b from-[#080c16] via-[#1e293b] to-[#060a14] border-r border-white/10">
       {/* Header */}
       <div className="p-6 border-b border-white/10">
         <div className="flex items-center gap-3 mb-2">
@@ -148,11 +147,10 @@ export default function Sidebar({
         </div>
       </div>
  
-      {/* Navigation - Add custom scrollbar class for desktop */}
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6 custom-scrollbar scrollbar-hide">
         {SECTIONS.map((section) => (
           <div key={section.title}>
-            <div className="text-[10px] text-white/40 font-bold tracking-widest mb-3 px-3">
+            <div className="text-[10px] text-white/40 font-bold tracking-widest mb-1 px-3">
               {section.title}
             </div>
             <div className="space-y-1.5">

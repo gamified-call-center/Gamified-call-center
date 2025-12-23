@@ -39,14 +39,14 @@ const AgentPerformanceLeaderboard = () => {
         const updated = [...prev];
         const randomIndex = Math.floor(Math.random() * updated.length);
         const randomChange = Math.floor(Math.random() * 3);
-        
+
         if (updated[randomIndex].dealsClosed + randomChange <= 100) {
           updated[randomIndex] = {
             ...updated[randomIndex],
             dealsClosed: updated[randomIndex].dealsClosed + randomChange
           };
         }
-        
+
         // Sort by deals closed
         return updated.sort((a, b) => b.dealsClosed - a.dealsClosed);
       });
@@ -101,7 +101,7 @@ const AgentPerformanceLeaderboard = () => {
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-6">
       {/* Premium Top Navigation Bar */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -112,7 +112,7 @@ const AgentPerformanceLeaderboard = () => {
             {/* Left Section - Live Leaderboard Title */}
             <div className="flex items-center gap-3">
               <motion.div
-                animate={{ 
+                animate={{
                   rotate: [0, 10, -10, 0],
                 }}
                 transition={{
@@ -128,12 +128,12 @@ const AgentPerformanceLeaderboard = () => {
                   <BarChart3 className="w-6 h-6 text-white" />
                 </div>
               </motion.div>
-              
+
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-xl md:text-2xl font-bold text-slate-900">Live Leaderboard</h1>
+                  <h1 className="text-md md:text-xl font-bold text-slate-900">Live Leaderboard</h1>
                   <motion.div
-                    animate={{ 
+                    animate={{
                       scale: [1, 1.2, 1],
                       opacity: [0.8, 1, 0.8]
                     }}
@@ -161,16 +161,16 @@ const AgentPerformanceLeaderboard = () => {
 
             {/* Right Section - Breadcrumb Navigation */}
             <div className="flex items-center gap-2 bg-slate-50 px-4 py-3 rounded-xl border border-slate-200">
-              <Link 
+              <Link
                 href="/aca/dashboard"
                 className="flex items-center gap-2 text-slate-700 hover:text-blue-600 transition-colors duration-200 group"
               >
                 <Home className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
                 <span className="text-sm font-medium group-hover:text-blue-600 transition-colors duration-200">Home</span>
               </Link>
-              
+
               <ChevronRight className="w-4 h-4 text-slate-400 mx-1" />
-              
+
               <div className="flex items-center gap-2 text-blue-600">
                 <BarChart3 className="w-4 h-4" />
                 <span className="text-sm font-semibold">Leaderboard</span>
@@ -208,26 +208,24 @@ const AgentPerformanceLeaderboard = () => {
       </motion.div>
 
       {/* Main Leaderboard Card */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.1 }}
         className="max-w-7xl mx-auto"
       >
         <div className="bg-white rounded-[2rem] shadow-2xl shadow-blue-100/50 p-6 md:p-8">
-          {/* Leaderboard Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div className="flex items-center gap-3">
               <div className="bg-gradient-to-br from-blue-500 to-cyan-500 p-2.5 rounded-2xl">
                 <Trophy className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl md:text-2xl font-bold text-slate-900">Top Performers</h2>
+                <h2 className="text-md md:text-xl font-bold text-slate-900">Top Performers</h2>
                 <p className="text-sm text-slate-500 mt-1">Real-time ranking based on closed deals</p>
               </div>
             </div>
 
-            {/* Date Selector */}
             <div className="relative">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -254,9 +252,8 @@ const AgentPerformanceLeaderboard = () => {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.05 }}
                         onClick={() => handleDateSelect(option)}
-                        className={`w-full px-4 py-3 text-left hover:bg-slate-50 transition-colors duration-150 flex items-center gap-2 ${
-                          option === date ? 'bg-blue-50 text-blue-600' : 'text-slate-700'
-                        }`}
+                        className={`w-full px-4 py-3 text-left hover:bg-slate-50 transition-colors duration-150 flex items-center gap-2 ${option === date ? 'bg-blue-50 text-blue-600' : 'text-slate-700'
+                          }`}
                       >
                         {option === date && (
                           <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
@@ -270,7 +267,6 @@ const AgentPerformanceLeaderboard = () => {
             </div>
           </div>
 
-          {/* Agent List */}
           <div className="space-y-3">
             {agents.length > 0 ? (
               agents.map((agent, index) => {
@@ -284,18 +280,17 @@ const AgentPerformanceLeaderboard = () => {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    whileHover={{ 
+                    whileHover={{
                       scale: 1.01,
                       y: -2,
                       boxShadow: "0 20px 40px rgba(0, 0, 0, 0.05)"
                     }}
-                    className={`group relative bg-white p-4 rounded-2xl border transition-all duration-300 hover:border-blue-200 ${
-                      isTopThree ? 'border-2' : 'border border-slate-200'
-                    } ${isTopThree ? 
-                      index === 0 ? 'border-yellow-300 bg-gradient-to-r from-yellow-50/30 via-white to-white' : 
-                      index === 1 ? 'border-slate-300 bg-gradient-to-r from-slate-50/30 via-white to-white' : 
-                      'border-amber-300 bg-gradient-to-r from-amber-50/30 via-white to-white' : ''
-                    }`}
+                    className={`group relative bg-white md:px-4 md:py-2  rounded-2xl border transition-all duration-300 hover:border-blue-200 ${isTopThree ? 'border-2' : 'border border-slate-200'
+                      } ${isTopThree ?
+                        index === 0 ? 'border-yellow-300 bg-gradient-to-r from-yellow-50/30 via-white to-white' :
+                          index === 1 ? 'border-slate-300 bg-gradient-to-r from-slate-50/30 via-white to-white' :
+                            'border-amber-300 bg-gradient-to-r from-amber-50/30 via-white to-white' : ''
+                      }`}
                   >
                     <div className="flex flex-col md:flex-row md:items-center gap-4">
                       {/* Rank & Profile */}
@@ -303,7 +298,7 @@ const AgentPerformanceLeaderboard = () => {
                         <div className="relative">
                           {/* Medal for top 3 */}
                           {isTopThree && (
-                            <motion.div 
+                            <motion.div
                               initial={{ scale: 0, rotate: -180 }}
                               animate={{ scale: 1, rotate: 0 }}
                               transition={{ delay: index * 0.2, type: "spring" }}
@@ -312,36 +307,33 @@ const AgentPerformanceLeaderboard = () => {
                               {getMedalIcon(index + 1)}
                             </motion.div>
                           )}
-                          
+
                           {/* Rank */}
-                          <div className={`w-10 h-10 flex items-center justify-center rounded-xl font-bold ${
-                            isTopThree ? 
+                          <div className={`w-10 h-10 flex items-center justify-center rounded-xl font-bold ${isTopThree ?
                               index === 0 ? 'bg-gradient-to-br from-yellow-100 to-amber-100 text-yellow-700 shadow-sm' :
-                              index === 1 ? 'bg-gradient-to-br from-slate-100 to-gray-100 text-slate-700 shadow-sm' :
-                              'bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 shadow-sm' :
+                                index === 1 ? 'bg-gradient-to-br from-slate-100 to-gray-100 text-slate-700 shadow-sm' :
+                                  'bg-gradient-to-br from-amber-100 to-orange-100 text-amber-700 shadow-sm' :
                               'bg-slate-100 text-slate-500'
-                          }`}>
+                            }`}>
                             {index + 1}
                           </div>
                         </div>
 
-                        {/* Squircle Profile */}
                         <div className="relative">
-                          <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${getPastelGradient(index)} flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-300`}>
+                          <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${getPastelGradient(index)} flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-300`}>
                             <span className="text-2xl font-bold text-slate-800">
                               {agent.name.charAt(0)}
                             </span>
                           </div>
                           {isTopThree && (
-                            <motion.div 
+                            <motion.div
                               whileHover={{ scale: 1.1, rotate: 5 }}
                               className="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-lg"
                             >
-                              <Trophy className={`w-4 h-4 ${
-                                index === 0 ? 'text-yellow-500' :
-                                index === 1 ? 'text-slate-400' :
-                                'text-amber-600'
-                              }`} />
+                              <Trophy className={`w-4 h-4 ${index === 0 ? 'text-yellow-500' :
+                                  index === 1 ? 'text-slate-400' :
+                                    'text-amber-600'
+                                }`} />
                             </motion.div>
                           )}
                         </div>
@@ -365,7 +357,7 @@ const AgentPerformanceLeaderboard = () => {
                                 <motion.div
                                   initial={{ width: 0 }}
                                   animate={{ width: `${progressPercentage}%` }}
-                                  transition={{ 
+                                  transition={{
                                     duration: 1.5,
                                     delay: index * 0.2,
                                     ease: "easeOut"
@@ -373,7 +365,7 @@ const AgentPerformanceLeaderboard = () => {
                                   className={`h-full rounded-full bg-gradient-to-r ${agent.color} shadow-sm`}
                                 />
                               </div>
-                              
+
                               {/* Progress Percentage */}
                               <motion.div
                                 initial={{ opacity: 0 }}
@@ -388,13 +380,12 @@ const AgentPerformanceLeaderboard = () => {
 
                           {/* Deal Count Badge */}
                           <div className="flex-shrink-0">
-                            <div className={`px-4 py-2.5 rounded-full text-sm font-semibold shadow-sm ${
-                              isTopThree ?
+                            <div className={`px-4 py-2.5 rounded-full text-sm font-semibold shadow-sm ${isTopThree ?
                                 index === 0 ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-800 border border-yellow-200' :
-                                index === 1 ? 'bg-gradient-to-r from-slate-100 to-gray-100 text-slate-800 border border-slate-200' :
-                                'bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-200' :
+                                  index === 1 ? 'bg-gradient-to-r from-slate-100 to-gray-100 text-slate-800 border border-slate-200' :
+                                    'bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 border border-amber-200' :
                                 'bg-gradient-to-r from-slate-50 to-gray-50 text-slate-800 border border-slate-200'
-                            }`}>
+                              }`}>
                               {agent.dealsClosed} Deals
                             </div>
                           </div>
@@ -441,20 +432,19 @@ const AgentPerformanceLeaderboard = () => {
                 <span className="text-sm text-slate-600">Top 3 Ranking</span>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setIsLive(!isLive)}
-                className={`px-6 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
-                  isLive 
-                    ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white hover:shadow-lg hover:shadow-red-200' 
+                className={`px-6 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${isLive
+                    ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white hover:shadow-lg hover:shadow-red-200'
                     : 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white hover:shadow-lg hover:shadow-emerald-200'
-                }`}
+                  }`}
               >
                 <Zap className="w-4 h-4" />
                 {isLive ? 'Pause Live Updates' : 'Enable Live Updates'}
               </button>
-              
+
               <div className="text-sm text-slate-500">
                 Last updated: Just now
               </div>
