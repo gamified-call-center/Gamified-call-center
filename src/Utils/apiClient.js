@@ -10,6 +10,10 @@ const URLS = {
   user: `${base_url}users`,
   s3bucket:"s3bucket",
   training:`${base_url}training`,
+  agent:`${base_url}agent`,
+  deals:`${base_url}deals`,
+  designation:`${base_url}designation`,
+  employee:`${base_url}employee`
 };
 
 export function encodeQueryData(data = {}) {
