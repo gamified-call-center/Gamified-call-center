@@ -20,12 +20,13 @@ import {
   Eye,
   EyeOff,
   Download,
+  Loader,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 import apiClient from "../../Utils/apiClient"; // ✅ CHANGE THIS PATH
-import {useAuthStore} from "../../store/user"
+import { useAuthStore } from "../../store/user"
+import toast from "react-hot-toast";
 
 type TrainingType = "video" | "image" | "pdf";
 
@@ -62,7 +63,7 @@ const normalizeTrainingItem = (item: any): TrainingItem => ({
 });
 
 export default function TrainingPage() {
-  const user = useAuthStore((st)=>st.user)
+  const user = useAuthStore((st) => st.user)
   const isAdmin = user?.employee?.designation?.name === "CEO";
   console.log(isAdmin)
 
@@ -99,9 +100,16 @@ export default function TrainingPage() {
 
   /** ---------------- API wrappers ---------------- */
   const fetchChapters = async () => {
-    const res = await apiClient.get(apiClient.URLS.training, {}, true);
-    console.log(res.body);
-    return res.body;
+    try {
+      const res = await apiClient.get(apiClient.URLS.training, {}, true);
+      if (res.status === 200) {
+        toast.success("Chapters fetched");
+        return res.body;
+      }
+    }
+    catch (e) {
+      toast.error("Failed to fetch chapters");
+    }
   };
 
   const createChapter = async (payload: {
@@ -109,62 +117,102 @@ export default function TrainingPage() {
     type: TrainingType;
     src: string;
   }) => {
-    const res = await apiClient.post(apiClient.URLS.training, payload, true);
-    return res.body;
+    try {
+      const res = await apiClient.post(apiClient.URLS.training, payload, true);
+
+      if (res.status === 201 || res.status === 200) {
+        toast.success("Chapter created");
+        return res.body;
+      }
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to create chapter");
+      throw e;
+    }
   };
+
 
   const updateChapter = async (
     id: TrainingItem["id"],
     payload: { title: string; type: TrainingType; src: string }
   ) => {
-    const res = await apiClient.put(
-      `${apiClient.URLS.training}/${id}`,
-      payload,
-      true
-    );
-    return res.body;
+    try {
+      const res = await apiClient.put(
+        `${apiClient.URLS.training}/${id}`,
+        payload,
+        true
+      );
+
+      if (res.status === 200) {
+        toast.success("Chapter updated");
+        return res.body;
+      }
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to update chapter");
+      throw e;
+    }
   };
 
+
   const deleteChapterApi = async (id: TrainingItem["id"]) => {
-    const res = await apiClient.delete(
-      `${apiClient.URLS.training}/${id}`,
-      {},
-      true
-    );
-    return res.body;
+    try {
+      const res = await apiClient.delete(
+        `${apiClient.URLS.training}/${id}`,
+        {},
+        true
+      );
+
+      if (res.status === 200) {
+        toast.success("Chapter deleted");
+        return res.body;
+      }
+
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to delete chapter");
+      throw e;
+    }
   };
+
 
   const updateProgress = async (
     id: TrainingItem["id"],
     payload: { completed?: boolean; viewedTime?: number; lastAccessed?: string }
   ) => {
-    const res = await apiClient.patch(
-      `${apiClient.URLS.training}/${id}/progress`,
-      payload,
-      true
-    );
-    return res.body;
+    try {
+      const res = await apiClient.patch(
+        `${apiClient.URLS.training}/${id}/progress`,
+        payload,
+        true
+      );
+
+      if (res.status === 200) {
+        toast.success(
+          payload.completed ? "Marked as completed" : "Marked as incomplete"
+        );
+        return res.body;
+      }
+
+    } catch (e: any) {
+      toast.error(e?.message || "Failed to update progress");
+      throw e;
+    }
   };
 
-  /** ---------------- Initial load ---------------- */
+
   useEffect(() => {
     const load = async () => {
       try {
         setLoading(true);
         setError(null);
-
         const body = await fetchChapters();
-        const items = Array.isArray(body.data) ? body.data : body?.data ?? [];
-        console.log(" Fetched training chapters:", items, body);
-
+        const items = Array.isArray(body.data)
+          ? body.data
+          : body?.data ?? [];
         const normalized = items.map(normalizeTrainingItem);
         setData(normalized);
-        console.log(" Fetched training chapters: d", normalized);
-
-        // derive completed count for UI progress
         const completedCount = normalized.filter(
           (i: TrainingItem) => i.completed
         ).length;
+
         setUserProgress((p) => ({
           ...p,
           completedChapters: completedCount,
@@ -172,15 +220,15 @@ export default function TrainingPage() {
         }));
       } catch (e: any) {
         setError(
-          e?.body?.error || e?.message || "Failed to load training data"
+          e?.message || "Failed to load training data"
         );
       } finally {
         setLoading(false);
       }
     };
-
     load();
   }, []);
+
 
   /** ---------------- Derived values ---------------- */
   const completedChapters = useMemo(
@@ -350,7 +398,7 @@ export default function TrainingPage() {
     try {
       setError(null);
 
-      let src = form.src;
+      const src = form.src;
 
       // if (file) {
       //   src = await uploadFile(file);
@@ -403,22 +451,17 @@ export default function TrainingPage() {
       setError(e?.body?.error || e?.message || "Failed to delete chapter");
     }
   };
+  if (loading) return <div className="h-full w-full"><Loader /></div>
 
   return (
     <div className="min-h-screen bg-slate-50 px-3 sm:px-4 md:px-6 py-4">
-      {/* Loading + Error */}
-      {loading && (
-        <div className="max-w-7xl mx-auto mb-4 p-3 rounded-xl bg-slate-100 text-slate-700">
-          Loading training...
-        </div>
-      )}
+
       {error && (
         <div className="max-w-7xl mx-auto mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700">
           {error}
         </div>
       )}
 
-      {/* Premium Top Navigation Bar - Mobile Responsive */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -447,7 +490,7 @@ export default function TrainingPage() {
                       TRAINING
                     </span>
                   </div>
-                  
+
                 </div>
                 <p className="text-xs sm:text-sm text-slate-500 mt-1">
                   Interactive learning materials and resources
@@ -513,11 +556,10 @@ export default function TrainingPage() {
                 {[0, 25, 50, 75, 100].map((percent) => (
                   <div
                     key={percent}
-                    className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
-                      completionPercentage >= percent
-                        ? "bg-white shadow-lg"
-                        : "bg-slate-300"
-                    }`}
+                    className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${completionPercentage >= percent
+                      ? "bg-white shadow-lg"
+                      : "bg-slate-300"
+                      }`}
                   />
                 ))}
               </div>
@@ -632,11 +674,10 @@ export default function TrainingPage() {
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowCompleted(!showCompleted)}
-                  className={`px-3 sm:px-4 py-2.5 rounded-xl font-medium transition-all duration-100 flex items-center gap-2 flex-1 sm:flex-none justify-center ${
-                    showCompleted
-                      ? "bg-linear-to-r from-purple-50 to-pink-50 text-purple-700 border border-purple-200"
-                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                  }`}
+                  className={`px-3 sm:px-4 py-2.5 rounded-xl font-medium transition-all duration-100 flex items-center gap-2 flex-1 sm:flex-none justify-center ${showCompleted
+                    ? "bg-linear-to-r from-purple-50 to-pink-50 text-purple-700 border border-purple-200"
+                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    }`}
                 >
                   {showCompleted ? (
                     <Eye className="w-4 h-4" />
@@ -715,23 +756,20 @@ export default function TrainingPage() {
                       boxShadow: "0 10px 30px rgba(0, 0, 0, 0.05)",
                     }}
                     className={`group relative bg-white border rounded-xl sm:rounded-2xl transition-all duration-150 hover:border-purple-200
-                      ${
-                        isOpen
-                          ? "border-purple-300 bg-linear-to-r from-purple-50/30 via-white to-white"
-                          : "border border-slate-200"
+                      ${isOpen
+                        ? "border-purple-300 bg-linear-to-r from-purple-50/30 via-white to-white"
+                        : "border border-slate-200"
                       }
-                      ${
-                        item.completed ? "border-l-4 border-l-emerald-500" : ""
+                      ${item.completed ? "border-l-4 border-l-emerald-500" : ""
                       }`}
                   >
                     {/* Header */}
                     <div
                       className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 sm:px-6
-                      ${
-                        isOpen
+                      ${isOpen
                           ? "bg-linear-to-r from-purple-50/50 to-transparent"
                           : "bg-white"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-3 flex-1">
                         {/* Completion Checkbox */}
@@ -739,11 +777,10 @@ export default function TrainingPage() {
                           whileHover={{ scale: 1.1 }}
                           whileTap={{ scale: 0.9 }}
                           onClick={() => toggleCompletion(item.id)}
-                          className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-100 ${
-                            item.completed
-                              ? "bg-linear-to-br from-emerald-500 to-teal-500"
-                              : "bg-slate-100 hover:bg-slate-200"
-                          }`}
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-100 ${item.completed
+                            ? "bg-linear-to-br from-emerald-500 to-teal-500"
+                            : "bg-slate-100 hover:bg-slate-200"
+                            }`}
                           title={
                             !isAdmin
                               ? "Toggle completion"
@@ -784,11 +821,10 @@ export default function TrainingPage() {
 
                           <div className="flex items-center gap-3 sm:gap-4 flex-1">
                             <div
-                              className={`hidden xs:flex w-8 h-8 sm:w-10 sm:h-10 items-center justify-center rounded-xl font-bold shadow-sm ${
-                                item.completed
-                                  ? "bg-linear-to-br from-emerald-100 to-teal-100 text-emerald-700"
-                                  : "bg-linear-to-br from-purple-100 to-pink-100 text-purple-700"
-                              }`}
+                              className={`hidden xs:flex w-8 h-8 sm:w-10 sm:h-10 items-center justify-center rounded-xl font-bold shadow-sm ${item.completed
+                                ? "bg-linear-to-br from-emerald-100 to-teal-100 text-emerald-700"
+                                : "bg-linear-to-br from-purple-100 to-pink-100 text-purple-700"
+                                }`}
                             >
                               {index + 1}
                             </div>
@@ -806,13 +842,12 @@ export default function TrainingPage() {
                               </div>
                               <div className="flex items-center gap-2 mt-1">
                                 <div
-                                  className={`px-2 py-0.5 rounded-lg text-xs font-medium ${
-                                    item.type === "video"
-                                      ? "bg-red-50 text-red-700"
-                                      : item.type === "pdf"
+                                  className={`px-2 py-0.5 rounded-lg text-xs font-medium ${item.type === "video"
+                                    ? "bg-red-50 text-red-700"
+                                    : item.type === "pdf"
                                       ? "bg-blue-50 text-blue-700"
                                       : "bg-emerald-50 text-emerald-700"
-                                  }`}
+                                    }`}
                                 >
                                   {item.type.toUpperCase()}
                                 </div>
@@ -923,8 +958,8 @@ export default function TrainingPage() {
                                 {item.type === "video"
                                   ? "Watch 90% of the video to complete this chapter."
                                   : item.type === "pdf"
-                                  ? "Review the entire document to complete this chapter."
-                                  : "View the image content to complete this chapter."}
+                                    ? "Review the entire document to complete this chapter."
+                                    : "View the image content to complete this chapter."}
                               </p>
                             </div>
                           </div>

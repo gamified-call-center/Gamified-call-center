@@ -2,11 +2,9 @@
 import ChatPanel from "@/components/ChatPanel";
 import withAdminLayout from "@/components/Layouts/GeneralLayout";
 
- const ChatHistoryPage=()=> {
+const ChatHistoryPage = () => {
     return (
-        <>
-            <ChatPanel />
-        </>
+        <ChatPanel />
     );
 }
 
