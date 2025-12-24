@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown, LogOut, User2, Settings } from "lucide-react";
 import clsx from "clsx";
+import { useRouter } from "next/navigation";
 
 export default function AvatarMenu({
   name = "Super Admin",
@@ -15,6 +16,12 @@ export default function AvatarMenu({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+
+  const handleLogout = () => {
+    console.log("navigating to the login page")
+    router.push('/login')
+  }
 
   useEffect(() => {
     const onDown = (e: MouseEvent) => {
@@ -73,10 +80,7 @@ export default function AvatarMenu({
               "w-full flex items-center gap-2 px-4 py-3 text-sm",
               "hover:bg-red-50 text-red-600"
             )}
-            onClick={() => {
-              setOpen(false);
-              onLogout?.();
-            }}
+            onClick={() => {handleLogout()}}
           >
             <LogOut className="h-4 w-4" />
             Logout

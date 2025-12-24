@@ -1,21 +1,26 @@
+import { foreignObject } from "framer-motion/client";
 import merge from "lodash/merge";
 import { getSession } from "next-auth/react";
 
 // const base_url = process.env.NEXT_PUBLIC_LOCAL_API_ENDPOINT;
-const base_url = "http://localhost:3000/api/";
+const base_url = "http://localhost:3001/";
 
 const URLS = {
   blogs: `${base_url}blog`,
   otp: `${base_url}otp`,
   user: `${base_url}users`,
   s3bucket: "s3bucket",
-  training: `${base_url}training`,
+  training: `${base_url}api/training`,
+  leaderboard: `${base_url}leaderboard/leaderboard`,
   agent: `${base_url}agent`,
   deals: `${base_url}deals`,
   designation: `${base_url}designation`,
   employee: `${base_url}employee`,
   permissions: `${base_url}permissions`,
   designationPermissions: `${base_url}designationPermissions`,
+  login: `${base_url}users/login`,
+  forgotPassword: `${base_url}auth`,
+
 };
 
 export function encodeQueryData(data = {}) {

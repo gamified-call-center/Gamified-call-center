@@ -1,11 +1,11 @@
 'use client'
-import ChatSidebar from "@/components/ChatPanel";
+import ChatPanel from "@/components/ChatPanel";
 import withAdminLayout from "@/components/Layouts/GeneralLayout";
 
  const ChatHistoryPage=()=> {
     return (
         <>
-            <ChatSidebar isOpen={true} onClose={() => {}} />
+            <ChatPanel />
         </>
     );
 }

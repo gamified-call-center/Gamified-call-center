@@ -2,12 +2,25 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export type User = {
-  id: string; // or number if your backend uses number
-  name: string;
-  designation: string;
+  id: string;
+  firstName: string;
+  lastName?: string;
+  email?: string;
   isTrainingCompleted: boolean;
-  email?: string; // optional but handy
+
+  employee?: {
+    id: string;
+    designation?: {
+      id: number;
+      name: string;
+      levelOrder?: number;
+    };
+    reportsTo?: any;
+    isActive?: boolean;
+    createdAt?: string;
+  };
 };
+
 
 type AuthState = {
   user: User | null;

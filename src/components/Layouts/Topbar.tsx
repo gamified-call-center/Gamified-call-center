@@ -2,6 +2,7 @@
 
 import AppsMenu from "@/commonComponents/AppMenu";
 import AvatarMenu from "@/commonComponents/Avatar";
+import { useAuthStore } from "@/store/user";
 import { Bell, ShieldCheck, Menu } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -15,6 +16,9 @@ export default function Topbar({
   title?: string;
 }) {
   const router = useRouter();
+  const user = useAuthStore((st) => st.user);
+  const name = user?.firstName ?? "Super Admin";
+  const role = user?.employee?.designation?.name ?? "Administrator";
 
   return (
     <header className="h-16 border-b min-w-full  border-black/10 flex  flex-row justify-between items-center px-4 md:px-6  sticky top-0 z-30">
@@ -51,8 +55,8 @@ export default function Topbar({
 
         <div className="hidden sm:block">
           <AvatarMenu
-            name="Super Admin"
-            role="Administrator"
+            name={name}
+            role={role}
             onLogout={() => {
               console.log("logout");
             }}
@@ -60,7 +64,7 @@ export default function Topbar({
         </div>
 
         <div className="sm:hidden">
-          <AvatarMenu name="Super Admin" role="Administrator" />
+          <AvatarMenu name={name} role={role}/>
         </div>
       </div>
     </header>

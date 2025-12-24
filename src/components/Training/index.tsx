@@ -25,7 +25,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import apiClient from "../../Utils/apiClient"; // ✅ CHANGE THIS PATH
-import Image from "next/image";
+import {useAuthStore} from "../../store/user"
 
 type TrainingType = "video" | "image" | "pdf";
 
@@ -53,12 +53,6 @@ type UserProgress = {
 /** ---------------- RBAC ---------------- */
 type Role = "ceo" | "manager" | "agent_lead" | "agent" | string;
 
-// const canManageTraining = (role?: Role) => role === "ceo"; // ✅ only CEO can Add/Edit/Delete
-const canManageTraining = (role?: Role) => role === role; // ✅ only CEO can Add/Edit/Delete
-
-// const canUpdateProgress = (role?: Role) => Boolean(role); // ✅ everyone logged-in can mark completion
-const canUpdateProgress = (role?: Role) => true; // ✅ everyone logged-in can mark completion
-
 /** ---------------- Normalizers ---------------- */
 const normalizeTrainingItem = (item: any): TrainingItem => ({
   ...item,
@@ -68,15 +62,13 @@ const normalizeTrainingItem = (item: any): TrainingItem => ({
 });
 
 export default function TrainingPage() {
-  const { data: session } = useSession();
-  const role: Role | undefined =
-    (session as any)?.user?.role ?? (session as any)?.role;
+  const user = useAuthStore((st)=>st.user)
+  const isAdmin = user?.employee?.designation?.name === "CEO";
+  console.log(isAdmin)
+
 
   const [data, setData] = useState<TrainingItem[]>([]);
   const [openId, setOpenId] = useState<string | number | null>(null);
-
-  // file upload state
-  const [file, setFile] = useState<File | null>(null);
 
   // modal state
   const [showModal, setShowModal] = useState(false);
@@ -162,10 +154,12 @@ export default function TrainingPage() {
         setError(null);
 
         const body = await fetchChapters();
-        const items = Array.isArray(body) ? body : body?.items ?? [];
+        const items = Array.isArray(body.data) ? body.data : body?.data ?? [];
+        console.log(" Fetched training chapters:", items, body);
 
         const normalized = items.map(normalizeTrainingItem);
         setData(normalized);
+        console.log(" Fetched training chapters: d", normalized);
 
         // derive completed count for UI progress
         const completedCount = normalized.filter(
@@ -216,7 +210,7 @@ export default function TrainingPage() {
   };
 
   const toggleCompletion = async (id: TrainingItem["id"]) => {
-    // if (!canUpdateProgress(role)) return;
+    if (isAdmin) return;
 
     const current = data.find((x) => x.id === id);
     if (!current) return;
@@ -316,7 +310,7 @@ export default function TrainingPage() {
 
   /** ---------------- CRUD modal ---------------- */
   const openAddModal = () => {
-    if (!canManageTraining(role)) return;
+    if (!isAdmin) return;
 
     setEditingItem(null);
     setForm({
@@ -324,42 +318,21 @@ export default function TrainingPage() {
       type: "video",
       src: "",
     });
-    setFile(null);
     setShowModal(true);
   };
 
-  // NOTE: Your current upload uses /api/upload (Next route).
-  // If backend later adds /api/uploads (multipart), update here.
-  const uploadFile = async (file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
-
-    const json = await res.json();
-
-    if (!res.ok) {
-      throw new Error(json.error || "Upload failed");
-    }
-
-    return json.url;
-  };
-
-  const handleFileChange = async (file: File) => {
-    setFile(file);
-    try {
-      const uploadedUrl = await uploadFile(file);
-      setForm((prev) => ({ ...prev, src: uploadedUrl }));
-    } catch (err: any) {
-      setError(err?.message || "Upload failed");
-    }
-  };
+  // const handleFileChange = async (file: File) => {
+  //   setFile(file);
+  //   try {
+  //     const uploadedUrl = await uploadFile(file);
+  //     setForm((prev) => ({ ...prev, src: uploadedUrl }));
+  //   } catch (err: any) {
+  //     setError(err?.message || "Upload failed");
+  //   }
+  // };
 
   const openEditModal = (item: TrainingItem) => {
-    if (!canManageTraining(role)) return;
+    if (!isAdmin) return;
 
     setEditingItem(item);
     setForm({
@@ -367,12 +340,11 @@ export default function TrainingPage() {
       type: item.type,
       src: item.src,
     });
-    setFile(null);
     setShowModal(true);
   };
 
   const handleSave = async () => {
-    if (!canManageTraining(role)) return;
+    if (!isAdmin) return;
     if (!form.title) return;
 
     try {
@@ -380,12 +352,12 @@ export default function TrainingPage() {
 
       let src = form.src;
 
-      if (file) {
-        src = await uploadFile(file);
-      }
+      // if (file) {
+      //   src = await uploadFile(file);
+      // }
 
       if (!src) {
-        setError("Please upload/select a file (src) before saving.");
+        setError("Please Enter the URL(src) before saving.");
         return;
       }
 
@@ -407,7 +379,6 @@ export default function TrainingPage() {
 
       setShowModal(false);
       setEditingItem(null);
-      setFile(null);
       setForm({ title: "", type: "video", src: "" });
     } catch (e: any) {
       setError(e?.body?.error || e?.message || "Failed to save chapter");
@@ -415,7 +386,7 @@ export default function TrainingPage() {
   };
 
   const confirmDelete = async () => {
-    if (!canManageTraining(role)) return;
+    if (!isAdmin) return;
     if (!deleteTarget) return;
 
     const target = deleteTarget;
@@ -476,14 +447,7 @@ export default function TrainingPage() {
                       TRAINING
                     </span>
                   </div>
-                  {/* Role Badge */}
-                  {role && (
-                    <div className="px-2 py-1 bg-slate-100 rounded-lg border border-slate-200">
-                      <span className="text-xs font-semibold text-slate-700">
-                        Role: {String(role)}
-                      </span>
-                    </div>
-                  )}
+                  
                 </div>
                 <p className="text-xs sm:text-sm text-slate-500 mt-1">
                   Interactive learning materials and resources
@@ -683,7 +647,7 @@ export default function TrainingPage() {
                 </button>
 
                 {/* ✅ CEO only */}
-                {canManageTraining(role) && (
+                {isAdmin && (
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -781,7 +745,7 @@ export default function TrainingPage() {
                               : "bg-slate-100 hover:bg-slate-200"
                           }`}
                           title={
-                            canUpdateProgress(role)
+                            !isAdmin
                               ? "Toggle completion"
                               : "Login required"
                           }
@@ -880,7 +844,7 @@ export default function TrainingPage() {
                         )}
 
                         {/* ✅ CEO only edit/delete */}
-                        {canManageTraining(role) && (
+                        {isAdmin && (
                           <motion.button
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
@@ -893,7 +857,7 @@ export default function TrainingPage() {
                             />
                           </motion.button>
                         )}
-                        {canManageTraining(role) && (
+                        {isAdmin && (
                           <motion.button
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
@@ -919,25 +883,24 @@ export default function TrainingPage() {
                         className="p-3 sm:p-4 sm:px-6 border-t border-slate-100"
                       >
                         {item.type === "video" && (
-  <div className="relative group/video">
-    <iframe
-    
-      src={item.src}
-      className="w-full h-75 sm:h-100 md:h-125 rounded-xl border-4 border-white shadow-lg"
-      title={item.title || "Video"}
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      allowFullScreen
-    />
-  </div>
-)}
-
+                          <div className="relative group/video">
+                            <iframe
+                              src={item.src}
+                              className="w-full h-75 sm:h-100 md:h-125 rounded-xl border-4 border-white shadow-lg"
+                              title={item.title || "Video"}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                              allowFullScreen
+                            />
+                          </div>
+                        )}
 
                         {item.type === "image" && (
                           <div className="relative group/image">
-                            <Image
+                            <iframe
                               src={item.src}
-                              alt={item.title}
-                              className="w-full h-auto max-h-75 sm:max-h-100 md:max-h-125 rounded-xl border-4 border-white shadow-lg object-contain mx-auto"
+                              className="w-full h-75 sm:h-100 md:h-125 rounded-xl border-4 border-white shadow-lg"
+                              title={item.title || "image"}
+                              allowFullScreen
                             />
                           </div>
                         )}
@@ -952,8 +915,6 @@ export default function TrainingPage() {
                           </div>
                         )}
 
-                       
-
                         {!item.completed && (
                           <div className="mt-4 p-3 bg-linear-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200">
                             <div className="flex items-start gap-2">
@@ -962,8 +923,8 @@ export default function TrainingPage() {
                                 {item.type === "video"
                                   ? "Watch 90% of the video to complete this chapter."
                                   : item.type === "pdf"
-                                    ? "Review the entire document to complete this chapter."
-                                    : "View the image content to complete this chapter."}
+                                  ? "Review the entire document to complete this chapter."
+                                  : "View the image content to complete this chapter."}
                               </p>
                             </div>
                           </div>
@@ -1096,39 +1057,16 @@ export default function TrainingPage() {
 
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Upload File
+                  Enter URL
                 </label>
                 <div className="border-2 border-dashed border-slate-300 rounded-xl p-4 sm:p-6 text-center hover:border-purple-400 hover:bg-purple-50/50 transition-all duration-100">
                   <input
-                    type="file"
-                    accept=".pdf,image/*,video/*"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0];
-                      if (f) handleFileChange(f);
-                    }}
-                    className="hidden"
-                    id="file-upload"
+                    placeholder="Enter URL"
+                    value={form.src}
+                    onChange={(e) => setForm({ ...form, src: e.target.value })}
+                    className="w-full border border-slate-300 rounded-xl px-4 py-3 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all duration-100"
                   />
-                  <label htmlFor="file-upload" className="cursor-pointer block">
-                    <div className="mx-auto w-10 h-10 sm:w-12 sm:h-12 bg-linear-to-br from-purple-100 to-pink-100 rounded-xl flex items-center justify-center mb-2 sm:mb-3">
-                      <Plus className="w-5 h-5 sm:w-6 sm:h-6 text-purple-500" />
-                    </div>
-                    <p className="text-sm text-slate-600 mb-1">
-                      Click to upload file
-                    </p>
-                    <p className="text-xs text-slate-400">
-                      PDF, Images, Videos
-                    </p>
-                  </label>
                 </div>
-
-                {file && (
-                  <div className="mt-3 p-3 bg-linear-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200">
-                    <p className="text-sm text-emerald-700 font-medium truncate">
-                      Selected: {file.name}
-                    </p>
-                  </div>
-                )}
               </div>
 
               <div className="flex gap-3 pt-4">

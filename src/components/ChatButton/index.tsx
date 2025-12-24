@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import ChatSidebar from "../ChatPanel";
+import { useRouter } from "next/navigation";
 
 type Props = {
   size?: number;
@@ -17,18 +17,11 @@ export default function FloatingChatButton({
   title = "Chat",
 }: Props) {
   const [isPulsing, setIsPulsing] = useState(true);
-   const [isChatOpen, setIsChatOpen] = useState(false);
+  const router = useRouter();
 
-  useEffect(() => {
-    const t = setInterval(() => setIsPulsing(true), 5000);
-    return () => clearInterval(t);
-  }, []);
-
-  useEffect(() => {
-    if (!isPulsing) return;
-    const t = setTimeout(() => setIsPulsing(false), 900);
-    return () => clearTimeout(t);
-  }, [isPulsing]);
+  const handleChatClick = () => {
+    router.push("/chat-history");
+  };
 
   return (
     <>
@@ -92,7 +85,7 @@ export default function FloatingChatButton({
 
       <button
         className="chat-fab"
-        onClick={() => setIsChatOpen(true)}
+        onClick={() => handleChatClick()}
         aria-label={title}
         title={title}
       >
@@ -106,10 +99,6 @@ export default function FloatingChatButton({
           <path d="M7 8h10v2H7V8Zm0 4h7v2H7v-2Z" />
         </svg>
       </button>
-       <ChatSidebar
-        isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-      />
     </>
   );
 }
