@@ -2,13 +2,14 @@
   "name": "gamified-call-center",
   "version": "0.1.0",
   "private": true,
-"scripts": {
-  "dev": "cross-env APP_ENV=dev node envSetup.cjs && next dev",
-  "build": "cross-env APP_ENV=prod node envSetup.cjs && next build",
-  "start": "next start",
-  "lint": "next lint"
-}
-,
+ "scripts": {
+    "dev": "cross-env NODE_ENV=development APP_ENV=dev node envSetup.js && cross-env NODE_OPTIONS='--inspect' next",
+    "build-dev": "cross-env NODE_ENV=development APP_ENV=dev node envSetup.js && next build",
+    "build": "cross-env NODE_ENV=production APP_ENV=prod node envSetup.js && next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+
   "dependencies": {
     "@headlessui/react": "^2.2.9",
     "@supabase/supabase-js": "^2.89.0",
