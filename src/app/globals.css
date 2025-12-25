@@ -1,37 +1,197 @@
 @import "tailwindcss";
+@import "../styles/fontface/font-family.css";
 
-/* Hide scrollbar but allow scrolling */
-.custom-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-.custom-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-/* @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #c9c3c3;
-    --foreground: #ededed;
+    --bg: 248 250 252;        /* page bg (slate-50) */
+    --card: 255 255 255;      /* card bg */
+    --text: 15 23 42;         /* text (slate-900) */
+    --muted: 100 116 139;     /* muted (slate-500) */
+    --border: 226 232 240;    /* border (slate-200) */
+    --head: 241 245 249;      /* table head bg (slate-100) */
+    --hover: 239 246 255; 
+        /* row hover (blue-50-ish) */
+          --soft: 241 245 249;        /* subtle surface (slate-100) */
+  --softHover: 226 232 240; 
+    --btnHover: 241 245 249;
+  }
+
+  .dark {
+    --bg: 9 12 20;            /* deep navy bg */
+    --card: 17 24 39;         /* slate-900 card */
+    --text: 226 232 240;      /* slate-200 text */
+    --muted: 148 163 184;     /* slate-400 muted */
+    --border: 51 65 85;       /* slate-700 border */
+   --head: 36 48 70;         /* slate-800 table head */
+    --hover: 30 41 59; 
+    --soft: 30 41 59;           /* subtle surface (slate-800) */
+  --softHover: 36 48 70;        /* slate-900 hover */
+    --btnHover: 30 41 59; 
+  }
+
+  html,
+  body {
+    font-family: Gordita-Regular, -apple-system, BlinkMacSystemFont, Segoe UI,
+      Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue,
+      sans-serif;
+
+    background: rgb(var(--bg));
+    color: rgb(var(--text));
+  }
+
+  strong,
+  b {
+    font-weight: bold !important;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-} */
+@layer components {
+  /* Use on page wrappers */
+  .app-surface {
+    background: rgb(var(--bg));
+    color: rgb(var(--text));
+  }
+
+  /* Use on cards / panels */
+  .app-card {
+    background: rgb(var(--card));
+    color: rgb(var(--text));
+    border: 1px solid rgb(var(--border));
+  }
+
+  /* Use on anything that needs only border color */
+  .app-border {
+    border-color: rgb(var(--border));
+  }
+
+  /* Muted text */
+ .app-muted {
+    color: rgb(var(--muted));
+  }
+
+  /* Table helpers */
+  .app-table-head {
+    background: rgb(var(--head));
+  }
+
+  .app-row-hover:hover {
+    background: rgb(var(--hover));
+  }
+  .app-text {
+    color: rgb(var(--text));
+  }
+  .app-heading {
+    color: rgb(var(--text));
+    font-weight: 600;
+  }
+
+  /* Inverse text (buttons on colored bg) */
+  .app-inverse {
+    color: #ffffff;
+  }
+  .app-btn {
+    background: transparent;
+    color: rgb(var(--text));
+    border: 1px solid rgb(var(--border));
+  }
+
+  .app-btn:hover {
+    background: rgb(var(--soft));
+  }
+
+  .app-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* active page button */
+  .app-btn-active {
+    background: rgb(79 70 229); /* indigo-600 */
+    color: #fff;
+    border-color: rgb(79 70 229);
+  }
+
+  .app-btn-active:hover {
+    background: rgb(67 56 202); /* indigo-700 */
+  }
+  .app-btn {
+    background: transparent;
+    color: rgb(var(--text));
+    border: 1px solid rgb(var(--border));
+  }
+  .app-btn:hover {
+    background: rgb(var(--btnHover));
+  }
+  .app-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* Active page button */
+  .app-btn-active {
+    background: rgb(79 70 229); /* indigo-600 */
+    color: #fff;
+    border: 1px solid rgb(79 70 229);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+  }
+  .app-btn-active:hover {
+    background: rgb(67 56 202); /* indigo-700 */
+    border-color: rgb(67 56 202);
+  }
+ .app-input {
+    background: rgb(var(--card));
+    color: rgb(var(--text));
+    border: 1px solid rgb(var(--border));
+  }
+  .app-input::placeholder {
+    color: rgb(var(--muted));
+  }
+  /* Action Buttons (Edit, Delete, View) */
+.app-btn-action {
+  /* @apply p-2 rounded-lg border transition-all; */
+  background: rgb(var(--soft));
+  color: rgb(var(--text));
+  border-color: rgb(var(--border));
+}
+
+.app-btn-action:hover {
+  background: rgb(var(--softHover));
+}
+
+.app-btn-action-danger {
+  /* @apply p-2 rounded-lg border transition-all; */
+  background: rgb(254 242 242); /* red-50 */
+  color: rgb(239 68 68);       /* red-500 */
+  border-color: rgb(239 68 68);
+}
+
+.dark .app-btn-action-danger {
+  background: rgb(239 68 68 / 0.1);
+  color: rgb(248 113 113); /* red-300 */
+  border-color: rgb(248 113 113);
+}
+
+.dark .app-btn-action-danger:hover {
+  background: rgb(239 68 68 / 0.2);
+}
+ .app-menu-item:hover {
+    background: rgb(var(--btnHover));
+  }
+
+  .app-menu-active {
+    background: rgb(var(--btnHover));
+  }
+
+  /* Selected option styling (brand) */
+  .app-menu-selected {
+    background: rgba(99, 102, 241, 0.12); /* indigo tint */
+    color: rgb(67, 56, 202); /* indigo-700-ish */
+  }
+
+  .dark .app-menu-selected {
+    background: rgba(99, 102, 241, 0.16);
+    color: rgb(199, 210, 254); /* indigo-200 */
+  }
+
+
+}

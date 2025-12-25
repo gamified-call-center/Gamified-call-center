@@ -49,51 +49,51 @@ export default function Pagination({
     return `Showing ${start}-${end} of ${totalItems}`;
   }, [page, totalItems, limit]);
 
-  const btnClass =
-    "min-w-[36px] px-3 py-1 rounded-lg border text-sm font-medium transition-all flex items-center justify-center";
+  const baseBtn =
+    "rounded-lg transition-all flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed";
+
+  const numBtn =
+    "min-w-[36px] px-3 py-1 text-sm font-medium";
+
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4 px-2">
-      <div className="text-sm text-slate-600 dark:text-slate-400 font-medium">
-        {showingText}
-      </div>
+ <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4 px-2">
+      <div className="text-sm app-text font-medium">{showingText}</div>
 
       <div className="flex flex-wrap items-center gap-2">
+        {/* First */}
         <button
           disabled={page === 1}
           onClick={() => onPageChange(1)}
-          className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed dark:border-slate-700 dark:hover:bg-slate-800"
+          className={`${baseBtn} app-btn p-2`}
           title="First page"
         >
           <ChevronsLeft className="w-4 h-4" />
         </button>
 
+        {/* Prev */}
         <button
           disabled={page === 1}
           onClick={() => onPageChange(page - 1)}
-          className="flex items-center gap-1 px-3 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed text-sm font-medium dark:border-slate-700 dark:hover:bg-slate-800"
+          className={`${baseBtn} app-btn flex items-center gap-1 px-3 py-2 text-sm font-medium`}
           title="Previous page"
         >
           <ChevronLeft className="w-4 h-4" />
           <span className="hidden sm:inline">Prev</span>
         </button>
 
+        {/* Pages */}
         {pages.map((p, idx) =>
           p === "..." ? (
-            <span
-              key={`ellipsis-${idx}`}
-              className="px-3 py-2 text-slate-400 dark:text-slate-500"
-            >
+            <span key={`ellipsis-${idx}`} className="px-3 py-2 app-muted text-sm">
               ...
             </span>
           ) : (
             <button
               key={p}
               onClick={() => onPageChange(p as number)}
-              className={`${btnClass} ${
-                p === page
-                  ? "bg-indigo-600 text-white border-indigo-600 shadow"
-                  : "border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
+              className={`${baseBtn} ${numBtn} ${
+                p === page ? "app-btn-active" : "app-btn"
               }`}
             >
               {p}
@@ -101,20 +101,22 @@ export default function Pagination({
           )
         )}
 
+        {/* Next */}
         <button
-          disabled={page === totalPages}
+          disabled={page === totalPages || totalPages === 0}
           onClick={() => onPageChange(page + 1)}
-          className="flex items-center gap-1 px-3 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed text-sm font-medium dark:border-slate-700 dark:hover:bg-slate-800"
+          className={`${baseBtn} app-btn flex items-center gap-1 px-3 py-2 text-sm font-medium`}
           title="Next page"
         >
           <span className="hidden sm:inline">Next</span>
           <ChevronRight className="w-4 h-4" />
         </button>
 
+        {/* Last */}
         <button
-          disabled={page === totalPages}
+          disabled={page === totalPages || totalPages === 0}
           onClick={() => onPageChange(totalPages)}
-          className="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed dark:border-slate-700 dark:hover:bg-slate-800"
+          className={`${baseBtn} app-btn p-2`}
           title="Last page"
         >
           <ChevronsRight className="w-4 h-4" />

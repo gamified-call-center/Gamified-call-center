@@ -8,6 +8,7 @@ import Loader from "@/commonComponents/Loader/";
 import Pagination from "@/commonComponents/Pagination";
 import toast from "react-hot-toast";
 import DealViewModal from "./DealViewModal";
+import Button from "@/commonComponents/Button";
 
 type DealRow = {
   id: string | number;
@@ -162,7 +163,7 @@ const AraDealsView = () => {
     setLoading(true);
 
     try {
-      const res = await apiClient.get(apiClient.URLS.user, {}, true);
+      const res = await apiClient.get(`${apiClient.URLS.user}/all`, {}, true);
 
       if (res.body && Array.isArray(res.body)) {
         console.log("Agents options:", res.body);
@@ -366,8 +367,8 @@ const AraDealsView = () => {
   }
 
   return (
-    <div className="md:p-4 p-1">
-      <div className=" rounded-md shadow-2xl md:p-4 p-1 bg-white">
+    <div className="md:p-4 p-1 app-surface">
+      <div className=" rounded-md shadow-2xl md:p-4 p-1 app-card">
         <TableToolbar
           search={{
             value: q,
@@ -385,15 +386,28 @@ const AraDealsView = () => {
           actionsSlot={
             <>
               <button
-                className="rounded-xl flex items-center gap-2  px-4 py-2 text-sm bg-[#80d26e] font-semibold text-white hover:bg-emerald-600"
                 onClick={exportToCSV}
+                className="
+    rounded-xl flex items-center gap-2 px-4 py-2 text-sm font-semibold
+    bg-emerald-500 text-white
+    hover:bg-emerald-600
+    dark:bg-emerald-400/90 dark:hover:bg-emerald-400
+    transition-colors
+  "
               >
                 <Download className="w-4 h-4" />
                 Excel
               </button>
+
               <button
                 onClick={openCreate}
-                className="rounded-xl bg-[#477891] px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+                className="
+    rounded-xl px-4 py-2 text-sm font-semibold
+    bg-indigo-600 text-white
+    hover:bg-indigo-700
+    dark:bg-indigo-500 dark:hover:bg-indigo-400
+    transition-colors
+  "
               >
                 + Create New Deal
               </button>
@@ -401,32 +415,32 @@ const AraDealsView = () => {
           }
         />
 
-        <div className="overflow-x-auto rounded-sm border border-slate-200  bg-white  shadow-sm">
-          <table className="min-w-275 w-full text-sm text-black  border-collapse">
-            <thead className="sticky top-0 z-10 bg-slate-100   ">
+        <div className="overflow-x-auto rounded-sm border app-border app-card  shadow-sm">
+          <table className="min-w-275 w-full text-sm app-text  border-collapse">
+            <thead className="sticky top-0 z-10 app-table-head   ">
               <tr>
-                <th className="px-4 py-1 text-left font-bold border border-slate-200 dark:border-slate-700">
+                <th className="px-4 py-1 text-left font-bold border app-border ">
                   Deal #
                 </th>
-                <th className="px-4 py-1 text-left font-bold border border-slate-200 dark:border-slate-700">
+                <th className="px-4 py-1 text-left font-bold border app-border ">
                   Full Name
                 </th>
-                <th className="px-4 py-1 text-center font-bold border border-slate-200 dark:border-slate-700">
+                <th className="px-4 py-1 text-center font-bold border app-border ">
                   Applicants
                 </th>
-                <th className="px-4 py-1 text-left font-bold border border-slate-200 dark:border-slate-700">
+                <th className="px-4 py-1 text-left font-bold border app-border ">
                   Carrier
                 </th>
-                <th className="px-4 py-1 text-left font-bold border border-slate-200 dark:border-slate-700">
+                <th className="px-4 py-1 text-left font-bold border app-border ">
                   Closed Date
                 </th>
-                <th className="px-4 py-1 text-left font-bold border border-slate-200 dark:border-slate-700">
+                <th className="px-4 py-1 text-left font-bold border app-border ">
                   Agent
                 </th>
-                <th className="px-4 py-1 text-left font-bold border border-slate-200 dark:border-slate-700">
+                <th className="px-4 py-1 text-left font-bold border app-border ">
                   Created By
                 </th>
-                <th className="px-4 py-1 text-center font-bold border border-slate-200 dark:border-slate-700">
+                <th className="px-4 py-1 text-center font-bold border app-border ">
                   Actions
                 </th>
               </tr>
@@ -437,43 +451,37 @@ const AraDealsView = () => {
                 <tr>
                   <td
                     colSpan={8}
-                    className="py-16 text-center text-slate-400 border border-slate-200 dark:border-slate-700"
+                    className="py-16 text-center app-text border app-border "
                   >
                     No deals found
                   </td>
                 </tr>
               ) : (
                 filteredItems.map((d, i) => (
-                  <tr
-                    key={d.id}
-                    className="hover:bg-indigo-50/60 dark:hover:bg-slate-800 transition-colors"
-                  >
-                    <td className="px-4 py-1 font-medium border border-slate-200 dark:border-slate-700">
+                  <tr key={d.id} className="app-row-hover  transition-colors">
+                    <td className="px-4 py-1 font-medium border app-border ">
                       {d.dealNo || i + 1}
                     </td>
-                    <td className="px-4 py-1 border border-slate-200 dark:border-slate-700">
+                    <td className="px-4 py-1 border app-border ">
                       {d.fullName?.trim() ||
                         `${d.applicantFirstName} ${d.applicantLastName}`}
                     </td>
-                    <td className="px-4 py-1 text-center border border-slate-200 dark:border-slate-700">
+                    <td className="px-4 py-1 text-center border app-border ">
                       {d.numberOfApplicants}
                     </td>
-                    <td className="px-4 py-1 border border-slate-200 dark:border-slate-700">
+                    <td className="px-4 py-1 border app-border ">
                       {d.carrier || "-"}
                     </td>
-                    <td className="px-4 py-1 whitespace-nowrap border border-slate-200 dark:border-slate-700">
+                    <td className="px-4 py-1 whitespace-nowrap  border app-border ">
                       {formatDateTime(d.closedDate)}
                     </td>
-                    <td className="px-4 py-1 border border-slate-200 dark:border-slate-700">
+                    <td className="px-4 py-1 border app-border ">
                       {d.agent?.user?.firstName || "-"}
                     </td>
-                    <td className="px-4 py-1 border border-slate-200 dark:border-slate-700">
-                      <div className="font-medium">{d.createdByName}</div>
-                      <div className="text-xs text-slate-500">
-                        {formatDateTime(d.createdAt)}
-                      </div>
+                    <td className="px-4 py-1 border app-border ">
+                      {formatDateTime(d.createdAt)}
                     </td>
-                    <td className="px-4 py-1 text-center border border-slate-200 dark:border-slate-700">
+                    <td className="px-4 py-1 text-center border app-border ">
                       <div className="inline-flex items-center gap-2">
                         <button
                           className="p-2 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-500/10 dark:hover:bg-indigo-500/20 transition"

@@ -30,16 +30,14 @@ export function Field({
           <div className="min-w-0">
             {label && (
               <label
-                className={cn(
-                  "block text-sm font-medium text-slate-800 ",
-                  labelClassName
-                )}
+                className={cn("block text-sm font-medium app-text", labelClassName)}
               >
                 {label} {required ? <span className="text-rose-500">*</span> : null}
               </label>
             )}
+
             {sublabel ? (
-              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{sublabel}</p>
+              <p className="mt-0.5 text-xs app-muted">{sublabel}</p>
             ) : null}
           </div>
         </div>
@@ -48,10 +46,11 @@ export function Field({
       {children}
 
       {hint && !error ? (
-        <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">{hint}</p>
+        <p className="mt-1.5 text-xs app-muted">{hint}</p>
       ) : null}
 
       {error ? <p className="mt-1.5 text-xs text-rose-500">{error}</p> : null}
     </div>
   );
 }
+

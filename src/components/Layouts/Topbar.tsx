@@ -2,6 +2,7 @@
 
 import AppsMenu from "@/commonComponents/AppMenu";
 import AvatarMenu from "@/commonComponents/Avatar";
+import ThemeToggle from "@/commonComponents/ThemeToggle";
 import { useAuthStore } from "@/store/user";
 import { Bell, ShieldCheck, Menu } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -37,6 +38,7 @@ export default function Topbar({
           <div className="text-[15px] font-semibold text-[#111827]">{title}</div>
         </div>
       </div>
+       <ThemeToggle />
 
       <div className="flex items-center gap-3">
         <AppsMenu

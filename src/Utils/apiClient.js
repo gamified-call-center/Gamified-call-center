@@ -14,7 +14,7 @@ const URLS = {
   leaderboard: `${base_url}leaderboard/leaderboard`,
   agent: `${base_url}agent`,
   deals: `${base_url}deals`,
-  designation: `${base_url}designation`,
+  designation: `${base_url}api/designation`,
   employee: `${base_url}employee`,
   permissions: `${base_url}permissions`,
   designationPermissions: `${base_url}designationPermissions`,

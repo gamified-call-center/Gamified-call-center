@@ -2,16 +2,16 @@
 
 import React, { useEffect, useState } from "react";
 import Modal from "@/commonComponents/Modal";
-import { 
-  X, 
-  User, 
-  Building2, 
-  Calendar, 
-  DollarSign, 
-  FileText, 
-  Users, 
-  CheckCircle, 
-  Clock, 
+import {
+  X,
+  User,
+  Building2,
+  Calendar,
+  DollarSign,
+  FileText,
+  Users,
+  CheckCircle,
+  Clock,
   AlertCircle,
   Download,
   Copy,
@@ -27,7 +27,7 @@ import {
   Briefcase,
   Globe,
   FileCheck,
-  Lock
+  Lock,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 
@@ -67,9 +67,9 @@ function formatDateOnly(dt: string) {
 
 function formatCurrency(amount: any) {
   const num = Number(amount);
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(isNaN(num) ? 0 : num);
@@ -99,91 +99,109 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
   if (!deal && !isVisible) return null;
 
   const getStatusConfig = (status: string) => {
-    const configs: Record<string, { color: string; bg: string; icon: React.ReactNode; label: string }> = {
-      OPEN: {
-        color: "text-emerald-700",
-        bg: "bg-emerald-100",
-        icon: <Clock className="w-4 h-4" />,
-        label: "Open"
-      },
-      CLOSED: {
-        color: "text-blue-700",
-        bg: "bg-blue-100",
-        icon: <CheckCircle className="w-4 h-4" />,
-        label: "Closed"
-      },
-      PENDING: {
-        color: "text-amber-700",
-        bg: "bg-amber-100",
-        icon: <Clock className="w-4 h-4" />,
-        label: "Pending"
-      },
-      CANCELLED: {
-        color: "text-red-700",
-        bg: "bg-red-100",
-        icon: <AlertCircle className="w-4 h-4" />,
-        label: "Cancelled"
-      }
-    };
-    return configs[status?.toUpperCase()] || configs.OPEN;
+  const configs: Record<
+    string,
+    { color: string; bg: string; icon: React.ReactNode; label: string }
+  > = {
+    OPEN: {
+      color: "text-emerald-700 dark:text-emerald-300",
+      bg: "bg-emerald-100 dark:bg-emerald-500/15",
+      icon: <Clock className="w-4 h-4 text-emerald-700 dark:text-emerald-300" />,
+      label: "Open",
+    },
+    CLOSED: {
+      color: "text-indigo-700 dark:text-indigo-300",
+      bg: "bg-indigo-100 dark:bg-indigo-500/15",
+      icon: <CheckCircle className="w-4 h-4 text-indigo-700 dark:text-indigo-300" />,
+      label: "Closed",
+    },
+    PENDING: {
+      color: "text-amber-800 dark:text-amber-300",
+      bg: "bg-amber-100 dark:bg-amber-500/15",
+      icon: <Clock className="w-4 h-4 text-amber-800 dark:text-amber-300" />,
+      label: "Pending",
+    },
+    CANCELLED: {
+      color: "text-rose-700 dark:text-rose-300",
+      bg: "bg-rose-100 dark:bg-rose-500/15",
+      icon: <AlertCircle className="w-4 h-4 text-rose-700 dark:text-rose-300" />,
+      label: "Cancelled",
+    },
   };
 
-  const getAgentStatusConfig = (status: string) => {
-    const configs: Record<string, { color: string; bg: string; label: string }> = {
-      ACTIVE: {
-        color: "text-emerald-700",
-        bg: "bg-emerald-100",
-        label: "Active"
-      },
-      INACTIVE: {
-        color: "text-slate-700",
-        bg: "bg-slate-100",
-        label: "Inactive"
-      }
-    };
-    return configs[status?.toUpperCase()] || configs.ACTIVE;
+  return configs[status?.toUpperCase()] || configs.OPEN;
+};
+
+
+ const getAgentStatusConfig = (status: string) => {
+  const configs: Record<string, { color: string; bg: string; label: string }> = {
+    ACTIVE: {
+      color: "text-emerald-700 dark:text-emerald-300",
+      bg: "bg-emerald-100 dark:bg-emerald-500/15",
+      label: "Active",
+    },
+    INACTIVE: {
+      color: "text-slate-700 dark:text-slate-300",
+      bg: "bg-slate-100 dark:bg-slate-500/15",
+      label: "Inactive",
+    },
   };
+
+  return configs[status?.toUpperCase()] || configs.ACTIVE;
+};
 
   const statusConfig = getStatusConfig(deal?.status);
   const agentStatusConfig = getAgentStatusConfig(deal?.agent?.user?.userStatus);
 
   const tabs = [
-    { id: "overview", label: "Overview", icon: <Building2 className="w-4 h-4" /> },
-    { id: "applicants", label: "Applicants", icon: <Users className="w-4 h-4" /> },
+    {
+      id: "overview",
+      label: "Overview",
+      icon: <Building2 className="w-4 h-4" />,
+    },
+    {
+      id: "applicants",
+      label: "Applicants",
+      icon: <Users className="w-4 h-4" />,
+    },
     { id: "agent", label: "Agent", icon: <User className="w-4 h-4" /> },
-    
   ];
 
   const stats = [
-    {
-      label: "Monthly Income",
-      value: formatCurrency(deal?.monthlyIncome),
-      icon: <DollarSign className="w-5 h-5" />,
-      color: "from-emerald-500 to-teal-500",
-      tooltip: "Estimated monthly income"
-    },
-    {
-      label: "Applicants",
-      value: deal?.numberOfApplicants || 0,
-      icon: <Users className="w-5 h-5" />,
-      color: "from-blue-500 to-cyan-500",
-      tooltip: "Total number of applicants"
-    },
-    {
-      label: "Coverage Types",
-      value: Array.isArray(deal?.typeOfCoverage) ? deal.typeOfCoverage.length : 0,
-      icon: <Shield className="w-5 h-5" />,
-      color: "from-purple-500 to-pink-500",
-      tooltip: "Types of coverage included"
-    },
-    {
-      label: "Years Experience",
-      value: deal?.agent?.yearsOfExperience || 0,
-      icon: <Award className="w-5 h-5" />,
-      color: "from-amber-500 to-orange-500",
-      tooltip: "Agent's years of experience"
-    },
-  ];
+  {
+    label: "Monthly Income",
+    value: formatCurrency(deal?.monthlyIncome),
+    icon: <DollarSign className="w-5 h-5 text-white" />,
+    color: "from-emerald-500 to-teal-500",
+    chipBg: "bg-emerald-500/10 dark:bg-emerald-400/10",
+    tooltip: "Estimated monthly income",
+  },
+  {
+    label: "Applicants",
+    value: deal?.numberOfApplicants || 0,
+    icon: <Users className="w-5 h-5 text-white" />,
+    color: "from-blue-500 to-cyan-500",
+    chipBg: "bg-blue-500/10 dark:bg-blue-400/10",
+    tooltip: "Total number of applicants",
+  },
+  {
+    label: "Coverage Types",
+    value: Array.isArray(deal?.typeOfCoverage) ? deal.typeOfCoverage.length : 0,
+    icon: <Shield className="w-5 h-5 text-white" />,
+    color: "from-purple-500 to-pink-500",
+    chipBg: "bg-purple-500/10 dark:bg-purple-400/10",
+    tooltip: "Types of coverage included",
+  },
+  {
+    label: "Years Experience",
+    value: deal?.agent?.yearsOfExperience || 0,
+    icon: <Award className="w-5 h-5 text-white" />,
+    color: "from-amber-500 to-orange-500",
+    chipBg: "bg-amber-500/10 dark:bg-amber-400/10",
+    tooltip: "Agent's years of experience",
+  },
+];
+
 
   const renderOverview = () => (
     <div className="space-y-6 animate-fadeIn">
@@ -195,19 +213,27 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
               <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-lg">
                 <User className="w-8 h-8 text-white" />
               </div>
-              <div className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-full ${statusConfig.bg} border-4 border-white dark:border-slate-800 flex items-center justify-center`}>
+              <div
+                className={`absolute -bottom-2 -right-2 w-8 h-8 rounded-full ${statusConfig.bg} border-4 border-white dark:border-slate-800 flex items-center justify-center`}
+              >
                 {statusConfig.icon}
               </div>
             </div>
             <div>
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-                {`${deal?.applicantFirstName || ''} ${deal?.applicantLastName || ''}`.trim() || "Unnamed Deal"}
+                {`${deal?.applicantFirstName || ""} ${
+                  deal?.applicantLastName || ""
+                }`.trim() || "Unnamed Deal"}
               </h2>
               <div className="flex items-center gap-3 mt-2 flex-wrap">
-                <span className={`px-3 py-1 rounded-full text-sm font-semibold ${statusConfig.bg} ${statusConfig.color}`}>
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-semibold ${statusConfig.bg} ${statusConfig.color}`}
+                >
                   {statusConfig.label}
                 </span>
-                <span className="text-sm text-slate-500 dark:text-slate-400">Deal ID: {deal?.id?.slice(0, 8)}...</span>
+                <span className="text-sm text-slate-500 dark:text-slate-400">
+                  Deal ID: {deal?.id?.slice(0, 8)}...
+                </span>
                 {deal?.ffm && (
                   <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">
                     FFM
@@ -249,8 +275,12 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
             title={stat.tooltip}
           >
             <div className="flex items-center justify-between mb-3">
-              <div className={`p-2 rounded-xl bg-linear-to-br ${stat.color} bg-opacity-10`}>
-                <div className={`text-white bg-linear-to-br ${stat.color} p-2 rounded-lg`}>
+              <div
+                className={`p-2 rounded-xl bg-linear-to-br ${stat.color} bg-opacity-10`}
+              >
+                <div
+                  className={`text-white bg-linear-to-br ${stat.color} p-2 rounded-lg`}
+                >
                   {stat.icon}
                 </div>
               </div>
@@ -274,38 +304,78 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
               <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                 <Tag className="w-5 h-5 text-blue-500" />
               </div>
-              <h3 className="font-semibold text-slate-900 dark:text-white">Deal Information</h3>
+              <h3 className="font-semibold text-slate-900 dark:text-white">
+                Deal Information
+              </h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
-                { label: "Carrier", value: deal?.carrier || "Not specified", icon: <Building2 className="w-4 h-4" /> },
-                { label: "Type of Work", value: deal?.typeOfWork || "Not specified", icon: <Briefcase className="w-4 h-4" /> },
-                { label: "Coverage Types", 
-                  value: Array.isArray(deal?.typeOfCoverage) && deal.typeOfCoverage.length > 0 
-                    ? deal.typeOfCoverage.map((type: string) => (
-                        <span key={type} className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded text-xs mr-1 mb-1 inline-block">
-                          {type}
-                        </span>
-                      ))
-                    : "Not specified", 
-                  icon: <Shield className="w-4 h-4" />,
-                  fullWidth: true 
+                {
+                  label: "Carrier",
+                  value: deal?.carrier || "Not specified",
+                  icon: <Building2 className="w-4 h-4" />,
                 },
-                { label: "FFM Status", value: deal?.ffm ? "Yes" : "No", icon: deal?.ffm ? <CheckCircle className="w-4 h-4" /> : <X className="w-4 h-4" /> },
-                { label: "Documents Needed", value: deal?.documentsNeeded || "None", icon: <FileText className="w-4 h-4" /> },
-                { label: "Customer Language", value: deal?.customerLanguage || "English", icon: <Globe className="w-4 h-4" /> },
-                { label: "Social Provider", value: deal?.socialProvider || "Not specified", icon: <User className="w-4 h-4" /> },
+                {
+                  label: "Type of Work",
+                  value: deal?.typeOfWork || "Not specified",
+                  icon: <Briefcase className="w-4 h-4" />,
+                },
+                {
+                  label: "Coverage Types",
+                  value:
+                    Array.isArray(deal?.typeOfCoverage) &&
+                    deal.typeOfCoverage.length > 0
+                      ? deal.typeOfCoverage.map((type: string) => (
+                          <span
+                            key={type}
+                            className="px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded text-xs mr-1 mb-1 inline-block"
+                          >
+                            {type}
+                          </span>
+                        ))
+                      : "Not specified",
+                  icon: <Shield className="w-4 h-4" />,
+                  fullWidth: true,
+                },
+                {
+                  label: "FFM Status",
+                  value: deal?.ffm ? "Yes" : "No",
+                  icon: deal?.ffm ? (
+                    <CheckCircle className="w-4 h-4" />
+                  ) : (
+                    <X className="w-4 h-4" />
+                  ),
+                },
+                {
+                  label: "Documents Needed",
+                  value: deal?.documentsNeeded || "None",
+                  icon: <FileText className="w-4 h-4" />,
+                },
+                {
+                  label: "Customer Language",
+                  value: deal?.customerLanguage || "English",
+                  icon: <Globe className="w-4 h-4" />,
+                },
+                {
+                  label: "Social Provider",
+                  value: deal?.socialProvider || "Not specified",
+                  icon: <User className="w-4 h-4" />,
+                },
               ].map((item, index) => (
-                <div 
-                  key={item.label} 
-                  className={`${item.fullWidth ? 'col-span-1 md:col-span-2' : ''} p-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors group border border-transparent hover:border-slate-200 dark:hover:border-slate-600`}
+                <div
+                  key={item.label}
+                  className={`${
+                    item.fullWidth ? "col-span-1 md:col-span-2" : ""
+                  } p-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-xl transition-colors group border border-transparent hover:border-slate-200 dark:hover:border-slate-600`}
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className="flex items-center gap-3 mb-2">
                     <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors">
                       {item.icon}
                     </div>
-                    <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">{item.label}</span>
+                    <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">
+                      {item.label}
+                    </span>
                   </div>
                   <div className="text-sm font-medium text-slate-900 dark:text-white pl-12">
                     {item.value}
@@ -322,7 +392,9 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                 <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                   <MessageSquare className="w-5 h-5 text-blue-500" />
                 </div>
-                <h3 className="font-semibold text-slate-900 dark:text-white">Notes</h3>
+                <h3 className="font-semibold text-slate-900 dark:text-white">
+                  Notes
+                </h3>
               </div>
               <div className="p-4 bg-white/80 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700">
                 <p className="text-slate-700 dark:text-slate-300 leading-relaxed">
@@ -336,9 +408,13 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                 <div className="p-2 bg-slate-100 dark:bg-slate-700 rounded-lg">
                   <MessageSquare className="w-5 h-5 text-slate-400" />
                 </div>
-                <h3 className="font-semibold text-slate-600 dark:text-slate-400">Notes</h3>
+                <h3 className="font-semibold text-slate-600 dark:text-slate-400">
+                  Notes
+                </h3>
               </div>
-              <p className="text-slate-500 dark:text-slate-500 italic">No notes added for this deal</p>
+              <p className="text-slate-500 dark:text-slate-500 italic">
+                No notes added for this deal
+              </p>
             </div>
           )}
         </div>
@@ -351,25 +427,38 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
               <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
                 <Calendar className="w-5 h-5 text-purple-500" />
               </div>
-              <h3 className="font-semibold text-slate-900 dark:text-white">Timeline</h3>
+              <h3 className="font-semibold text-slate-900 dark:text-white">
+                Timeline
+              </h3>
             </div>
             <div className="space-y-4 relative before:absolute before:left-7 before:top-8 before:bottom-8 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-700">
               {[
-                { 
-                  event: "Deal Created", 
-                  date: formatDateTime(deal?.createdAt), 
+                {
+                  event: "Deal Created",
+                  date: formatDateTime(deal?.createdAt),
                   color: "bg-blue-500",
-                  icon: <Clock className="w-4 h-4 text-white" />
+                  icon: <Clock className="w-4 h-4 text-white" />,
                 },
-                { 
-                  event: "Close Date", 
-                  date: deal?.closedDate ? formatDateOnly(deal.closedDate) : "Not set", 
+                {
+                  event: "Close Date",
+                  date: deal?.closedDate
+                    ? formatDateOnly(deal.closedDate)
+                    : "Not set",
                   color: deal?.closedDate ? "bg-emerald-500" : "bg-slate-300",
-                  icon: deal?.closedDate ? <CheckCircle className="w-4 h-4 text-white" /> : <Clock className="w-4 h-4 text-white" />
+                  icon: deal?.closedDate ? (
+                    <CheckCircle className="w-4 h-4 text-white" />
+                  ) : (
+                    <Clock className="w-4 h-4 text-white" />
+                  ),
                 },
               ].map((item, index) => (
-                <div key={item.event} className="flex items-start gap-4 relative z-10 group">
-                  <div className={`w-12 h-12 rounded-full ${item.color} flex items-center justify-center shrink-0 shadow-lg transform group-hover:scale-110 transition-transform`}>
+                <div
+                  key={item.event}
+                  className="flex items-start gap-4 relative z-10 group"
+                >
+                  <div
+                    className={`w-12 h-12 rounded-full ${item.color} flex items-center justify-center shrink-0 shadow-lg transform group-hover:scale-110 transition-transform`}
+                  >
                     {item.icon}
                   </div>
                   <div className="flex-1 pt-1">
@@ -393,24 +482,31 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                   <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
                     <User className="w-5 h-5 text-emerald-500" />
                   </div>
-                  <h3 className="font-semibold text-slate-900 dark:text-white">Assigned Agent</h3>
+                  <h3 className="font-semibold text-slate-900 dark:text-white">
+                    Assigned Agent
+                  </h3>
                 </div>
-                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${agentStatusConfig.bg} ${agentStatusConfig.color}`}>
+                <span
+                  className={`px-2 py-1 text-xs font-semibold rounded-full ${agentStatusConfig.bg} ${agentStatusConfig.color}`}
+                >
                   {agentStatusConfig.label}
                 </span>
               </div>
-              
+
               <div className="flex items-center gap-4 p-4 bg-linear-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800/30 mb-4">
                 <div className="w-14 h-14 rounded-full bg-linear-to-br from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg">
                   <span className="text-white font-bold text-lg">
-                    {deal.agent.user?.firstName?.charAt(0)}{deal.agent.user?.lastName?.charAt(0)}
+                    {deal.agent.user?.firstName?.charAt(0)}
+                    {deal.agent.user?.lastName?.charAt(0)}
                   </span>
                 </div>
                 <div className="flex-1">
                   <h4 className="font-semibold text-slate-900 dark:text-white">
                     {deal.agent.user?.firstName} {deal.agent.user?.lastName}
                   </h4>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">Primary Agent</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    Primary Agent
+                  </p>
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded">
                       NPM: {deal.agent.npm}
@@ -427,19 +523,31 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
               <div className="space-y-3">
                 <div className="flex items-center gap-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg transition-colors">
                   <Mail className="w-4 h-4 text-slate-400" />
-                  <span className="text-sm text-slate-700 dark:text-slate-300 truncate">{deal.agent.user?.email}</span>
+                  <span className="text-sm text-slate-700 dark:text-slate-300 truncate">
+                    {deal.agent.user?.email}
+                  </span>
                 </div>
                 <div className="flex items-center gap-3 p-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg transition-colors">
                   <Phone className="w-4 h-4 text-slate-400" />
-                  <span className="text-sm text-slate-700 dark:text-slate-300">{deal.agent.user?.phone}</span>
+                  <span className="text-sm text-slate-700 dark:text-slate-300">
+                    {deal.agent.user?.phone}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between p-2">
-                  <span className="text-sm text-slate-600 dark:text-slate-400">Experience</span>
-                  <span className="font-medium text-slate-900 dark:text-white">{deal.agent.yearsOfExperience} years</span>
+                  <span className="text-sm text-slate-600 dark:text-slate-400">
+                    Experience
+                  </span>
+                  <span className="font-medium text-slate-900 dark:text-white">
+                    {deal.agent.yearsOfExperience} years
+                  </span>
                 </div>
                 <div className="flex items-center justify-between p-2">
-                  <span className="text-sm text-slate-600 dark:text-slate-400">Access Level</span>
-                  <span className="font-medium text-slate-900 dark:text-white">{deal.agent.accessLevel}</span>
+                  <span className="text-sm text-slate-600 dark:text-slate-400">
+                    Access Level
+                  </span>
+                  <span className="font-medium text-slate-900 dark:text-white">
+                    {deal.agent.accessLevel}
+                  </span>
                 </div>
               </div>
             </div>
@@ -465,25 +573,34 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                 <p className="text-slate-500 dark:text-slate-400 mb-8">
                   Total number of applicants in this deal
                 </p>
-                
+
                 <div className="max-w-md mx-auto bg-slate-50 dark:bg-slate-700/50 rounded-xl p-6 border border-slate-200 dark:border-slate-600">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Primary Applicant</span>
-                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium rounded-full">
-                      Main Contact
+                {deal.agent.stateLicenseNumber && <div className="flex items-center justify-between mb-4">
+                    <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                      stateLicenseNumber
                     </span>
-                  </div>
+                    <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm font-medium rounded-full">
+                      {deal.agent.stateLicenseNumber}
+                    </span>
+                  </div>}
+                  
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-600 dark:text-slate-400">Name</span>
+                      <span className="text-slate-600 dark:text-slate-400">
+                        Name
+                      </span>
                       <span className="font-medium text-slate-900 dark:text-white">
                         {deal?.applicantFirstName} {deal?.applicantLastName}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-600 dark:text-slate-400">Coverage Type</span>
+                      <span className="text-slate-600 dark:text-slate-400">
+                        Coverage Type
+                      </span>
                       <span className="font-medium text-slate-900 dark:text-white">
-                        {Array.isArray(deal?.typeOfCoverage) ? deal.typeOfCoverage[0] : "Not specified"}
+                        {Array.isArray(deal?.typeOfCoverage)
+                          ? deal.typeOfCoverage[0]
+                          : "Not specified"}
                       </span>
                     </div>
                   </div>
@@ -502,7 +619,8 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-full bg-linear-to-br from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg">
                       <span className="text-white font-bold text-xl">
-                        {deal.agent.user?.firstName?.charAt(0)}{deal.agent.user?.lastName?.charAt(0)}
+                        {deal.agent.user?.firstName?.charAt(0)}
+                        {deal.agent.user?.lastName?.charAt(0)}
                       </span>
                     </div>
                     <div>
@@ -510,10 +628,14 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                         {deal.agent.user?.firstName} {deal.agent.user?.lastName}
                       </h2>
                       <div className="flex items-center gap-3 mt-2 flex-wrap">
-                        <span className={`px-3 py-1 rounded-full text-sm font-semibold ${agentStatusConfig.bg} ${agentStatusConfig.color}`}>
+                        <span
+                          className={`px-3 py-1 rounded-full text-sm font-semibold ${agentStatusConfig.bg} ${agentStatusConfig.color}`}
+                        >
                           {agentStatusConfig.label}
                         </span>
-                        <span className="text-sm text-slate-500 dark:text-slate-400">NPM: {deal.agent.npm}</span>
+                        <span className="text-sm text-slate-500 dark:text-slate-400">
+                          NPM: {deal.agent.npm}
+                        </span>
                         {deal.agent.ahipCertified && (
                           <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
                             AHIP Certified
@@ -527,37 +649,68 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-6">
                     <div className="bg-linear-to-r from-slate-50 to-blue-50 dark:from-slate-700/50 dark:to-blue-900/20 rounded-xl p-6 border border-slate-200 dark:border-slate-600">
-                      <h3 className="font-semibold text-slate-900 dark:text-white mb-4">Contact Information</h3>
+                      <h3 className="font-semibold text-slate-900 dark:text-white mb-4">
+                        Contact Information
+                      </h3>
                       <div className="space-y-4">
                         <div className="flex items-center gap-3">
                           <Mail className="w-5 h-5 text-slate-400" />
                           <div>
-                            <p className="text-sm text-slate-600 dark:text-slate-400">Email</p>
-                            <p className="font-medium text-slate-900 dark:text-white">{deal.agent.user?.email}</p>
+                            <p className="text-sm text-slate-600 dark:text-slate-400">
+                              Email
+                            </p>
+                            <p className="font-medium text-slate-900 dark:text-white">
+                              {deal.agent.user?.email}
+                            </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-3">
                           <Phone className="w-5 h-5 text-slate-400" />
                           <div>
-                            <p className="text-sm text-slate-600 dark:text-slate-400">Phone</p>
-                            <p className="font-medium text-slate-900 dark:text-white">{deal.agent.user?.phone}</p>
+                            <p className="text-sm text-slate-600 dark:text-slate-400">
+                              Phone
+                            </p>
+                            <p className="font-medium text-slate-900 dark:text-white">
+                              {deal.agent.user?.phone}
+                            </p>
                           </div>
                         </div>
                       </div>
                     </div>
 
                     <div className="bg-linear-to-r from-slate-50 to-emerald-50 dark:from-slate-700/50 dark:to-emerald-900/20 rounded-xl p-6 border border-slate-200 dark:border-slate-600">
-                      <h3 className="font-semibold text-slate-900 dark:text-white mb-4">Professional Details</h3>
+                      <h3 className="font-semibold text-slate-900 dark:text-white mb-4">
+                        Professional Details
+                      </h3>
                       <div className="space-y-3">
                         {[
-                          { label: "Years of Experience", value: `${deal.agent.yearsOfExperience} years` },
-                          { label: "Access Level", value: deal.agent.accessLevel },
-                          { label: "State Licensed", value: deal.agent.stateLicensed ? "Yes" : "No" },
-                          { label: "Active Since", value: formatDateOnly(deal.agent.createdAt) },
+                          {
+                            label: "Years of Experience",
+                            value: `${deal.agent.yearsOfExperience} years`,
+                          },
+                          {
+                            label: "Access Level",
+                            value: deal.agent.accessLevel,
+                          },
+                          {
+                            label: "State Licensed",
+                            value: deal.agent.stateLicensed ? "Yes" : "No",
+                          },
+                          {
+                            label: "Active Since",
+                            value: formatDateOnly(deal.agent.createdAt),
+                          },
                         ].map((item, index) => (
-                          <div key={item.label} className="flex items-center justify-between">
-                            <span className="text-sm text-slate-600 dark:text-slate-400">{item.label}</span>
-                            <span className="font-medium text-slate-900 dark:text-white">{item.value}</span>
+                          <div
+                            key={item.label}
+                            className="flex items-center justify-between"
+                          >
+                            <span className="text-sm text-slate-600 dark:text-slate-400">
+                              {item.label}
+                            </span>
+                            <span className="font-medium text-slate-900 dark:text-white">
+                              {item.value}
+                            </span>
                           </div>
                         ))}
                       </div>
@@ -566,18 +719,46 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
 
                   <div className="space-y-6">
                     <div className="bg-linear-to-r from-slate-50 to-purple-50 dark:from-slate-700/50 dark:to-purple-900/20 rounded-xl p-6 border border-slate-200 dark:border-slate-600">
-                      <h3 className="font-semibold text-slate-900 dark:text-white mb-4">System Information</h3>
+                      <h3 className="font-semibold text-slate-900 dark:text-white mb-4">
+                        System Information
+                      </h3>
                       <div className="space-y-3">
                         {[
-                          { label: "User ID", value: deal.agent.user?.id?.slice(0, 8) + "..." },
-                          { label: "System Role", value: deal.agent.user?.systemRole },
-                          { label: "Date of Birth", value: formatDateOnly(deal.agent.user?.dob) },
-                          { label: "Agent ID", value: deal.agent.id?.slice(0, 8) + "..." },
+                          {
+                            label: "User ID",
+                            value: deal.agent.user?.id?.slice(0, 8) + "...",
+                          },
+                          {
+                            label: "System Role",
+                            value: deal.agent.user?.systemRole,
+                          },
+                          {
+                            label: "Date of Birth",
+                            value: formatDateOnly(deal.agent.user?.dob),
+                          },
+                          {
+                            label: "Agent ID",
+                            value: deal.agent.id?.slice(0, 8) + "...",
+                          },
                         ].map((item, index) => (
-                          <div key={item.label} className="flex items-center justify-between">
-                            <span className="text-sm text-slate-600 dark:text-slate-400">{item.label}</span>
+                          <div
+                            key={item.label}
+                            className="flex items-center justify-between"
+                          >
+                            <span className="text-sm text-slate-600 dark:text-slate-400">
+                              {item.label}
+                            </span>
                             <button
-                              onClick={() => copyToClipboard(item.label === "User ID" ? deal.agent.user?.id : item.label === "Agent ID" ? deal.agent.id : item.value, item.label)}
+                              onClick={() =>
+                                copyToClipboard(
+                                  item.label === "User ID"
+                                    ? deal.agent.user?.id
+                                    : item.label === "Agent ID"
+                                    ? deal.agent.id
+                                    : item.value,
+                                  item.label
+                                )
+                              }
                               className="font-medium text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1"
                             >
                               {item.value}
@@ -593,8 +774,12 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
             ) : (
               <div className="text-center py-12">
                 <User className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300">No Agent Assigned</h3>
-                <p className="text-slate-500 dark:text-slate-400 mt-2">This deal doesn't have an assigned agent yet</p>
+                <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300">
+                  No Agent Assigned
+                </h3>
+                <p className="text-slate-500 dark:text-slate-400 mt-2">
+                  This deal doesn't have an assigned agent yet
+                </p>
               </div>
             )}
           </div>
@@ -649,9 +834,7 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
 
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto">
-          <div className="p-6">
-            {renderTabContent()}
-          </div>
+          <div className="p-6">{renderTabContent()}</div>
         </div>
       </div>
 

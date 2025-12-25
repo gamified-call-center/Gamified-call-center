@@ -177,13 +177,13 @@ export default function CreateDealModal({
   console.log(errors)
 
   const handleSubmit = async () => {
-    // if (!validate()) return;
+    if (!validate()) return;
 
 
     try {
       setSaving(true);
       if (onSubmit) await onSubmit({ ...form });
-      // Parent closes modal after successful API
+      
     } finally {
       setSaving(false);
     }
@@ -195,16 +195,7 @@ export default function CreateDealModal({
       handleDrawerToggle={(v) => !v && onClose()}
       //   title={mode === "EDIT" ? "Edit Deal" : "Create Deal"}
       openVariant="right"
-      panelCls="
-    w-[95%] md:w-[80%] lg:w-[calc(82%-190px)]
-    bg-slate-50
-    shadow-[0_20px_50px_rgba(0,0,0,0.18)]
-    border-l border-slate-200
-    overflow-x-hidden
-    z-[9999999]
-  "
-      panelInnerCls="md:px-8 px-3 py-6"
-      overLayCls="bg-slate-900/40 backdrop-blur-sm"
+panelCls=" w-[95%] md:w-[80%] lg:w-[calc(82%-190px)] bg-slate-50 dark:bg-black shadow-[0_20px_50px_rgba(0,0,0,0.18)] border-l border-slate-200 overflow-x-hidden z-[9999999] " panelInnerCls=" app-surface md:px-8 px-3 py-6" overLayCls="bg-slate-900/40  backdrop-blur-sm"
     >
       <div className="md:space-y-8 space-y-4">
 
@@ -388,39 +379,24 @@ export default function CreateDealModal({
         </Section>
 
         {/* ---------------- Footer ---------------- */}
-        <div
-          className="
-        sticky bottom-0
-        bg-white/90 backdrop-blur
-        border-t border-slate-200
-        px-8 py-4
-        flex justify-end gap-3
-      "
-        >
-          <button
-            onClick={onClose}
-            className="
-          px-4 py-2 rounded-sm
-          text-slate-700
-          bg-slate-100 hover:bg-slate-200
-          transition
-        "
-          >
-            Cancel
-          </button>
+       <div className="sticky bottom-0 app-card px-8 py-4 flex justify-end gap-3 backdrop-blur">
 
-          <button
-            type="submit"
-            onClick={handleSubmit}
-            className="
-          px-5 py-2 rounded-sm
-          text-white font-medium
-          bg-indigo-600 hover:bg-indigo-700
-          transition shadow-sm
-        "
-          >
-            {mode === "EDIT" ? "Update Deal" : "Create Deal"}
-          </button>
+         <button
+  onClick={onClose}
+  className="px-4 py-2 rounded-lg app-btn transition"
+>
+  Cancel
+</button>
+
+
+      <button
+  type="submit"
+  onClick={handleSubmit}
+  className="px-5 py-2 rounded-lg app-btn-active transition"
+>
+  {mode === "EDIT" ? "Update Deal" : "Create Deal"}
+</button>
+
         </div>
       </div>
     </Drawer>
@@ -434,59 +410,31 @@ type SectionProps = {
 };
 
 const Section = ({ title, subtitle, titleCls, children }: SectionProps) => (
-  <div
-    className="
-      rounded-2xl
-      bg-white
-      border border-slate-200
-      shadow-sm
-      transition-all
-      duration-200
-      hover:shadow-md
-    "
-  >
-    
-    <div
-      className="
-        px-6 py-4
-        border-b border-slate-100
-        bg-linear-to-r from-slate-50 to-white
-        rounded-t-2xl
-      "
-    >
+  <div className="rounded-2xl app-card shadow-sm transition-all duration-200 hover:shadow-md">
+    {/* Header */}
+    <div className="px-6 py-4 border-b app-border app-table-head rounded-t-2xl">
       <div className="flex items-start gap-3">
-       
         <span className="mt-1 h-5 w-1 rounded-full bg-indigo-600" />
 
         <div>
-          <h3
-            className="
-    text-lg
-    font-semibold
-    text-indigo-700
-    tracking-wide
-  "
-          >
+          <h3 className={"text-lg font-semibold tracking-wide app-text"}>
             {title}
           </h3>
+
+          {subtitle ? (
+            <p className="mt-1 text-sm app-muted">{subtitle}</p>
+          ) : null}
         </div>
       </div>
     </div>
 
-
-    <div
-      className="
-        px-6 py-6
-        space-y-6
-        text-sm
-        text-slate-700
-        leading-relaxed
-      "
-    >
+    {/* Body */}
+    <div className="px-6 py-6 space-y-6 text-sm app-text leading-relaxed">
       {children}
     </div>
   </div>
 );
+
 
 const TwoCol = ({ children }: { children: React.ReactNode }) => (
   <div

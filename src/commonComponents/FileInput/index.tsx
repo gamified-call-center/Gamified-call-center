@@ -127,7 +127,7 @@ const FileInput = ({
           {uploading ? "Uploading..." : "Choose File"}
         </label>
 
-        <span className="text-slate-400 text-sm truncate max-w-[180px]">
+        <span className="text-slate-400 text-sm truncate max-w-45">
           {fileName}
         </span>
 

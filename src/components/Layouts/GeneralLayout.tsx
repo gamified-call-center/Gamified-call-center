@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import FloatingChatButton from "../ChatButton";
+import ThemeToggle from "@/commonComponents/ThemeToggle";
 
 type WithAdminLayoutOptions = {
   hideChrome?: boolean;
@@ -53,7 +54,8 @@ function AdminShell({
       <div className="flex-1 flex flex-col min-w-0 md:ml-70 ml-0">
         <Topbar title={title} onOpenSidebar={() => setMobileOpen(true)} />
 
-        <main className="flex-1 overflow-x-auto overflow-y-auto md:px-6 px-2 py-3 min-w-0">
+        <main className="flex-1 overflow-x-auto overflow-y-auto md:px-6 px-2 py-3 min-w-0 app-surface">
+          
           {children}
           <FloatingChatButton />
         </main>

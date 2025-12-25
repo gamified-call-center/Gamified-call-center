@@ -32,7 +32,7 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
           disabled={disabled}
           {...props}
           className={cn(
-            "w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400",
+            "w-full app-text text-sm text-slate-900 outline-none placeholder:text-slate-400",
             " dark:placeholder:text-slate-500",
             inputClassName
           )}

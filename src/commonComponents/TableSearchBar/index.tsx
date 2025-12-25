@@ -40,8 +40,8 @@ export default function TableToolbar({
   actionsSlot,
   className,
 }: TableToolbarProps) {
-  // debounce search locally (so parent doesn't refetch on every keypress)
   const [localSearch, setLocalSearch] = useState(search?.value ?? "");
+
   useEffect(() => {
     setLocalSearch(search?.value ?? "");
   }, [search?.value]);
@@ -54,10 +54,12 @@ export default function TableToolbar({
       if (localSearch !== search.value) search.onChange(localSearch);
     }, debounceMs);
     return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localSearch, debounceMs]);
+  }, [localSearch, debounceMs]); // eslint-disable-line
 
-  const searchWidth = useMemo(() => search?.widthClassName ?? "w-72", [search?.widthClassName]);
+  const searchWidth = useMemo(
+    () => search?.widthClassName ?? "w-72",
+    [search?.widthClassName]
+  );
 
   return (
     <div
@@ -66,26 +68,31 @@ export default function TableToolbar({
         className
       )}
     >
-      {/* Left */}
+      {/* LEFT */}
       <div className="flex flex-col gap-3 md:flex-row md:items-center">
+        {/* Search */}
         {search ? (
-          <div className={cn("flex items-center gap-2 rounded-xl border bg-white px-3 py-2",
-            " dark:border-slate-700", searchWidth)}
+          <div
+            className={cn(
+              "flex items-center gap-2 rounded-xl px-3 py-2 border dark:border-white app-input",
+              searchWidth
+            )}
           >
             <input
               value={localSearch}
               onChange={(e) => setLocalSearch(e.target.value)}
               placeholder={search.placeholder ?? "Search..."}
-              className="w-full bg-transparent text-sm outline-none text-slate-900 "
+              className="w-full bg-transparent text-sm outline-none app-text"
             />
-            <span className="text-slate-400">⌕</span>
+            <span className="app-muted text-sm">⌕</span>
           </div>
         ) : null}
 
+        {/* Date Range */}
         {dateRange ? (
-          <div className="flex items-center md:gap-2 gap-1 rounded-xl border bg-white md:px-3 px-1 py-2  dark:border-slate-700">
+          <div className="flex items-center gap-2 rounded-xl px-3 py-2 border dark:border-white app-input">
             {dateRange.label ? (
-              <span className="text-xs text-slate-500 dark:text-slate-400">{dateRange.label}</span>
+              <span className="text-xs app-muted">{dateRange.label}</span>
             ) : null}
 
             <input
@@ -93,26 +100,47 @@ export default function TableToolbar({
               value={dateRange.value.from}
               min={dateRange.min}
               max={dateRange.max}
-              onChange={(e) => dateRange.onChange({ ...dateRange.value, from: e.target.value })}
-              className="bg-transparent text-sm outline-none text-slate-900 "
+              onChange={(e) =>
+                dateRange.onChange({
+                  ...dateRange.value,
+                  from: e.target.value,
+                })
+              }
+              className="bg-transparent text-sm outline-none app-text"
             />
-            <span className="text-slate-400">to</span>
+
+            <span className="app-muted text-sm">to</span>
+
             <input
               type="date"
               value={dateRange.value.to}
               min={dateRange.min}
               max={dateRange.max}
-              onChange={(e) => dateRange.onChange({ ...dateRange.value, to: e.target.value })}
-              className="bg-transparent text-sm outline-none text-slate-900 "
+              onChange={(e) =>
+                dateRange.onChange({
+                  ...dateRange.value,
+                  to: e.target.value,
+                })
+              }
+              className="bg-transparent text-sm outline-none app-text app-muted"
             />
           </div>
         ) : null}
 
-        {filtersSlot ? <div className="flex flex-wrap items-center gap-2">{filtersSlot}</div> : null}
+        {/* Filters */}
+        {filtersSlot ? (
+          <div className="flex flex-wrap items-center gap-2">
+            {filtersSlot}
+          </div>
+        ) : null}
       </div>
 
-      {/* Right */}
-      {actionsSlot ? <div className="flex items-center gap-2 justify-end">{actionsSlot}</div> : null}
+      {/* RIGHT */}
+      {actionsSlot ? (
+        <div className="flex items-center gap-2 justify-end">
+          {actionsSlot}
+        </div>
+      ) : null}
     </div>
   );
 }

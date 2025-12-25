@@ -1,4 +1,7 @@
 import type { Config } from "tailwindcss";
+import defaultTheme from "tailwindcss/defaultTheme";
+
+
 
 const config: Config = {
   darkMode: "class",
@@ -9,7 +12,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bgPrimary: "#0b0f19",
+       bgPrimary: "#0b0f19",
         cardDark: "#111827",
         accent: "#22c55e",
         warning: "#f59e0b",
@@ -23,6 +26,16 @@ const config: Config = {
       borderRadius: {
         xl: "1rem",
       },
+fontFamily: {
+  "Gordita-Bold": ["Gordita-Bold", ...defaultTheme.fontFamily.sans],
+  "Gordita-Medium": ["Gordita-Medium", ...defaultTheme.fontFamily.sans],
+  "Gordita-Regular": ["Gordita-Regular", ...defaultTheme.fontFamily.sans],
+  "Gordita-Light": ["Gordita-Light", ...defaultTheme.fontFamily.sans],
+  "Gordita-SemiBold": ["Gordita-SemiBold", ...defaultTheme.fontFamily.sans],
+  "Gordita-Extra-Bold": ["Gordita-Extra-Bold", ...defaultTheme.fontFamily.sans],
+},
+
+
       keyframes: {
         loaderProgress: {
           "0%": { transform: "translateX(-60%)" },

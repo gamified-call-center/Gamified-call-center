@@ -124,7 +124,7 @@ export default function PremiumLogin({ resetSuccess }: { resetSuccess?: boolean 
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4   bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-br from-gray-50 to-gray-100">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}

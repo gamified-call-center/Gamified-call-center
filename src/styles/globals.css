@@ -1,0 +1,134 @@
+@import "tailwindcss/preflight";
+@tailwind utilities;
+
+@import "./fontface/font-family.css";
+
+
+@import "./fontface/font-family.css";
+@layer base {
+  :root {
+    /* Light mode tokens */
+    --bg: 255 255 255;
+    --card: 255 255 255;
+    --text: 17 24 39;      /* gray-900 */
+    --muted: 107 114 128;  /* gray-500 */
+    --border: 229 231 235; /* gray-200 */
+  }
+
+  /* When you add class="dark" on <html> */
+  .dark {
+    /* Dark mode tokens */
+    --bg: 11 15 25;        /* bgPrimary-ish */
+    --card: 17 24 39;      /* cardDark-ish */
+    --text: 243 244 246;   /* gray-100 */
+    --muted: 156 163 175;  /* gray-400 */
+    --border: 55 65 81;    /* gray-700 */
+  }
+
+  html,
+  body {
+    
+  font-family: Gordita-Regular, -apple-system, BlinkMacSystemFont, Segoe UI,
+    Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue,
+    sans-serif;
+
+
+    background: rgb(var(--bg));
+    color: rgb(var(--text));
+  }
+
+  strong,
+  b {
+    font-weight: bold !important;
+  }
+}
+
+/* OPTIONAL: quick utility classes so you can just "call the class name" */
+@layer components {
+  .app-bg {
+    @apply bg-white dark:bg-bgPrimary;
+  }
+  .app-card {
+    @apply bg-white dark:bg-cardDark;
+  }
+  .app-text {
+    @apply text-gray-900 dark:text-gray-100;
+  }
+  .app-muted {
+    @apply text-gray-500 dark:text-gray-400;
+  }
+  .app-border {
+    @apply border-gray-200 dark:border-gray-700;
+  }
+
+  /* Your existing typography helpers (kept) */
+  .label-text {
+    @apply text-[12px] md:text-[14px] font-Gordita-Medium;
+  }
+  .key-text {
+    @apply text-[12px] md:text-[14px] font-Gordita-Medium;
+  }
+  .sub-heading {
+    @apply text-[14px] md:text-[16px] font-Gordita-Medium;
+  }
+  .btn-text {
+    @apply text-[12px] md:text-[14px] font-Gordita-Medium;
+  }
+  .heading-text {
+    @apply text-[16px] md:text-[18px] font-Gordita-Bold;
+  }
+  .text-medium {
+    @apply text-[14px] md:text-[16px] font-Gordita-Medium;
+  }
+  .sublabel-text {
+    @apply text-[10px] md:text-[12px];
+  }
+}
+
+/* Autofill fix (keep) */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+  box-shadow: 0 0 0px 1000px rgba(255, 255, 255, 0) inset;
+  transition: background-color 5000s ease-in-out 0s;
+  background-color: rgba(255, 255, 255, 0);
+}
+
+/* Scrollbars (your code – but note you duplicated .custom-scrollbar) */
+.custom-scrollbar {
+  overflow: auto; /* handles both x and y */
+}
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+.dark .custom-scrollbar::-webkit-scrollbar-track {
+  background: #111827;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #d9dadd;
+  border-radius: 10px;
+}
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #374151;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

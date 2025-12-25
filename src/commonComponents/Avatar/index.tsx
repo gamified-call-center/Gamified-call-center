@@ -60,7 +60,8 @@ export default function AvatarMenu({
         <div className="absolute right-0 mt-2 w-56 rounded-xl bg-white shadow-xl border border-black/10 z-50 overflow-hidden">
           <button
             className="w-full flex items-center gap-2 text-black px-4 py-3 text-sm hover:bg-black/5"
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              setOpen(false)}}
           >
             <User2 className="h-4 w-4" />
             Profile

@@ -19,10 +19,12 @@ import {
   Globe,
   Home,
   Key,
+  Landmark,
   Lock,
   Mail,
   MapIcon,
   MapPin,
+  MapPinHouse,
   Pencil,
   Phone,
   Plus,
@@ -48,6 +50,7 @@ import { Textarea } from "@/commonComponents/form/Textarea";
 import { FileInput } from "@/commonComponents/form/FileInput";
 import Modal from "@/commonComponents/Modal";
 import Loader from "@/commonComponents/Loader";
+import { uploadFile } from "@/Utils/uploadFile";
 
 type Designation = { id: number; name: string; levelOrder?: number };
 type UserMini = {
@@ -106,6 +109,7 @@ type UserFull = {
   email?: string | null;
   phone?: string | null;
   userStatus?: string | null;
+  profileImage?: string | null;
   systemRole?: string | null;
   createdAt?: string;
   updatedAt?: string;
@@ -180,7 +184,6 @@ export default function UserProfileView() {
     "5dbfc2a1-ae62-478b-9a07-7fb7b345bf41";
   const [data, setData] = useState<UserFull | null>(null);
   const [loading, setLoading] = useState(true);
-  const [profileImage, setProfileImage] = useState<string | null>(null);
 
   const [activeTab, setActiveTab] = useState("profile");
   const [showPassword, setShowPassword] = useState(false);
@@ -227,8 +230,8 @@ export default function UserProfileView() {
   useEffect(() => {
     const load = async () => {
       if (!userId) return;
+      setLoading(true);
       try {
-        setLoading(true);
         const res = await apiClient.get(`${apiClient.URLS.user}/${userId}`);
         console.log("res", res);
         setData(res.body as UserFull);
@@ -250,7 +253,7 @@ export default function UserProfileView() {
         dto
       );
       console.log(updated);
-      setData(updated.body.user as UserFull);
+      setData(updated.body as UserFull);
     } catch (error) {
       console.error("errror is", error);
     } finally {
@@ -281,16 +284,34 @@ export default function UserProfileView() {
     },
   ];
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [profileImage, setProfileImage] = useState<string>(
+    data?.profileImage || ""
+  );
+  const [uploadingProfile, setUploadingProfile] = useState(false);
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setProfileImage(reader.result as string);
-      toast.success("Profile picture updated!");
-    };
-    reader.readAsDataURL(file);
+    if (!file || uploadingProfile) return;
+
+    try {
+      setUploadingProfile(true);
+
+      const localPreview = URL.createObjectURL(file);
+      setProfileImage(localPreview);
+
+      const url = await uploadFile(file, "users/profile");
+      if (!url) throw new Error("Upload failed");
+
+      setProfileImage(url);
+      toast.success("Profile picture uploaded!");
+    } catch (err) {
+      toast.error("Failed to upload profile picture");
+    } finally {
+      setUploadingProfile(false);
+
+      e.target.value = "";
+    }
   };
+
   const exportUserData = () => {
     if (!data) return;
 
@@ -317,6 +338,8 @@ export default function UserProfileView() {
         email: v.email?.trim() || null,
         phone: v.phone?.trim() || null,
         dob: v.dob || null,
+        systemRole: v?.systemRole || "",
+        profileImage: v?.profileImage || profileImage || "",
       },
     };
 
@@ -421,182 +444,171 @@ export default function UserProfileView() {
   const lastLogin = undefined;
 
   const renderProfileTab = () => {
-    const mode: ModalMode = hasProfileData(data) ? "edit" : "add";
-    const init = {
-      firstName: data?.firstName || "",
-      lastName: data?.lastName || "",
-      email: data?.email || "",
-      phone: data?.phone || "",
-      dob: data?.dob || "",
-    };
+  const mode: ModalMode = hasProfileData(data) ? "edit" : "add";
+  const init = {
+    firstName: data?.firstName || "",
+    lastName: data?.lastName || "",
+    email: data?.email || "",
+    phone: data?.phone || "",
+    dob: data?.dob || "",
+    systemRole: data?.systemRole || "",
+    profileImage: data?.profileImage || profileImage || "",
+  };
 
-    return (
-      <div className="space-y-6 animate-fadeIn md:p-6 p-2">
-        <div className="bg-linear-to-r from-white to-blue-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl md:p-6 p-2 shadow-sm border border-slate-200 dark:border-slate-700">
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-            <div className="relative">
-              <div className="w-32 h-32 rounded-2xl bg-linear-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-lg overflow-hidden">
-                {profileImage ? (
-                  <img
-                    src={profileImage}
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <UserIcon big />
+  return (
+    <div className="space-y-6 animate-fadeIn md:p-6 p-2">
+      {/* Header Card */}
+      <div className="app-gradient rounded-2xl md:p-6 p-2 shadow-sm">
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+          {/* Avatar */}
+          <div className="relative">
+            <div className="w-32 h-32 rounded-2xl bg-linear-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-lg overflow-hidden">
+              {profileImage ? (
+                <img
+                  src={profileImage}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <UserIcon big />
+              )}
+            </div>
+
+            {/* Upload button */}
+            <label className="absolute bottom-2 right-2 w-10 h-10 rounded-full app-card flex items-center justify-center cursor-pointer transition-colors shadow-lg hover:bg-[rgb(var(--btnHover))]">
+              <Upload className="w-4 h-4 text-[rgb(var(--muted))]" />
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageUpload}
+              />
+            </label>
+
+            {/* Verified badge */}
+            <div className="absolute -top-2 -left-2 w-8 h-8 rounded-full bg-emerald-500 border-4 border-white dark:border-slate-800 flex items-center justify-center">
+              <CheckCircle className="w-4 h-4 text-white" />
+            </div>
+          </div>
+
+          {/* Info */}
+          <div className="flex-1">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h1 className="md:text-3xl text-[14px] font-bold app-heading">
+                  {(data?.firstName || "-") + " " + (data?.lastName || "")}
+                </h1>
+
+                <div className="flex items-center gap-3 mt-2 flex-wrap">
+                  <span className="px-3 py-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 md:text-sm text-[12px] font-semibold rounded-full">
+                    {statusLabel}
+                  </span>
+
+                  <span className="md:text-sm text-[12px] app-muted">
+                    User ID: {data?.id}
+                  </span>
+                </div>
+
+                {data?.employee?.designation?.name && (
+                  <div className="mt-2 md:text-sm text-[12px] app-text">
+                    Designation:{" "}
+                    <span className="font-semibold">
+                      {data.employee.designation.name}
+                    </span>
+                  </div>
                 )}
               </div>
 
-              <label className="absolute bottom-2 right-2 w-10 h-10 rounded-full bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 flex items-center justify-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-lg">
-                <Upload className="w-4 h-4 text-slate-600" />
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageUpload}
-                />
-              </label>
-
-              <div className="absolute -top-2 -left-2 w-8 h-8 rounded-full bg-emerald-500 border-4 border-white dark:border-slate-800 flex items-center justify-center">
-                <CheckCircle className="w-4 h-4 text-white" />
-              </div>
-            </div>
-
-            <div className="flex-1">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <h1 className="md:text-3xl text-[14px] font-bold text-slate-900 dark:text-white">
-                    {(data?.firstName || "-") + " " + (data?.lastName || "")}
-                  </h1>
-                  <div className="flex items-center gap-3 mt-2 flex-wrap">
-                    <span className="px-3 py-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 md:text-sm text-[12px] font-semibold rounded-full">
-                      {statusLabel}
-                    </span>
-                    <span className="md:text-sm text-[12px] text-slate-500 dark:text-slate-400">
-                      User ID: {data?.id}
-                    </span>
-                  </div>
-
-                  {data?.employee?.designation?.name && (
-                    <div className="mt-2 md:text-sm text-[12px] text-slate-600 dark:text-slate-300">
-                      Designation:{" "}
-                      <span className="font-semibold">
-                        {data.employee.designation.name}
-                      </span>
-                    </div>
+              <div className="flex items-center gap-2">
+                {/* Keep your brand CTA gradient (looks good in both modes) */}
+                <button
+                  onClick={() => openModal("profile", mode, init)}
+                  className="flex items-center font-medium text-nowrap gap-2 px-4 py-2 bg-linear-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all shadow-lg hover:shadow-xl"
+                >
+                  {mode === "edit" ? (
+                    <Pencil className="w-4 h-4" />
+                  ) : (
+                    <Plus className="w-4 h-4" />
                   )}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => openModal("profile", mode, init)}
-                    className="flex items-center font-medium text-nowrap gap-2 px-4 py-2 bg-linear-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all shadow-lg hover:shadow-xl"
-                  >
-                    {mode === "edit" ? (
-                      <Pencil className="w-4 h-4" />
-                    ) : (
-                      <Plus className="w-4 h-4" />
-                    )}
-                    {mode === "edit" ? "Edit Profile" : "Add Profile"}
-                  </button>
-                </div>
+                  {mode === "edit" ? "Edit Profile" : "Add Profile"}
+                </button>
               </div>
             </div>
           </div>
         </div>
-
-        <SectionCard
-          title="Personal Information"
-          icon={<Mail className="w-5 h-5 text-blue-500" />}
-          actionLabel={mode === "edit" ? "Edit" : "Add"}
-          actionIcon={
-            mode === "edit" ? (
-              <Pencil className="w-4 h-4" />
-            ) : (
-              <Plus className="w-4 h-4" />
-            )
-          }
-          onAction={() => openModal("profile", mode, init)}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <KV
-              icon={<UserIcon />}
-              label="First Name"
-              value={data?.firstName}
-            />
-            <KV icon={<UserIcon />} label="Last Name" value={data?.lastName} />
-            <KV
-              icon={<Mail className="w-4 h-4" />}
-              label="Email"
-              value={data?.email}
-            />
-            <KV
-              icon={<Phone className="w-4 h-4" />}
-              label="Phone"
-              value={data?.phone}
-            />
-            <KV
-              icon={<Calendar className="w-4 h-4" />}
-              label="DOB"
-              value={data?.dob}
-            />
-            <KV
-              icon={<Shield className="w-4 h-4" />}
-              label="System Role"
-              value={data?.systemRole}
-            />
-          </div>
-        </SectionCard>
       </div>
-    );
+
+      {/* Personal Info Section */}
+      <SectionCard
+        title="Personal Information"
+        icon={<Mail className="w-5 h-5 text-blue-500" />}
+        actionLabel={mode === "edit" ? "Edit" : "Add"}
+        actionIcon={
+          mode === "edit" ? (
+            <Pencil className="w-4 h-4" />
+          ) : (
+            <Plus className="w-4 h-4" />
+          )
+        }
+        onAction={() => openModal("profile", mode, init)}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <KV icon={<UserIcon />} label="First Name" value={data?.firstName} />
+          <KV icon={<UserIcon />} label="Last Name" value={data?.lastName} />
+          <KV icon={<Mail className="w-4 h-4" />} label="Email" value={data?.email} />
+          <KV icon={<Phone className="w-4 h-4" />} label="Phone" value={data?.phone} />
+          <KV icon={<Calendar className="w-4 h-4" />} label="DOB" value={data?.dob} />
+          <KV icon={<Shield className="w-4 h-4" />} label="System Role" value={data?.systemRole} />
+        </div>
+      </SectionCard>
+    </div>
+  );
+};
+
+
+ const renderEmployeeTab = () => {
+  const emp = data?.employee || null;
+  const mode: ModalMode = emp?.id ? "edit" : "add";
+
+  const init = {
+    designation: emp?.designation?.id ? String(emp.designation.id) : "",
+    reportsTo: emp?.reportsTo?.id ? String(emp.reportsTo.id) : "",
+    isActive: emp?.isActive ?? true,
   };
 
-  const renderEmployeeTab = () => {
-    const emp = data?.employee || null;
-    const mode: ModalMode = emp?.id ? "edit" : "add";
+  return (
+    <div className="space-y-6 animate-fadeIn md:p-6 p-2">
+      <SectionCard
+        title="Employee Details"
+        icon={<Briefcase className="w-5 h-5 text-purple-500" />}
+        actionLabel={mode === "edit" ? "Edit" : "Add"}
+        actionIcon={
+          mode === "edit" ? <Pencil className="w-4 h-4" /> : <Plus className="w-4 h-4" />
+        }
+        onAction={() => openModal("employee", mode, init)}
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <KV
+            icon={<Award className="w-4 h-4" />}
+            label="Designation"
+            value={emp?.designation?.name ?? "-"}
+          />
+          <KV
+            icon={<UserIcon />}
+            label="Reports To"
+            value={emp?.reportsTo?.designation?.name ?? "-"}
+          />
+          <KV
+            icon={<CheckCircle className="w-4 h-4" />}
+            label="Active"
+            value={emp?.isActive ? "Yes" : "No"}
+          />
+        </div>
+      </SectionCard>
+    </div>
+  );
+};
 
-    const init = {
-      designation: emp?.designation?.id ? String(emp.designation.id) : "",
-      reportsTo: emp?.reportsTo?.id ? String(emp.reportsTo.id) : "",
-      isActive: emp?.isActive ?? true,
-    };
-
-    return (
-      <div className="space-y-6 animate-fadeIn p-6">
-        <SectionCard
-          title="Employee Details"
-          icon={<Briefcase className="w-5 h-5 text-purple-500" />}
-          actionLabel={mode === "edit" ? "Edit" : "Add"}
-          actionIcon={
-            mode === "edit" ? (
-              <Pencil className="w-4 h-4" />
-            ) : (
-              <Plus className="w-4 h-4" />
-            )
-          }
-          onAction={() => openModal("employee", mode, init)}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <KV
-              icon={<Award className="w-4 h-4" />}
-              label="Designation"
-              value={emp?.designation?.name ?? "-"}
-            />
-            <KV
-              icon={<UserIcon />}
-              label="Reports To"
-              value={emp?.reportsTo?.designation?.name ?? "-"}
-            />
-            <KV
-              icon={<CheckCircle className="w-4 h-4" />}
-              label="Active"
-              value={emp?.isActive ? "Yes" : "No"}
-            />
-          </div>
-        </SectionCard>
-      </div>
-    );
-  };
 
   const renderProfessionalTab = () => {
     const a = data?.agentProfile || null;
@@ -710,17 +722,17 @@ export default function UserProfileView() {
     const init = primary
       ? { ...primary }
       : {
-        address1: "",
-        address2: null,
-        city: "",
-        state: "",
-        zip: "",
-        country: "",
-        locality: null,
-        landmark: null,
+          address1: "",
+          address2: null,
+          city: "",
+          state: "",
+          zip: "",
+          country: "",
+          locality: null,
+          landmark: null,
 
-        isDefault: true,
-      };
+          isDefault: true,
+        };
 
     return (
       <div className="space-y-6 animate-fadeIn p-6">
@@ -801,14 +813,14 @@ export default function UserProfileView() {
                         <KV
                           label="Locality"
                           value={addr.locality}
-                          icon={undefined}
+                          icon={<MapPinHouse size={16} />}
                         />
                       )}
                       {addr.landmark && (
                         <KV
                           label="Landmark"
                           value={addr.landmark}
-                          icon={undefined}
+                          icon={<Landmark size={16} />}
                         />
                       )}
                     </div>
@@ -891,16 +903,18 @@ export default function UserProfileView() {
                     <button
                       key={t.id}
                       onClick={() => setActiveTab(t.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === t.id
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
+                        activeTab === t.id
                           ? "bg-linear-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
                           : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
-                        }`}
+                      }`}
                     >
                       {t.icon}
                       <span className="font-medium">{t.label}</span>
                       <ChevronRight
-                        className={`w-4 h-4 ml-auto transition-transform ${activeTab === t.id ? "rotate-90" : ""
-                          }`}
+                        className={`w-4 h-4 ml-auto transition-transform ${
+                          activeTab === t.id ? "rotate-90" : ""
+                        }`}
                       />
                     </button>
                   ))}
@@ -1083,18 +1097,18 @@ function ProfileModal({
         ? "Edit Profile"
         : "Add Profile"
       : type === "employee"
-        ? mode === "edit"
-          ? "Edit Employee"
-          : "Add Employee"
-        : type === "professional"
-          ? mode === "edit"
-            ? "Edit Professional"
-            : "Add Professional"
-          : type === "address"
-            ? mode === "edit"
-              ? "Edit Address"
-              : "Add Address"
-            : "Change Password";
+      ? mode === "edit"
+        ? "Edit Employee"
+        : "Add Employee"
+      : type === "professional"
+      ? mode === "edit"
+        ? "Edit Professional"
+        : "Add Professional"
+      : type === "address"
+      ? mode === "edit"
+        ? "Edit Address"
+        : "Add Address"
+      : "Change Password";
 
   const validate = () => {
     if (type === "profile") {
@@ -1195,6 +1209,18 @@ function ProfileModal({
                   value={values.dob || ""}
                   onChange={(e: any) => set("dob", e.target.value)}
                   placeholder="DOB"
+                />
+              </Field>
+              <Field label="System Role" required>
+                <SingleSelect
+                  value={values.systemRole || ""}
+                  onChange={(v: any) => set("systemRole", v)}
+                  options={[
+                    { label: "Admin", value: "ADMIN" },
+                    { label: "Standard", value: "STANDARD" },
+                  ]}
+                  placeholder="Select Role"
+                  placement="auto"
                 />
               </Field>
             </div>

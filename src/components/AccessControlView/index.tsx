@@ -108,7 +108,7 @@ export default function DesignationsPermissionsPage() {
       <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-5">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-100">
-          <h2 className="md:text-xl text-[18px] font-bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+          <h2 className="md:text-xl text-[18px] font-Gordita-Bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             Designations
           </h2>
 
@@ -221,13 +221,14 @@ function DesignationPermissionsCrudModalBody({
           true
         );
         const list = Array.isArray(res?.body) ? res.body : [];
+        console.log(list)
         setDesignationOptions(
           list.map((d: any) => ({ label: d.name, value: String(d.id) }))
         );
       } catch (e) {
         console.error(e);
       }
-    };
+    }
     fetchDesignations();
   }, []);
 
