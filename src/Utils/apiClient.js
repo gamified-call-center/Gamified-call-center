@@ -1,4 +1,3 @@
-import { foreignObject } from "framer-motion/client";
 import merge from "lodash/merge";
 import { getSession } from "next-auth/react";
 
@@ -20,7 +19,6 @@ const URLS = {
   designationPermissions: `${base_url}designationPermissions`,
   login: `${base_url}users/login`,
   forgotPassword: `${base_url}auth`,
-
 };
 
 export function encodeQueryData(data = {}) {

@@ -1,7 +1,5 @@
 'use client';
-
 import AccessControlView from '@/components/AccessControlView';
-import AraDealsView from '@/components/AraComponents/DealsView'
 import withAdminLayout from '@/components/Layouts/GeneralLayout';
 
 const AccessControl = () => {
@@ -12,4 +10,4 @@ const AccessControl = () => {
     )
 }
 
-export default withAdminLayout(AccessControl );
+export default withAdminLayout(AccessControl);

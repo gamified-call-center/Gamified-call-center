@@ -106,7 +106,6 @@ export default function DesignationsPermissionsPage() {
   return (
     <div className="md:p-6 p-2 md:space-y-6 space-y-3 bg-slate-50 min-h-screen">
       <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-5">
-        {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-slate-100">
           <h2 className="md:text-xl text-[18px] font-Gordita-Bold bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             Designations
@@ -608,11 +607,10 @@ function DesignationPermissionsCrudModalBody({
                 disabled={!designationId}
                 className={` md:px-4 py-2 font-medium  px-2 rounded-lg md:text-[14px] text-[12px] font-Gordita-Medium text-white
                         shadow-sm transition
-                        ${
-                          !designationId
-                            ? "bg-emerald-300 cursor-not-allowed"
-                            : "bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-700"
-                        }`}
+                        ${!designationId
+                    ? "bg-emerald-300 cursor-not-allowed"
+                    : "bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-700"
+                  }`}
               >
                 {editIndex !== null ? "Update Permission" : "Save Resource"}
               </button>
@@ -701,11 +699,10 @@ function DesignationPermissionsCrudModalBody({
                               toggleCell(idx, action as keyof Crud)
                             }
                             className={`inline-flex items-center justify-center w-8 h-8 rounded-lg border transition
-                          ${
-                            perm[action as keyof ResourceRow]
-                              ? "bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100"
-                              : "bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100"
-                          }`}
+                          ${perm[action as keyof ResourceRow]
+                                ? "bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100"
+                                : "bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100"
+                              }`}
                             title={action}
                           >
                             {perm[action as keyof ResourceRow] ? "✓" : "✕"}
@@ -762,11 +759,10 @@ function DesignationPermissionsCrudModalBody({
             type="submit"
             disabled={saving || loading || !designationId}
             className={`md:px-4 py-2 font-medium px-2 rounded-lg md:text-[14px] text-[12px] font-Gordita-Medium text-white shadow-sm
-          ${
-            saving || loading || !designationId
-              ? "bg-violet-300 cursor-not-allowed"
-              : "bg-violet-600 hover:bg-violet-700 active:bg-violet-700"
-          }`}
+          ${saving || loading || !designationId
+                ? "bg-violet-300 cursor-not-allowed"
+                : "bg-violet-600 hover:bg-violet-700 active:bg-violet-700"
+              }`}
           >
             {saving ? "Saving..." : "Save Permissions"}
           </button>

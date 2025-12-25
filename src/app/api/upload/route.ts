@@ -1,41 +1,50 @@
-import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import AWS from "aws-sdk";
 
-export async function POST(req: Request) {
-  try {
-    const formData = await req.formData();
-    const file = formData.get("file");
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
+});
 
-    if (!file || !(file instanceof File)) {
-      return NextResponse.json(
-        { error: "No file uploaded" },
-        { status: 400 }
-      );
+export default async function handler(req: any, res: any) {
+  if (req.method === "POST") {
+    const { fileName, fileType } = req.body;
+
+    const params = {
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: fileName,
+      Expires: 60,
+      ContentType: fileType,
+    };
+    try {
+      const uploadURL = await s3.getSignedUrlPromise("putObject", params);
+      res.status(200).json({ uploadURL });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Error generating the upload URL" });
     }
+  } else if (req.method === "PUT") {
+    const { fileName } = req.body;
+    console.log("fileName", fileName);
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const s3URL = `https://${process.env.S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
 
-    const uploadDir = path.join(process.cwd(), "public", "training");
-
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
+    res.status(200).json({ s3URL });
+  } else if (req.method === "DELETE") {
+    const { fileName } = req.body;
+    const params = {
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: fileName,
+    } as any;
+    try {
+      await s3.deleteObject(params).promise();
+      res.status(200).json({ message: "File deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      res.status(500).json({ error: "Error deleting the file" });
     }
-
-    const fileName = `${Date.now()}-${file.name.replace(/\s+/g, "-")}`;
-    const filePath = path.join(uploadDir, fileName);
-
-    fs.writeFileSync(filePath, buffer);
-
-    return NextResponse.json({
-      url: `/training/${fileName}`,
-    });
-  } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Upload failed" },
-      { status: 500 }
-    );
+  } else {
+    res.setHeader("Allow", ["POST", "PUT", "DELETE"]);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }

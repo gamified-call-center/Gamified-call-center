@@ -1,5 +1,9 @@
 @import "tailwindcss/preflight";
+
+@tailwind base;
+@tailwind components;
 @tailwind utilities;
+
 @import "./fontface/font-family.css";
 @layer base {
   :root {
