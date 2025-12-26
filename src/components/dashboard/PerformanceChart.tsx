@@ -34,7 +34,7 @@ export default function PerformanceChart({ data }: PerformanceChartProps) {
     <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-slate-900">
+        <h2 className="text-xl  font-Gordita-Bold text-slate-900">
           Weekly Performance
         </h2>
         <TrendingUp size={22} className="text-emerald-500" />
@@ -124,7 +124,7 @@ function StatCard({
         <span className={`h-2.5 w-2.5 rounded-full bg-current ${colors[color]}`} />
         <span className="text-xs text-slate-500">{label}</span>
       </div>
-      <p className="text-2xl font-bold text-slate-900">{value}</p>
+      <p className="text-2xl  font-Gordita-Bold text-slate-900">{value}</p>
     </div>
   );
 }

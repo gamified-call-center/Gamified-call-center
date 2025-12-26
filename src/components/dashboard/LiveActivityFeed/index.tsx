@@ -19,7 +19,7 @@ export default function LiveActivityFeed({ items }: { items: LiveActivityItem[] 
       <div className="flex items-start justify-between">
         <div>
           <div className="text-sm text-white">Real-time Feed</div>
-          <div className="text-lg font-semibold">Live Activity</div>
+          <div className="text-lg  font-Gordita-Bold">Live Activity</div>
           <div className="text-xs text-white mt-1">
             This is where WebSocket events will stream (deal celebrations, level-ups, badge unlocks, leaderboard updates).
           </div>
@@ -38,7 +38,7 @@ export default function LiveActivityFeed({ items }: { items: LiveActivityItem[] 
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between gap-3">
-                  <div className="text-sm font-semibold truncate">
+                  <div className="text-sm  font-Gordita-Bold truncate">
                     {i.title}{" "}
                     {i.actorName ? <span className="text-white font-normal">• {i.actorName}</span> : null}
                   </div>

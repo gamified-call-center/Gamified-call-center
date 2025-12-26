@@ -9,7 +9,7 @@ export default function RewardsBoxCard({ app }: { app: AppKey }) {
       <div className="flex items-start justify-between">
         <div>
           <div className="text-sm text-white">Rewards & Gift Box</div>
-          <div className="text-lg font-semibold">Open a Box</div>
+          <div className="text-lg  font-Gordita-Bold">Open a Box</div>
           <div className="text-xs text-white mt-1">
             Weighted reward pools + rate limits to prevent abuse.
           </div>
@@ -32,7 +32,7 @@ export default function RewardsBoxCard({ app }: { app: AppKey }) {
               🎁
             </div>
             <div>
-              <div className="text-sm font-semibold">Daily Gift Box</div>
+              <div className="text-sm  font-Gordita-Bold">Daily Gift Box</div>
               <div className="text-xs text-white">
                 Unlock by completing missions & maintaining streaks.
               </div>

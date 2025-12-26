@@ -19,7 +19,7 @@ export default function YearSelect({
 
   return (
     <div className="space-y-3 ">
-      <label className={twMerge("text-sm font-medium mb-4", labelCls)}>
+      <label className={twMerge("text-sm  font-Gordita-Medium mb-4", labelCls)}>
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <select

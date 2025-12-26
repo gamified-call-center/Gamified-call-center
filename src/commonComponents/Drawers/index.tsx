@@ -113,7 +113,7 @@ export default function Drawer({
                       {title && (
                         <Dialog.Title
                           className={twMerge(
-                            "text-lg font-semibold text-white",
+                            "text-lg  font-Gordita-Bold text-white",
                             titleCls
                           )}
                         >

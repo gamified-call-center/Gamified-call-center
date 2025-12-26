@@ -155,7 +155,7 @@ export default function Topbar({
 
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5 text-black/70" />
-            <div className="text-[15px] font-semibold text-[#111827]">
+            <div className="text-[15px]  font-Gordita-Bold text-[#111827]">
               {title}
             </div>
           </div>
@@ -215,7 +215,7 @@ export default function Topbar({
           >
             <div className="h-16 px-4 border-b border-black/10 flex items-center justify-between">
               <div>
-                <div className="text-[16px] font-semibold text-[#111827]">
+                <div className="text-[16px]  font-Gordita-Bold text-[#111827]">
                   Notifications
                 </div>
                 <div className="text-[12px] text-black/50">
@@ -226,7 +226,8 @@ export default function Topbar({
               <div className="flex items-center gap-2">
                 <Button
                   onClick={markAllRead}
-                  className="h-9 px-3 rounded-lg text-[12px] font-medium bg-black/5 hover:bg-black/10 text-[#111827] flex items-center gap-2"
+                  className="h-9 px-3 rounded-lg text-[12px]  font-Gordita-Medium bg-black/5 hover:bg-black/10 text-[#111827] flex items-center gap-2"
+                  type="button"
                 >
                   <CheckCheck className="h-4 w-4" />
                   Mark all read
@@ -247,7 +248,8 @@ export default function Topbar({
               </div>
               <Button
                 onClick={clearAll}
-                className="h-9 px-3 rounded-lg text-[12px] font-medium  flex items-center gap-2"
+                className="h-9 px-3 rounded-lg text-[12px]  font-Gordita-Medium bg-red-50 hover:bg-red-100 text-red-700 flex items-center gap-2"
+                type="button"
               >
                 <Trash2 className="h-4 w-4" />
                 Clear all
@@ -257,7 +259,7 @@ export default function Topbar({
             <div className="flex-1 overflow-auto">
               {notifications.length === 0 ? (
                 <div className="p-6 text-center">
-                  <div className="text-[14px] font-medium text-[#111827]">
+                  <div className="text-[14px]  font-Gordita-Medium text-[#111827]">
                     You’re all caught up 🎉
                   </div>
                   <div className="text-[12px] text-black/60 mt-1">
@@ -280,7 +282,7 @@ export default function Topbar({
                         />
                         <div className="flex-1">
                           <div className="flex items-start justify-between gap-3">
-                            <div className="text-[13px] font-semibold text-[#111827]">
+                            <div className="text-[13px]  font-Gordita-Bold text-[#111827]">
                               {n.title}
                             </div>
                             <div className="text-[11px] text-black/50 whitespace-nowrap">
@@ -297,14 +299,16 @@ export default function Topbar({
                             {!n.read && (
                               <Button
                                 onClick={() => markOneRead(n.id)}
-                                className="h-8 px-3 rounded-lg text-[12px] font-medium bg-black/5 hover:bg-black/10 text-[#111827]"
+                                className="h-8 px-3 rounded-lg text-[12px]  font-Gordita-Medium bg-black/5 hover:bg-black/10 text-[#111827]"
+                                type="button"
                               >
                                 Mark read
                               </Button>
                             )}
                             <Button
                               onClick={() => removeOne(n.id)}
-                              className="h-8 px-3 rounded-lg text-[12px] font-medium bg-black/5 hover:bg-black/10 text-[#111827]"
+                              className="h-8 px-3 rounded-lg text-[12px]  font-Gordita-Medium bg-black/5 hover:bg-black/10 text-[#111827]"
+                              type="button"
                             >
                               Remove
                             </Button>
@@ -320,7 +324,7 @@ export default function Topbar({
             <div className="p-4 border-t border-black/10">
               <Button
                 onClick={() => setNotifOpen(false)}
-                className="h-11 w-full rounded-xl bg-[#111827] text-white font-semibold hover:opacity-95 transition"
+                className="h-11 w-full rounded-xl bg-[#111827] text-white  font-Gordita-Bold hover:opacity-95 transition"
               >
                 Close
               </Button>

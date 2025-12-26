@@ -66,7 +66,7 @@ export default function AppsMenu({
           )}
           role="menu"
         >
-          <div className="text-sm font-semibold text-[#111827] mb-3">
+          <div className="text-sm  font-Gordita-Bold text-[#111827] mb-3">
             Applications
           </div>
 
@@ -101,7 +101,7 @@ export default function AppsMenu({
                     <Icon className="h-6 w-6 text-[#111827]" />
                   </div>
 
-                  <div className="text-sm font-medium text-[#111827]">
+                  <div className="text-sm  font-Gordita-Medium text-[#111827]">
                     {app.title}
                   </div>
                 </button>

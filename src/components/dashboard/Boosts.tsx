@@ -19,7 +19,7 @@ export default function Boosts({ boosts }: BoostsProps) {
 
   return (
     <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
-      {/* <h3 className="text-lg font-bold text-slate-900 mb-4">
+      {/* <h3 className="text-lg  font-Gordita-Bold text-slate-900 mb-4">
         Active Boosts
       </h3>
 
@@ -41,12 +41,12 @@ export default function Boosts({ boosts }: BoostsProps) {
                     <Zap size={16} className="text-blue-600" />
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-900 text-sm">
+                    <p className=" font-Gordita-Bold text-slate-900 text-sm">
                       {boost.name}
                     </p>
                     <div className="flex items-center gap-1 mt-1">
                       <Zap size={12} className="text-amber-500" />
-                      <span className="text-xs font-bold text-amber-600">
+                      <span className="text-xs  font-Gordita-Bold text-amber-600">
                         +{boost.xp_bonus} XP
                       </span>
                     </div>
@@ -65,7 +65,7 @@ export default function Boosts({ boosts }: BoostsProps) {
         </div>
       )}
 
-      <button className="w-full mt-4 bg-slate-100 hover:bg-slate-200 text-slate-900 font-medium py-2 rounded-xl transition-colors border border-slate-300">
+      <button className="w-full mt-4 bg-slate-100 hover:bg-slate-200 text-slate-900  font-Gordita-Medium py-2 rounded-xl transition-colors border border-slate-300">
         Get More Boosts
       </button> */}
     </div>

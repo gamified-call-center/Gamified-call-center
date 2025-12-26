@@ -185,10 +185,10 @@ export default function ValidateResetTokenClient() {
                   <Shield className="w-6 h-6 sm:w-8 sm:h-8" />
                 </div>
                 <div>
-                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl  font-Gordita-Bold tracking-tight">
                     Reset Password
                   </h1>
-                  <p className="text-white/90 text-sm sm:text-base font-medium mt-1">
+                  <p className="text-white/90 text-sm sm:text-base  font-Gordita-Medium mt-1">
                     Think Insurance First
                   </p>
                 </div>
@@ -201,7 +201,7 @@ export default function ValidateResetTokenClient() {
                 className="flex items-center gap-2 text-white"
               >
                 <Key className="w-4 h-4 sm:w-5 sm:h-5" />
-                <h2 className="text-lg sm:text-xl font-semibold">
+                <h2 className="text-lg sm:text-xl  font-Gordita-Bold">
                   {validating 
                     ? "Validating Link..." 
                     : isValid 
@@ -234,7 +234,7 @@ export default function ValidateResetTokenClient() {
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-medium text-red-700">{errorMsg}</p>
+                    <p className="text-sm  font-Gordita-Medium text-red-700">{errorMsg}</p>
                   </div>
                 </div>
               </motion.div>
@@ -250,7 +250,7 @@ export default function ValidateResetTokenClient() {
                 <div className="flex items-start gap-3">
                   <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-medium text-emerald-700">{successMsg}</p>
+                    <p className="text-sm  font-Gordita-Medium text-emerald-700">{successMsg}</p>
                   </div>
                 </div>
               </motion.div>
@@ -273,7 +273,7 @@ export default function ValidateResetTokenClient() {
                 <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <AlertCircle className="w-8 h-8 text-red-500" />
                 </div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">
+                <h3 className="text-xl  font-Gordita-Bold text-gray-800 mb-2">
                   Link Expired
                 </h3>
                 <p className="text-gray-600 mb-6">
@@ -281,7 +281,7 @@ export default function ValidateResetTokenClient() {
                 </p>
                 <button
                   onClick={() => router.push("/login")}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg transition-all"
+                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl  font-Gordita-Medium hover:shadow-lg transition-all"
                 >
                   Return to Login
                 </button>
@@ -295,7 +295,7 @@ export default function ValidateResetTokenClient() {
                 {/* New Password Field */}
                 <div className="mb-4 sm:mb-6">
                   <label
-                    className="block text-sm font-medium mb-2"
+                    className="block text-sm  font-Gordita-Medium mb-2"
                     style={{ color: COLORS.neutral }}
                   >
                     New Password
@@ -344,7 +344,7 @@ export default function ValidateResetTokenClient() {
                 {/* Confirm Password Field */}
                 <div className="mb-6 sm:mb-8">
                   <label
-                    className="block text-sm font-medium mb-2"
+                    className="block text-sm  font-Gordita-Medium mb-2"
                     style={{ color: COLORS.neutral }}
                   >
                     Confirm New Password
@@ -393,7 +393,7 @@ export default function ValidateResetTokenClient() {
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={submitting}
-                  className="w-full py-3 sm:py-4 px-6 rounded-lg sm:rounded-xl font-semibold text-white flex items-center justify-center gap-2 sm:gap-3 transition-all shadow-lg hover:shadow-xl text-sm sm:text-base"
+                  className="w-full py-3 sm:py-4 px-6 rounded-lg sm:rounded-xl  font-Gordita-Bold text-white flex items-center justify-center gap-2 sm:gap-3 transition-all shadow-lg hover:shadow-xl text-sm sm:text-base"
                   style={{
                     background: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS.secondary})`,
                     opacity: submitting ? 0.8 : 1,

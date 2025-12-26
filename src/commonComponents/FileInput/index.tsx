@@ -119,7 +119,7 @@ const FileInput = ({
         {label && (
           <label
             className={twMerge(
-              "block text-sm font-medium text-gray-700",
+              "block text-sm  font-Gordita-Medium text-gray-700",
               labelCls
             )}
           >

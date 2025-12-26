@@ -19,7 +19,7 @@ export default function ProgressSection({
   const progressPercentage = Math.min(Math.max(rawProgress, 0), 100);
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200 p-6 lg:p-8 shadow-sm">
+    <div className="app-card rounded-3xl border app-border p-6 lg:p-8 shadow-sm">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
         {/* LEVEL INFO */}
         <div className="flex items-center gap-4">
@@ -29,17 +29,17 @@ export default function ProgressSection({
             </div>
 
             <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-white border-2 border-amber-500 flex items-center justify-center shadow-sm">
-              <span className="text-xs font-bold text-amber-600">
+              <span className="text-xs  font-Gordita-Bold text-amber-600">
                 {level}
               </span>
             </div>
           </div>
 
           <div>
-            <h3 className="text-3xl font-bold text-slate-900">
+            <h3 className="text-3xl  font-Gordita-Bold app-text">
               Level {level}
             </h3>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-sm app-text mt-1">
               {currentXp} / {xpToNextLevel} XP
             </p>
           </div>
@@ -49,10 +49,10 @@ export default function ProgressSection({
         <div>
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-slate-500">
+              <span className="app-text">
                 Progress to Level {level + 1}
               </span>
-              <span className="text-emerald-600 font-semibold">
+              <span className="text-emerald-600  font-Gordita-Bold">
                 {Math.round(progressPercentage)}%
               </span>
             </div>
@@ -79,7 +79,7 @@ export default function ProgressSection({
             </div>
 
             <div>
-              <p className="text-3xl font-bold text-slate-900">
+              <p className="text-3xl  font-Gordita-Bold text-slate-900">
                 {dailyStreak}
               </p>
               <p className="text-sm text-orange-600">

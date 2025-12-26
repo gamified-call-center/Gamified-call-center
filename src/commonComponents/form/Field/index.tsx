@@ -30,7 +30,7 @@ export function Field({
           <div className="min-w-0">
             {label && (
               <label
-                className={cn("block text-sm font-medium app-text", labelClassName)}
+                className={cn("block text-sm  font-Gordita-Medium app-border", labelClassName)}
               >
                 {label} {required ? <span className="text-rose-500">*</span> : null}
               </label>

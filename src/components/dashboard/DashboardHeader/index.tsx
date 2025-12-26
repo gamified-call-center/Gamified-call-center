@@ -27,21 +27,21 @@ export default function DashboardHeader({
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex items-start gap-4">
             <div className="h-12 w-12 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center">
-              <span className="text-lg font-semibold">★</span>
+              <span className="text-lg  font-Gordita-Bold">★</span>
             </div>
 
             <div>
               <div className="text-sm text-white">Welcome back</div>
-              <div className="text-lg md:text-xl font-semibold leading-tight">{profile.name}</div>
+              <div className="text-lg md:text-xl  font-Gordita-Bold leading-tight">{profile.name}</div>
               <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-white">
                 <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1">
-                  Level <span className="text-white/90 font-semibold">{profile.level}</span>
+                  Level <span className="text-white/90  font-Gordita-Bold">{profile.level}</span>
                 </span>
                 <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1">
-                  Streak <span className="text-white/90 font-semibold">{profile.streakDays}</span> days
+                  Streak <span className="text-white/90  font-Gordita-Bold">{profile.streakDays}</span> days
                 </span>
                 <span className="rounded-full border border-white/10 bg-white/5 px-2 py-1">
-                  XP <span className="text-white/90 font-semibold">{formatCompactNumber(profile.currentXp)}</span> /{" "}
+                  XP <span className="text-white/90  font-Gordita-Bold">{formatCompactNumber(profile.currentXp)}</span> /{" "}
                   {formatCompactNumber(profile.xpToNextLevel)}
                 </span>
               </div>

@@ -184,10 +184,10 @@ export default function PremiumLogin({ resetSuccess }: { resetSuccess?: boolean 
                   <Shield className="w-6 h-6 sm:w-8 sm:h-8" />
                 </div>
                 <div>
-                  <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
+                  <h1 className="text-xl sm:text-2xl md:text-3xl  font-Gordita-Bold tracking-tight">
                     Think Insurance First
                   </h1>
-                  <p className="text-white/90 text-sm sm:text-base font-medium mt-1">
+                  <p className="text-white/90 text-sm sm:text-base  font-Gordita-Medium mt-1">
                     Trusted Tools for Trusted Advisors
                   </p>
                 </div>
@@ -201,7 +201,7 @@ export default function PremiumLogin({ resetSuccess }: { resetSuccess?: boolean 
                   className="flex items-center gap-2 text-white"
                 >
                   <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
-                  <h2 className="text-lg sm:text-xl font-semibold">
+                  <h2 className="text-lg sm:text-xl  font-Gordita-Bold">
                     {view === "login" ? "Welcome Back!" : "Forgot Password"}
                   </h2>
                 </motion.div>
@@ -214,7 +214,7 @@ export default function PremiumLogin({ resetSuccess }: { resetSuccess?: boolean 
                       setError(null);
                       setInfo(null);
                     }}
-                    className="text-white/90 hover:text-white flex items-center gap-1 text-sm font-medium"
+                    className="text-white/90 hover:text-white flex items-center gap-1 text-sm  font-Gordita-Medium"
                   >
                     <ArrowLeft className="w-4 h-4" />
                     Back
@@ -260,7 +260,7 @@ export default function PremiumLogin({ resetSuccess }: { resetSuccess?: boolean 
             {/* Shared Email Field */}
             <div className="mb-4 sm:mb-6">
               <label
-                className="block text-sm font-medium mb-2"
+                className="block text-sm  font-Gordita-Medium mb-2"
                 style={{ color: COLORS.neutral }}
               >
                 Email
@@ -294,7 +294,7 @@ export default function PremiumLogin({ resetSuccess }: { resetSuccess?: boolean 
                 {/* Password Field */}
                 <div className="mb-4 sm:mb-6">
                   <label
-                    className="block text-sm font-medium mb-2"
+                    className="block text-sm  font-Gordita-Medium mb-2"
                     style={{ color: COLORS.neutral }}
                   >
                     Password
@@ -386,7 +386,7 @@ export default function PremiumLogin({ resetSuccess }: { resetSuccess?: boolean 
                       setError(null);
                       setInfo(null);
                     }}
-                    className="text-sm font-medium flex items-center gap-1"
+                    className="text-sm  font-Gordita-Medium flex items-center gap-1"
                     style={{ color: COLORS.primary }}
                   >
                     Forgot password?{" "}
@@ -400,7 +400,7 @@ export default function PremiumLogin({ resetSuccess }: { resetSuccess?: boolean 
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-3 sm:py-4 px-6 rounded-lg sm:rounded-xl font-semibold text-white flex items-center justify-center gap-2 sm:gap-3 transition-all shadow-lg hover:shadow-xl text-sm sm:text-base"
+                  className="w-full py-3 sm:py-4 px-6 rounded-lg sm:rounded-xl  font-Gordita-Bold text-white flex items-center justify-center gap-2 sm:gap-3 transition-all shadow-lg hover:shadow-xl text-sm sm:text-base"
                   style={{
                     background: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS.secondary})`,
                     opacity: isLoading ? 0.8 : 1,
@@ -427,7 +427,7 @@ export default function PremiumLogin({ resetSuccess }: { resetSuccess?: boolean 
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={forgotLoading}
-                  className="w-full py-3 sm:py-4 px-6 rounded-lg sm:rounded-xl font-semibold text-white flex items-center justify-center gap-2 sm:gap-3 transition-all shadow-lg hover:shadow-xl text-sm sm:text-base"
+                  className="w-full py-3 sm:py-4 px-6 rounded-lg sm:rounded-xl  font-Gordita-Bold text-white flex items-center justify-center gap-2 sm:gap-3 transition-all shadow-lg hover:shadow-xl text-sm sm:text-base"
                   style={{
                     background: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS.secondary})`,
                     opacity: forgotLoading ? 0.8 : 1,

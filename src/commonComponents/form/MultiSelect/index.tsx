@@ -187,7 +187,7 @@ export function MultiSelect({
             </button>
             <button
               type="button"
-              className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-700"
+              className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs  font-Gordita-Medium text-white hover:bg-indigo-700"
               onClick={() => setOpen(false)}
             >
               Done

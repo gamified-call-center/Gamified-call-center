@@ -9,7 +9,7 @@ export default function LeaderboardPanel({ entries }: { entries: LeaderboardEntr
       <div className="flex items-start justify-between">
         <div>
           <div className="text-sm text-white">Leaderboard</div>
-          <div className="text-lg font-semibold">Top Agents</div>
+          <div className="text-lg  font-Gordita-Bold">Top Agents</div>
           <div className="text-xs text-white mt-1">
             Rankings can be Daily/Weekly/Monthly/All-time (Redis sorted sets).
           </div>
@@ -24,11 +24,11 @@ export default function LeaderboardPanel({ entries }: { entries: LeaderboardEntr
           <div key={e.id} className="rounded-xl border border-white/10 bg-white/3 px-4 py-3">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
-                <div className="h-9 w-9 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-sm font-semibold">
+                <div className="h-9 w-9 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center text-sm  font-Gordita-Bold">
                   #{e.rank}
                 </div>
                 <div className="min-w-0">
-                  <div className="text-sm font-semibold truncate">{e.name}</div>
+                  <div className="text-sm  font-Gordita-Bold truncate">{e.name}</div>
                   <div className="text-xs text-white">
                     Level {e.level} • Deals {e.deals} • +{e.improvementPct}% improvement
                   </div>

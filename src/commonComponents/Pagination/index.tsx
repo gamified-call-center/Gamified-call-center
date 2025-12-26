@@ -53,12 +53,12 @@ export default function Pagination({
     "rounded-lg transition-all flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed";
 
   const numBtn =
-    "min-w-[36px] px-3 py-1 text-sm font-medium";
+    "min-w-[36px] px-3 py-1 text-sm  font-Gordita-Medium";
 
 
   return (
  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-4 px-2">
-      <div className="text-sm app-text font-medium">{showingText}</div>
+      <div className="text-sm app-text  font-Gordita-Medium">{showingText}</div>
 
       <div className="flex flex-wrap items-center gap-2">
         {/* First */}
@@ -75,7 +75,7 @@ export default function Pagination({
         <button
           disabled={page === 1}
           onClick={() => onPageChange(page - 1)}
-          className={`${baseBtn} app-btn flex items-center gap-1 px-3 py-2 text-sm font-medium`}
+          className={`${baseBtn} app-btn flex items-center gap-1 px-3 py-2 text-sm  font-Gordita-Medium`}
           title="Previous page"
         >
           <ChevronLeft className="w-4 h-4" />
@@ -105,7 +105,7 @@ export default function Pagination({
         <button
           disabled={page === totalPages || totalPages === 0}
           onClick={() => onPageChange(page + 1)}
-          className={`${baseBtn} app-btn flex items-center gap-1 px-3 py-2 text-sm font-medium`}
+          className={`${baseBtn} app-btn flex items-center gap-1 px-3 py-2 text-sm  font-Gordita-Medium`}
           title="Next page"
         >
           <span className="hidden sm:inline">Next</span>

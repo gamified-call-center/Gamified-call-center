@@ -2,7 +2,7 @@ import merge from "lodash/merge";
 import { getSession } from "next-auth/react";
 
 // const base_url = process.env.NEXT_PUBLIC_LOCAL_API_ENDPOINT;
-const base_url = process.env.NEXT_PUBLIC_BACKEND_URL;
+const base_url = "process.env.NEXT_PUBLIC_BACKEND_URL";
 
 const URLS = {
   blogs: `${base_url}blog`,

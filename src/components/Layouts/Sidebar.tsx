@@ -157,10 +157,10 @@ export default function Sidebar({
           )}
         </div>
 
-        <span className="text-sm font-medium truncate flex-1">{item.label}</span>
+        <span className="text-sm  font-Gordita-Medium truncate flex-1">{item.label}</span>
 
         {item.badge && (
-          <span className="ml-2 px-2.5 py-0.5 text-[10px] font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full shadow-sm">
+          <span className="ml-2 px-2.5 py-0.5 text-[10px]  font-Gordita-Bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full shadow-sm">
             {item.badge}
           </span>
         )}
@@ -183,7 +183,7 @@ export default function Sidebar({
             </div>
 
             <div>
-              <div className="text-white font-bold text-xl bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text">
+              <div className="text-white  font-Gordita-Bold text-xl bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text">
                 ThinkFirst
               </div>
               <div className="text-white/50 text-xs">Insurance Platform</div>
@@ -197,7 +197,7 @@ export default function Sidebar({
               <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
               <span className="text-xs text-white/70">Active</span>
             </div>
-            <div className="flex items-center gap-1 text-emerald-300 text-xs font-bold">
+            <div className="flex items-center gap-1 text-emerald-300 text-xs  font-Gordita-Bold">
               <Sparkles className="h-3 w-3" />
               <span>Premium</span>
             </div>
@@ -208,7 +208,7 @@ export default function Sidebar({
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
         {SECTIONS.map((section) => (
           <div key={section.title}>
-            <div className="text-[10px] text-white/40 font-bold tracking-widest mb-1 px-3">
+            <div className="text-[10px] text-white/40  font-Gordita-Bold tracking-widest mb-1 px-3">
               {section.title}
             </div>
             <div className="space-y-1.5">
@@ -224,14 +224,14 @@ export default function Sidebar({
         <div className="flex items-center gap-3">
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full blur opacity-30" />
-            <div className="relative h-11 w-11 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg">
+            <div className="relative h-11 w-11 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white  font-Gordita-Bold shadow-lg">
               KR
             </div>
             <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#1e293b]" />
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-semibold text-white truncate">
+            <div className="text-sm  font-Gordita-Bold text-white truncate">
               Kishor Reddy
             </div>
             <div className="text-[11px] text-white/50 truncate">Director</div>

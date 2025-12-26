@@ -426,7 +426,7 @@ export default function ChatPanel() {
             className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-all duration-200 group"
           >
             <Home className="w-4 h-4 text-gray-500 group-hover:text-blue-600 transition-colors" />
-            <span className="text-sm font-medium text-gray-600 group-hover:text-gray-900 transition-colors">
+            <span className="text-sm  font-Gordita-Medium text-gray-600 group-hover:text-gray-900 transition-colors">
               Home
             </span>
           </a>
@@ -435,7 +435,7 @@ export default function ChatPanel() {
 
           <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl">
             <MessageSquare className="w-4 h-4 text-blue-600" />
-            <span className="text-sm font-semibold text-gray-900">Chat</span>
+            <span className="text-sm  font-Gordita-Bold text-gray-900">Chat</span>
             <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 animate-pulse" />
           </div>
         </div>
@@ -583,7 +583,7 @@ function ChatWindow({
                   <div
                     className={`w-11 h-11 rounded-2xl flex items-center justify-center text-white ${selectedChat.avatarColor}`}
                   >
-                    <span className="text-base font-semibold">
+                    <span className="text-base  font-Gordita-Bold">
                       {initials(selectedChat.name)}
                     </span>
                   </div>
@@ -600,7 +600,7 @@ function ChatWindow({
               )}
 
               <div className="min-w-0">
-                <h2 className="text-base md:text-lg font-bold text-gray-900 truncate">
+                <h2 className="text-base md:text-lg  font-Gordita-Bold text-gray-900 truncate">
                   {activeTitle}
                 </h2>
                 <p className="text-xs md:text-sm text-gray-500 truncate">
@@ -630,7 +630,7 @@ function ChatWindow({
         ) : (
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-bold text-gray-900">
+              <h2 className="text-lg  font-Gordita-Bold text-gray-900">
                 Select a chat to start messaging
               </h2>
               <p className="text-sm text-gray-500">
@@ -659,7 +659,7 @@ function ChatWindow({
                   ].join(" ")}
                 >
                   {!m.isOwn && (
-                    <p className="text-[11px] font-semibold mb-1 opacity-70">
+                    <p className="text-[11px]  font-Gordita-Bold mb-1 opacity-70">
                       {m.senderName}
                     </p>
                   )}
@@ -689,7 +689,7 @@ function ChatWindow({
               <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center mb-5">
                 <MessageSquare className="w-10 h-10 text-blue-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900">
+              <h3 className="text-xl  font-Gordita-Bold text-gray-900">
                 Welcome to Chat
               </h3>
               <p className="text-sm text-gray-500 mt-2">
@@ -819,7 +819,7 @@ function SidebarContent({
             onClick={() => setActiveTab(tab)}
             className={`flex-1 py-2 flex items-center justify-center gap-2.5 relative overflow-hidden group ${
               activeTab === tab
-                ? "text-blue-700 font-semibold"
+                ? "text-blue-700  font-Gordita-Bold"
                 : "text-gray-500 hover:text-gray-700"
             }`}
             type="button"
@@ -860,7 +860,7 @@ function SidebarContent({
             </div>
 
             {/* Text */}
-            <span className="relative z-10 font-medium text-sm">
+            <span className="relative z-10  font-Gordita-Medium text-sm">
               {tab === "chats" ? "Chats" : "Channels"}
             </span>
 
@@ -882,18 +882,18 @@ function SidebarContent({
         <div className="sticky top-0 z-10 px-5 py-2 bg-gradient-to-b from-white to-white/95 backdrop-blur-sm border-b border-gray-100">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold text-gray-800 uppercase tracking-wide">
+              <h2 className="text-sm  font-Gordita-Bold text-gray-800 uppercase tracking-wide">
                 {activeTab === "chats" ? "Direct Messages" : "Team Channels"}
               </h2>
               <div className="px-2 py-1 bg-gradient-to-r from-gray-100 to-gray-200 rounded-lg">
-                <span className="text-xs font-semibold text-gray-600">
+                <span className="text-xs  font-Gordita-Bold text-gray-600">
                   {activeTab === "chats"
                     ? filteredUsers.length
                     : filteredChannels.length}
                 </span>
               </div>
             </div>
-            <div className="text-xs text-gray-400 font-medium">
+            <div className="text-xs text-gray-400  font-Gordita-Medium">
               {activeTab === "chats"
                 ? `${filteredUsers.length} online`
                 : `${filteredChannels.reduce(
@@ -937,7 +937,7 @@ function SidebarContent({
                         <div
                           className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white shadow-lg ${user.avatarColor}`}
                         >
-                          <span className="text-base font-bold">
+                          <span className="text-base  font-Gordita-Bold">
                             {initials(user.name)}
                           </span>
                         </div>
@@ -965,7 +965,7 @@ function SidebarContent({
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2 mb-1">
                           <div className="flex items-center gap-2 min-w-0">
-                            <h3 className="font-bold text-gray-900 truncate text-sm">
+                            <h3 className=" font-Gordita-Bold text-gray-900 truncate text-sm">
                               {user.name}
                             </h3>
                             {user.isMuted && (
@@ -973,7 +973,7 @@ function SidebarContent({
                             )}
                           </div>
                           {user.timestamp && (
-                            <span className="text-xs text-gray-400 font-medium flex-shrink-0">
+                            <span className="text-xs text-gray-400  font-Gordita-Medium flex-shrink-0">
                               {user.timestamp}
                             </span>
                           )}
@@ -986,7 +986,7 @@ function SidebarContent({
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <span
-                              className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                              className={`text-xs px-2.5 py-1 rounded-full  font-Gordita-Medium ${
                                 user.status === "online"
                                   ? "bg-gradient-to-r from-green-100 to-emerald-100 text-emerald-700"
                                   : user.status === "away"
@@ -1008,7 +1008,7 @@ function SidebarContent({
                             <motion.span
                               initial={{ scale: 0 }}
                               animate={{ scale: 1 }}
-                              className="px-2.5 py-1 text-xs font-bold bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full min-w-[24px] text-center shadow-sm"
+                              className="px-2.5 py-1 text-xs  font-Gordita-Bold bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full min-w-[24px] text-center shadow-sm"
                             >
                               {user.unreadCount}
                             </motion.span>
@@ -1077,12 +1077,12 @@ function SidebarContent({
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2 mb-1">
                           <div className="flex items-center gap-2 min-w-0">
-                            <h3 className="font-bold text-gray-900 truncate text-sm">
+                            <h3 className=" font-Gordita-Bold text-gray-900 truncate text-sm">
                               {channel.name}
                             </h3>
                           </div>
                           {channel.timestamp && (
-                            <span className="text-xs text-gray-400 font-medium flex-shrink-0">
+                            <span className="text-xs text-gray-400  font-Gordita-Medium flex-shrink-0">
                               {channel.timestamp}
                             </span>
                           )}
@@ -1096,7 +1096,7 @@ function SidebarContent({
                           <div className="flex items-center gap-2">
                             <div className="flex items-center gap-1 text-xs text-gray-500">
                               <Users className="w-3.5 h-3.5" />
-                              <span className="font-medium">
+                              <span className=" font-Gordita-Medium">
                                 {channel.memberCount}
                               </span>
                               <span>members</span>
@@ -1113,7 +1113,7 @@ function SidebarContent({
                             <motion.span
                               initial={{ scale: 0 }}
                               animate={{ scale: 1 }}
-                              className="px-2.5 py-1 text-xs font-bold bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full min-w-[24px] text-center shadow-sm"
+                              className="px-2.5 py-1 text-xs  font-Gordita-Bold bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full min-w-[24px] text-center shadow-sm"
                             >
                               {channel.unreadCount}
                             </motion.span>

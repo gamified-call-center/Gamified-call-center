@@ -129,7 +129,7 @@ export default function Modal({
                 >
                     <div
                         className={cn(
-                            "fixed inset-0 bg-black/40 backdrop-blur-[2px]",
+                            "fixed inset-0 app-text backdrop-blur-[2px]",
                             overlayClassName
                         )}
                         onClick={() => {
@@ -152,7 +152,7 @@ export default function Modal({
                         >
                             <Dialog.Panel
                                 className={cn(
-                                    "relative w-full rounded-2xl bg-white shadow-xl ring-1 ring-black/5",
+                                    "relative w-full rounded-2xl app-card shadow-xl ring-1 ring-black/5",
                                     "dark:bg-slate-100 dark:ring-white/10",
                                     maxWidth,
                                     size === "full" ? "p-0" : "p-0",
@@ -167,20 +167,20 @@ export default function Modal({
                                 {(title || subtitle || showCloseIcon) && (
                                     <div
                                         className={cn(
-                                            "flex items-start justify-between gap-4 border-b px-5 py-4",
+                                            "flex items-start app-text justify-between gap-4 border-b px-5 py-4",
                                             "border-slate-200 dark:border-slate-800",
                                             headerClassName
                                         )}
                                     >
                                         <div className="min-w-0">
                                             {title ? (
-                                                <Dialog.Title className="text-base font-semibold text-slate-900 ">
+                                                <Dialog.Title className="text-base  font-Gordita-Bold app-text ">
                                                     {title}
                                                 </Dialog.Title>
                                             ) : null}
 
                                             {subtitle ? (
-                                                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                                                <p className="mt-1 text-sm app-text">
                                                     {subtitle}
                                                 </p>
                                             ) : null}
@@ -234,7 +234,7 @@ export default function Modal({
                                                         onClick={secondaryAction.onClick ?? handleRequestClose}
                                                         disabled={secondaryAction.disabled}
                                                         className={cn(
-                                                            "rounded-xl cursor-pointer border px-4 py-2 text-sm font-medium",
+                                                            "rounded-xl cursor-pointer border px-4 py-2 text-sm  font-Gordita-Medium",
                                                             "border-slate-200 text-slate-700 hover:bg-slate-50",
                                                             "dark:border-slate-700  dark:hover:bg-slate-800",
                                                             secondaryAction.disabled && "opacity-60 cursor-not-allowed"
@@ -250,7 +250,7 @@ export default function Modal({
                                                         onClick={primaryAction.onClick}
                                                         disabled={primaryAction.disabled || primaryAction.loading}
                                                         className={cn(
-                                                            "rounded-xl cursor-pointer bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700",
+                                                            "rounded-xl cursor-pointer bg-indigo-600 px-4 py-2 text-sm  font-Gordita-Bold text-white hover:bg-indigo-700",
                                                             "disabled:opacity-60 disabled:cursor-not-allowed"
                                                         )}
                                                     >

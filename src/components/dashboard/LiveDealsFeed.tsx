@@ -53,7 +53,7 @@ export default function LiveDealsFeed({ deals }: LiveDealsFeedProps) {
               <TrendingUp size={20} className="text-emerald-400 opacity-50" />
             </div>
           </div>
-          <h3 className="text-lg font-bold text-white">Live Deal Updates</h3>
+          <h3 className="text-lg  font-Gordita-Bold text-white">Live Deal Updates</h3>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
@@ -72,13 +72,13 @@ export default function LiveDealsFeed({ deals }: LiveDealsFeedProps) {
               key={`${deal.id}-${index}`}
               className="flex items-center gap-4 px-6 py-3 border-b border-white/5 hover:bg-slate-700/30 transition-colors"
             >
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500 flex items-center justify-center text-white text-xs  font-Gordita-Bold flex-shrink-0">
                 {deal.username.substring(0, 2).toUpperCase()}
               </div>
 
               <div className="flex-1 min-w-0">
                 <p className="text-sm text-white truncate">
-                  <span className="font-semibold">{deal.username}</span>
+                  <span className=" font-Gordita-Bold">{deal.username}</span>
                   <span className="text-slate-400 mx-2">closed</span>
                   <span className="text-emerald-400">{deal.deal_title}</span>
                 </p>
@@ -87,7 +87,7 @@ export default function LiveDealsFeed({ deals }: LiveDealsFeedProps) {
               <div className="flex items-center gap-3 flex-shrink-0">
                 <div className="flex items-center gap-1 bg-emerald-500/20 border border-emerald-500/30 rounded-lg px-3 py-1">
                   <DollarSign size={14} className="text-emerald-400" />
-                  <span className="text-sm font-bold text-emerald-400">
+                  <span className="text-sm  font-Gordita-Bold text-emerald-400">
                     {deal.amount.toLocaleString()}
                   </span>
                 </div>

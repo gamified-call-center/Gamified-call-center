@@ -279,7 +279,7 @@ const AgentPerformanceLeaderboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 md:p-6">
+    <div className="min-h-screen app-card p-4 md:p-6">
       {/* Top Navigation (unchanged) */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -287,7 +287,7 @@ const AgentPerformanceLeaderboard = () => {
         transition={{ duration: 0.5 }}
         className="max-w-7xl mx-auto mb-6"
       >
-        <div className="bg-white rounded-2xl shadow-lg shadow-blue-100/30 p-4 md:p-6">
+        <div className="app-surface rounded-2xl shadow-lg shadow-blue-100/30 p-4 md:p-6">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-3">
               <motion.div
@@ -308,7 +308,7 @@ const AgentPerformanceLeaderboard = () => {
 
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-md md:text-xl font-bold text-slate-900">
+                  <h1 className="text-md md:text-xl  font-Gordita-Bold app-text">
                     Live Leaderboard
                   </h1>
                   <motion.div
@@ -324,7 +324,7 @@ const AgentPerformanceLeaderboard = () => {
                       <div className="absolute inset-0 animate-ping bg-red-400 rounded-full opacity-75"></div>
                       <Zap className="relative w-4 h-4 text-red-500" />
                     </div>
-                    <span className="text-xs font-semibold bg-linear-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
+                    <span className="text-xs  font-Gordita-Bold bg-linear-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
                       LIVE
                     </span>
                   </motion.div>
@@ -335,20 +335,20 @@ const AgentPerformanceLeaderboard = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2 bg-slate-50 px-4 py-3 rounded-xl border border-slate-200">
+            <div className="flex items-center gap-2 app-card px-4 py-3 rounded-xl border border-slate-200">
               <Link
                 href="/aca/dashboard"
-                className="flex items-center gap-2 text-slate-700 hover:text-blue-600 transition-colors duration-200 group"
+                className="flex items-center gap-2 app-text hover:text-blue-600 transition-colors duration-200 group"
               >
                 <Home className="w-4 h-4 group-hover:scale-110 transition-transform duration-200" />
-                <span className="text-sm font-medium group-hover:text-blue-600 transition-colors duration-200">
+                <span className="text-sm  font-Gordita-Medium group-hover:text-blue-600 transition-colors duration-200">
                   Home
                 </span>
               </Link>
-              <ChevronRight className="w-4 h-4 text-slate-400 mx-1" />
+              <ChevronRight className="w-4 h-4 app-muted mx-1" />
               <div className="flex items-center gap-2 text-blue-600">
                 <BarChart3 className="w-4 h-4" />
-                <span className="text-sm font-semibold">Leaderboard</span>
+                <span className="text-sm  font-Gordita-Bold">Leaderboard</span>
               </div>
             </div>
           </div>
@@ -356,31 +356,31 @@ const AgentPerformanceLeaderboard = () => {
           {/* Stats row (unchanged styling) */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
             <div className="bg-linear-to-br from-blue-50 to-cyan-50 p-3 rounded-xl border border-blue-100">
-              <div className="text-xs text-slate-500 uppercase tracking-wider font-medium">
+              <div className="text-xs text-slate-500 uppercase tracking-wider  font-Gordita-Medium">
                 Total Agents
               </div>
-              <div className="text-lg font-bold text-slate-900 mt-1">
+              <div className="text-lg  font-Gordita-Bold text-slate-900 mt-1">
                 {meta.total ?? agents.length}
               </div>
             </div>
             <div className="bg-linear-to-br from-emerald-50 to-teal-50 p-3 rounded-xl border border-emerald-100">
-              <div className="text-xs text-slate-500 uppercase tracking-wider font-medium">
+              <div className="text-xs text-slate-500 uppercase tracking-wider  font-Gordita-Medium">
                 Avg. Performance
               </div>
-              <div className="text-lg font-bold text-slate-900 mt-1">
+              <div className="text-lg  font-Gordita-Bold text-slate-900 mt-1">
                 {avgDeals}
               </div>
             </div>
             <div className="bg-linear-to-br from-amber-50 to-orange-50 p-3 rounded-xl border border-amber-100">
-              <div className="text-xs text-slate-500 uppercase tracking-wider font-medium">
+              <div className="text-xs text-slate-500 uppercase tracking-wider  font-Gordita-Medium">
                 Top Score
               </div>
-              <div className="text-lg font-bold text-slate-900 mt-1">
+              <div className="text-lg  font-Gordita-Bold text-slate-900 mt-1">
                 {topScore}
               </div>
             </div>
             <div className="bg-linear-to-br from-violet-50 to-purple-50 p-3 rounded-xl border border-violet-100">
-              <div className="text-xs text-slate-500 uppercase tracking-wider font-medium">
+              <div className="text-xs text-slate-500 uppercase tracking-wider  font-Gordita-Medium">
                 Active Updates
               </div>
               <div className="flex items-center gap-2 mt-1">
@@ -389,7 +389,7 @@ const AgentPerformanceLeaderboard = () => {
                     isLive ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
                   }`}
                 ></div>
-                <div className="text-sm font-semibold text-slate-900">
+                <div className="text-sm  font-Gordita-Bold text-slate-900">
                   {isLive ? "Enabled" : "Paused"}
                 </div>
               </div>
@@ -409,17 +409,17 @@ const AgentPerformanceLeaderboard = () => {
         transition={{ duration: 0.6, delay: 0.1 }}
         className="max-w-7xl mx-auto"
       >
-        <div className="bg-white rounded-4xl shadow-2xl shadow-blue-100/50 p-6 md:p-8">
+        <div className="app-card rounded-4xl shadow-2xl shadow-blue-100/50 p-6 md:p-8">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div className="flex items-center gap-3">
               <div className="bg-linear-to-br from-blue-500 to-cyan-500 p-2.5 rounded-2xl">
                 <Trophy className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-md md:text-xl font-bold text-slate-900">
+                <h2 className="text-md md:text-xl  font-Gordita-Bold app-text">
                   Top Performers
                 </h2>
-                <p className="text-sm text-slate-500 mt-1">
+                <p className="text-sm app-muted mt-1">
                   Real-time ranking based on closed deals
                 </p>
               </div>
@@ -432,7 +432,7 @@ const AgentPerformanceLeaderboard = () => {
                 className="flex items-center gap-3 px-4 py-3 bg-white border border-slate-200 rounded-2xl hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100/50 transition-all duration-200 group"
               >
                 <Calendar className="w-4 h-4 text-slate-500 group-hover:text-blue-500 transition-colors duration-200" />
-                <span className="font-medium text-slate-700 group-hover:text-blue-600 transition-colors duration-200">
+                <span className=" font-Gordita-Medium text-slate-700 group-hover:text-blue-600 transition-colors duration-200">
                   {selectedLabel}
                 </span>
                 <ChevronDown
@@ -452,7 +452,7 @@ const AgentPerformanceLeaderboard = () => {
                     className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-lg z-20 overflow-hidden"
                   >
                     {/* ✅ Mode selector (3 options) */}
-                    <div className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider bg-slate-50 border-b border-slate-200">
+                    <div className="px-4 py-3 text-xs  font-Gordita-Bold  uppercase tracking-wider bg-slate-50 border-b border-slate-200">
                       Filter Mode
                     </div>
 
@@ -586,7 +586,7 @@ const AgentPerformanceLeaderboard = () => {
                             </motion.div>
                           )}
                           <div
-                            className={`w-10 h-10 flex items-center justify-center rounded-xl font-bold ${
+                            className={`w-10 h-10 flex items-center justify-center rounded-xl  font-Gordita-Bold ${
                               isTopThree
                                 ? index === 0
                                   ? "bg-linear-to-br from-yellow-100 to-amber-100 text-yellow-700 shadow-sm"
@@ -606,7 +606,7 @@ const AgentPerformanceLeaderboard = () => {
                               index
                             )} flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-300`}
                           >
-                            <span className="text-2xl font-bold text-slate-800">
+                            <span className="text-2xl  font-Gordita-Bold text-slate-800">
                               {agent.name.charAt(0)}
                             </span>
                           </div>
@@ -632,7 +632,7 @@ const AgentPerformanceLeaderboard = () => {
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
                           <div className="min-w-35">
-                            <h3 className="font-semibold text-slate-900 truncate text-lg">
+                            <h3 className=" font-Gordita-Bold text-slate-900 truncate text-lg">
                               {agent.name}
                             </h3>
                             <p className="text-sm text-slate-500 mt-1 flex items-center gap-1">
@@ -661,7 +661,7 @@ const AgentPerformanceLeaderboard = () => {
                                 transition={{ delay: index * 0.2 + 1 }}
                                 className="absolute -top-6 right-0 px-2 py-1 bg-white rounded-lg shadow-sm border border-slate-200"
                               >
-                                <span className="text-xs font-semibold text-slate-700">
+                                <span className="text-xs  font-Gordita-Bold text-slate-700">
                                   {progressPercentage}%
                                 </span>
                               </motion.div>
@@ -669,7 +669,7 @@ const AgentPerformanceLeaderboard = () => {
                           </div>
 
                           <div className="shrink-0">
-                            <div className="px-4 py-2.5 rounded-full text-sm font-semibold shadow-sm bg-linear-to-r from-slate-50 to-gray-50 text-slate-800 border border-slate-200">
+                            <div className="px-4 py-2.5 rounded-full text-sm  font-Gordita-Bold shadow-sm bg-linear-to-r from-slate-50 to-gray-50 text-slate-800 border border-slate-200">
                               {agent.dealsClosed} Deals
                             </div>
                           </div>
@@ -690,10 +690,10 @@ const AgentPerformanceLeaderboard = () => {
                 <div className="w-20 h-20 mx-auto bg-linear-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center mb-6">
                   <Trophy className="w-10 h-10 text-slate-400" />
                 </div>
-                <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                <h3 className="text-xl  font-Gordita-Bold app-text mb-2">
                   No Data Available
                 </h3>
-                <p className="text-slate-500 mb-6">
+                <p className="app-muted mb-6">
                   Select a different filter to view performance data
                 </p>
                 <button
@@ -705,7 +705,7 @@ const AgentPerformanceLeaderboard = () => {
                     setTo("");
                     setPage(1);
                   }}
-                  className="px-6 py-3 bg-linear-to-r from-blue-500 to-cyan-500 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-blue-200 transition-all duration-200"
+                  className="px-6 py-3 bg-linear-to-r from-blue-500 to-cyan-500 text-white rounded-xl  font-Gordita-Medium hover:shadow-lg hover:shadow-blue-200 transition-all duration-200"
                 >
                   Reset to Today
                 </button>
@@ -718,18 +718,18 @@ const AgentPerformanceLeaderboard = () => {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2">
                 <div className="w-3 h-3 rounded-full bg-linear-to-r from-emerald-400 to-teal-400 shadow"></div>
-                <span className="text-sm text-slate-600">Progress Bar</span>
+                <span className="text-sm app-text">Progress Bar</span>
               </div>
               <div className="flex items-center gap-2">
                 <Crown className="w-3 h-3 text-yellow-500" />
-                <span className="text-sm text-slate-600">Top 3 Ranking</span>
+                <span className="text-sm app-text">Top 3 Ranking</span>
               </div>
             </div>
 
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setIsLive(!isLive)}
-                className={`px-6 py-2.5 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 ${
+                className={`px-6 py-2.5 rounded-xl  font-Gordita-Medium transition-all duration-200 flex items-center gap-2 ${
                   isLive
                     ? "bg-linear-to-r from-red-500 to-orange-500 text-white hover:shadow-lg hover:shadow-red-200"
                     : "bg-linear-to-r from-emerald-500 to-teal-500 text-white hover:shadow-lg hover:shadow-emerald-200"
@@ -739,7 +739,7 @@ const AgentPerformanceLeaderboard = () => {
                 {isLive ? "Pause Live Updates" : "Enable Live Updates"}
               </button>
 
-              <div className="text-sm text-slate-500">
+              <div className="text-sm app-text">
                 Last updated: Just now
               </div>
             </div>
@@ -750,7 +750,7 @@ const AgentPerformanceLeaderboard = () => {
             <button
               disabled={!canPrev || loading}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className={`px-6 py-2.5 rounded-xl font-medium transition-all duration-200 ${
+              className={`px-6 py-2.5 rounded-xl  font-Gordita-Medium transition-all duration-200 ${
                 canPrev && !loading
                   ? "bg-white border border-slate-200 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100/50"
                   : "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed"
@@ -759,15 +759,15 @@ const AgentPerformanceLeaderboard = () => {
               Prev
             </button>
 
-            <div className="text-sm text-slate-600">
-              Page <span className="font-semibold">{meta.page}</span> of{" "}
-              <span className="font-semibold">{meta.totalPages}</span>
+            <div className="text-sm app-text">
+              Page <span className=" font-Gordita-Bold">{meta.page}</span> of{" "}
+              <span className=" font-Gordita-Bold">{meta.totalPages}</span>
             </div>
 
             <button
               disabled={!canNext || loading}
               onClick={() => setPage((p) => p + 1)}
-              className={`px-6 py-2.5 rounded-xl font-medium transition-all duration-200 ${
+              className={`px-6 py-2.5 rounded-xl  font-Gordita-Medium transition-all duration-200 ${
                 canNext && !loading
                   ? "bg-white border border-slate-200 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100/50"
                   : "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed"

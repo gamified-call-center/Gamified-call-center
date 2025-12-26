@@ -24,7 +24,7 @@ export default function TrendPanel({
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="text-sm text-white">Trends</div>
-          <div className="text-lg font-semibold">{appTitle(app)} • {rangeLabel(range)}</div>
+          <div className="text-lg  font-Gordita-Bold">{appTitle(app)} • {rangeLabel(range)}</div>
           <div className="text-xs text-white mt-1">
             Calls & deals are derived from verified events; XP follows the XP engine safeguards.
           </div>
@@ -37,7 +37,7 @@ export default function TrendPanel({
 
       <div className="mt-5 grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="rounded-xl border border-white/10 bg-white/3 p-4">
-          <div className="text-sm font-semibold">Calls / Deals</div>
+          <div className="text-sm  font-Gordita-Bold">Calls / Deals</div>
           <div className="mt-3 h-55">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={trend}>
@@ -56,7 +56,7 @@ export default function TrendPanel({
         </div>
 
         <div className="rounded-xl border border-white/10 bg-white/3 p-4">
-          <div className="text-sm font-semibold">XP Velocity</div>
+          <div className="text-sm  font-Gordita-Bold">XP Velocity</div>
           <div className="mt-3 h-55">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={trend}>

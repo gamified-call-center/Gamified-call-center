@@ -141,7 +141,7 @@ export default function Dashboard() {
 //                   </motion.div>
                   
 //                   <div>
-//                     <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+//                     <h1 className="text-2xl md:text-3xl  font-Gordita-Bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
 //                       Performance Dashboard
 //                     </h1>
 //                     <p className="text-slate-600 text-sm md:text-base">
@@ -372,7 +372,7 @@ export default function Dashboard() {
 //                   <Award className="w-6 h-6 text-white" />
 //                 </div>
 //                 <div className="flex-1">
-//                   <h4 className="font-semibold text-slate-900">Daily Goal Achieved! 🎯</h4>
+//                   <h4 className=" font-Gordita-Bold text-slate-900">Daily Goal Achieved! 🎯</h4>
 //                   <p className="text-sm text-slate-600">+150 XP earned today</p>
 //                 </div>
 //                 <ChevronRight className="w-5 h-5 text-slate-400" />

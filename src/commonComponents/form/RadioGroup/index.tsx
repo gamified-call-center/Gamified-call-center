@@ -32,7 +32,7 @@ export function RadioGroup({ value, onChange, options, name }: RadioGroupProps) 
             className="mt-1 h-4 w-4 text-indigo-600 focus:ring-indigo-200"
           />
           <div>
-            <div className="text-sm font-medium text-slate-800 ">{opt.label}</div>
+            <div className="text-sm  font-Gordita-Medium text-slate-800 ">{opt.label}</div>
             {opt.hint ? <div className="text-xs text-slate-500 dark:text-slate-400">{opt.hint}</div> : null}
           </div>
         </label>

@@ -28,15 +28,16 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(
         className={containerClassName}
       >
         <input
-          ref={ref}
-          disabled={disabled}
-          {...props}
-          className={cn(
-            "w-full app-text text-sm text-slate-900 outline-none placeholder:text-slate-400",
-            " dark:placeholder:text-slate-500",
-            inputClassName
-          )}
-        />
+  ref={ref}
+  disabled={disabled}
+  {...props}
+  className={cn(
+    "w-full text-sm outline-none app-input placeholder:app-muted",
+    disabled && "opacity-60 cursor-not-allowed",
+    inputClassName
+  )}
+/>
+
       </ControlShell>
     );
   }

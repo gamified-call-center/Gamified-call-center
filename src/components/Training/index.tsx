@@ -454,7 +454,7 @@ export default function TrainingPage() {
   if (loading) return <div className="h-full w-full"><Loader /></div>
 
   return (
-    <div className="min-h-screen bg-slate-50 px-3 sm:px-4 md:px-6 py-4">
+    <div className="min-h-screen app-card px-3 sm:px-4 md:px-6 py-4">
 
       {error && (
         <div className="max-w-7xl mx-auto mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700">
@@ -468,7 +468,7 @@ export default function TrainingPage() {
         transition={{ duration: 0.5 }}
         className="max-w-7xl mx-auto mb-4 sm:mb-6"
       >
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-lg shadow-blue-100/30 p-4 sm:p-6">
+        <div className="app-card rounded-xl sm:rounded-2xl shadow-lg shadow-blue-100/30 p-4 sm:p-6">
           {/* Top Row */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             {/* Left Section */}
@@ -476,45 +476,45 @@ export default function TrainingPage() {
               <motion.div whileHover={{ scale: 1.05 }} className="relative">
                 <div className="absolute inset-0 bg-linear-to-br from-purple-400 to-pink-400 rounded-xl blur opacity-20"></div>
                 <div className="relative bg-linear-to-br from-purple-500 to-pink-500 p-3 rounded-xl">
-                  <GraduationCap className="w-6 h-6 text-white" />
+                  <GraduationCap className="w-6 h-6 app-text" />
                 </div>
               </motion.div>
 
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900">
+                  <h1 className="text-lg sm:text-xl md:text-2xl  font-Gordita-Bold app-text">
                     Training Portal
                   </h1>
                   <div className="px-2 py-1 bg-linear-to-r from-purple-100 to-pink-100 rounded-lg">
-                    <span className="text-xs font-semibold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    <span className="text-xs  font-Gordita-Bold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                       TRAINING
                     </span>
                   </div>
 
                 </div>
-                <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                <p className="text-xs sm:text-sm app-text mt-1">
                   Interactive learning materials and resources
                 </p>
               </div>
             </div>
 
             {/* Breadcrumb Navigation - Hidden on mobile */}
-            <div className="hidden sm:flex items-center gap-2 bg-slate-50 px-4 py-3 rounded-xl border border-slate-200">
+            <div className="hidden sm:flex items-center gap-2 app-card px-4 py-3 rounded-xl border app-border">
               <Link
                 href="/aca/dashboard"
-                className="flex items-center gap-2 text-slate-700 hover:text-purple-600 transition-colors duration-100 group"
+                className="flex items-center gap-2 app-text hover:text-purple-600 transition-colors duration-100 group"
               >
                 <Home className="w-4 h-4 group-hover:scale-110 transition-transform duration-100" />
-                <span className="text-sm font-medium group-hover:text-purple-600 transition-colors duration-100">
+                <span className="text-sm  font-Gordita-Medium group-hover:text-purple-600 transition-colors duration-100">
                   Home
                 </span>
               </Link>
 
-              <ChevronRight className="w-4 h-4 text-slate-400 mx-1" />
+              <ChevronRight className="w-4 h-4 app-text mx-1" />
 
               <div className="flex items-center gap-2 text-purple-600">
                 <BookOpen className="w-4 h-4" />
-                <span className="text-sm font-semibold">Training</span>
+                <span className="text-sm  font-Gordita-Bold">Training</span>
               </div>
             </div>
           </div>
@@ -524,16 +524,16 @@ export default function TrainingPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
               <div className="flex items-center gap-2">
                 <Target className="w-5 h-5 text-purple-600" />
-                <h3 className="font-semibold text-slate-900">
+                <h3 className=" font-Gordita-Bold app-text">
                   Learning Progress
                 </h3>
               </div>
-              <div className="text-sm text-slate-600">
-                <span className="font-bold text-purple-600">
+              <div className="text-sm app-text">
+                <span className=" font-Gordita-Bold text-purple-600">
                   {completedChapters}
                 </span>{" "}
                 of{" "}
-                <span className="font-bold text-slate-900">
+                <span className=" font-Gordita-Bold app-text">
                   {totalChapters}
                 </span>{" "}
                 chapters
@@ -542,7 +542,7 @@ export default function TrainingPage() {
 
             {/* Progress Bar */}
             <div className="relative">
-              <div className="h-3 sm:h-4 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+              <div className="h-3 sm:h-4 app-card rounded-full overflow-hidden shadow-inner">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${completionPercentage}%` }}
@@ -558,7 +558,7 @@ export default function TrainingPage() {
                     key={percent}
                     className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${completionPercentage >= percent
                       ? "bg-white shadow-lg"
-                      : "bg-slate-300"
+                      : "bg-slate-100"
                       }`}
                   />
                 ))}
@@ -567,7 +567,7 @@ export default function TrainingPage() {
 
             {/* Progress Actions */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mt-2">
-              <div className="text-xs text-slate-500">
+              <div className="text-xs app-text">
                 {completionPercentage}% • {totalChapters - completedChapters}{" "}
                 remaining
               </div>
@@ -599,7 +599,7 @@ export default function TrainingPage() {
                 <div className="text-xs text-slate-500">Total</div>
                 <BookOpen className="w-4 h-4 text-blue-500" />
               </div>
-              <div className="text-xl sm:text-2xl font-bold text-slate-900 mt-1 sm:mt-2">
+              <div className="text-xl sm:text-2xl  font-Gordita-Bold text-slate-900 mt-1 sm:mt-2">
                 {data.length}
               </div>
             </div>
@@ -608,7 +608,7 @@ export default function TrainingPage() {
                 <div className="text-xs text-slate-500">Completed</div>
                 <CheckCircle className="w-4 h-4 text-purple-500" />
               </div>
-              <div className="text-xl sm:text-2xl font-bold text-slate-900 mt-1 sm:mt-2">
+              <div className="text-xl sm:text-2xl  font-Gordita-Bold text-slate-900 mt-1 sm:mt-2">
                 {completedChapters}
               </div>
             </div>
@@ -617,7 +617,7 @@ export default function TrainingPage() {
                 <div className="text-xs text-slate-500">Time Spent</div>
                 <Clock className="w-4 h-4 text-emerald-500" />
               </div>
-              <div className="text-xl sm:text-2xl font-bold text-slate-900 mt-1 sm:mt-2">
+              <div className="text-xl sm:text-2xl  font-Gordita-Bold text-slate-900 mt-1 sm:mt-2">
                 {userProgress.totalTimeSpent}m
               </div>
             </div>
@@ -626,7 +626,7 @@ export default function TrainingPage() {
                 <div className="text-xs text-slate-500">Streak</div>
                 <Award className="w-4 h-4 text-amber-500" />
               </div>
-              <div className="text-xl sm:text-2xl font-bold text-slate-900 mt-1 sm:mt-2">
+              <div className="text-xl sm:text-2xl  font-Gordita-Bold text-slate-900 mt-1 sm:mt-2">
                 {userProgress.streakDays} days
               </div>
             </div>
@@ -641,7 +641,7 @@ export default function TrainingPage() {
         transition={{ duration: 0.6, delay: 0.1 }}
         className="max-w-7xl mx-auto"
       >
-        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl shadow-blue-100/50 p-4 sm:p-6 md:p-8">
+        <div className="app-card rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl shadow-blue-100/50 p-4 sm:p-6 md:p-8">
           {/* Header with Controls */}
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 sm:mb-8 gap-4">
             <div className="flex items-center gap-3">
@@ -649,10 +649,10 @@ export default function TrainingPage() {
                 <BookOpen className="w-5 sm:w-6 h-5 sm:h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900">
+                <h2 className="text-lg sm:text-xl md:text-2xl  font-Gordita-Bold app-text">
                   Training Materials
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                <p className="text-xs sm:text-sm app-text mt-1">
                   {filteredData.length} chapters • {completedChapters} completed
                 </p>
               </div>
@@ -661,20 +661,20 @@ export default function TrainingPage() {
             {/* Search and Actions */}
             <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
               <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2  h-3 w-3 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2  h-3 w-3 app-muted" />
                 <input
                   type="text"
                   placeholder="Search chapters..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-1.5 border border-slate-300 rounded-xl placeholder:text-[14px] focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all duration-100 w-full"
+                  className="pl-10 pr-4 py-1.5 border app-border rounded-xl placeholder:text-[14px] focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all duration-100 w-full"
                 />
               </div>
 
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowCompleted(!showCompleted)}
-                  className={`px-3 sm:px-4 py-2.5 rounded-xl font-medium transition-all duration-100 flex items-center gap-2 flex-1 sm:flex-none justify-center ${showCompleted
+                  className={`px-3 sm:px-4 py-2.5 rounded-xl  font-Gordita-Medium transition-all duration-100 flex items-center gap-2 flex-1 sm:flex-none justify-center ${showCompleted
                     ? "bg-linear-to-r from-purple-50 to-pink-50 text-purple-700 border border-purple-200"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                     }`}
@@ -693,7 +693,7 @@ export default function TrainingPage() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={openAddModal}
-                    className="px-4 sm:px-6 py-2.5 rounded-xl font-medium bg-linear-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-200 transition-all duration-100 flex items-center gap-2 flex-1 sm:flex-none justify-center"
+                    className="px-4 sm:px-6 py-2.5 rounded-xl  font-Gordita-Medium bg-linear-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-200 transition-all duration-100 flex items-center gap-2 flex-1 sm:flex-none justify-center"
                   >
                     <Plus size={18} />
                     <span className="hidden sm:inline">Add Chapter</span>
@@ -717,7 +717,7 @@ export default function TrainingPage() {
                     <Award className="w-5 sm:w-6 h-5 sm:h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-emerald-900 text-sm sm:text-base">
+                    <h3 className=" font-Gordita-Bold text-emerald-900 text-sm sm:text-base">
                       🎉 Training Completed!
                     </h3>
                     <p className="text-xs sm:text-sm text-emerald-700">
@@ -729,7 +729,7 @@ export default function TrainingPage() {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleCompleteAll}
-                  className="px-4 sm:px-6 py-2 sm:py-3 bg-linear-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-emerald-200 transition-all duration-100 flex items-center gap-2 w-full sm:w-auto justify-center"
+                  className="px-4 sm:px-6 py-2 sm:py-3 bg-linear-to-r from-emerald-600 to-teal-600 text-white rounded-xl  font-Gordita-Medium hover:shadow-lg hover:shadow-emerald-200 transition-all duration-100 flex items-center gap-2 w-full sm:w-auto justify-center"
                 >
                   <Download className="w-4 sm:w-5 h-4 sm:h-5" />
                   <span className="text-sm">Get Certificate</span>
@@ -755,7 +755,7 @@ export default function TrainingPage() {
                       y: -2,
                       boxShadow: "0 10px 30px rgba(0, 0, 0, 0.05)",
                     }}
-                    className={`group relative bg-white border rounded-xl sm:rounded-2xl transition-all duration-150 hover:border-purple-200
+                    className={`group relative app-card border rounded-xl sm:rounded-2xl transition-all duration-150 hover:border-purple-200
                       ${isOpen
                         ? "border-purple-300 bg-linear-to-r from-purple-50/30 via-white to-white"
                         : "border border-slate-200"
@@ -821,7 +821,7 @@ export default function TrainingPage() {
 
                           <div className="flex items-center gap-3 sm:gap-4 flex-1">
                             <div
-                              className={`hidden xs:flex w-8 h-8 sm:w-10 sm:h-10 items-center justify-center rounded-xl font-bold shadow-sm ${item.completed
+                              className={`hidden xs:flex w-8 h-8 sm:w-10 sm:h-10 items-center justify-center rounded-xl  font-Gordita-Bold shadow-sm ${item.completed
                                 ? "bg-linear-to-br from-emerald-100 to-teal-100 text-emerald-700"
                                 : "bg-linear-to-br from-purple-100 to-pink-100 text-purple-700"
                                 }`}
@@ -831,18 +831,18 @@ export default function TrainingPage() {
 
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
-                                <span className="text-slate-800 font-semibold text-base sm:text-[16px] text-[14px] truncate">
+                                <span className="text-slate-800  font-Gordita-Bold text-base sm:text-[16px] text-[14px] truncate">
                                   {item.title}
                                 </span>
                                 {item.completed && (
-                                  <span className="hidden sm:inline px-2 py-0.5 bg-linear-to-r from-emerald-100 to-teal-100 text-emerald-700 text-xs font-medium rounded-lg">
+                                  <span className="hidden sm:inline px-2 py-0.5 bg-linear-to-r from-emerald-100 to-teal-100 text-emerald-700 text-xs  font-Gordita-Medium rounded-lg">
                                     COMPLETED
                                   </span>
                                 )}
                               </div>
                               <div className="flex items-center gap-2 mt-1">
                                 <div
-                                  className={`px-2 py-0.5 rounded-lg text-xs font-medium ${item.type === "video"
+                                  className={`px-2 py-0.5 rounded-lg text-xs  font-Gordita-Medium ${item.type === "video"
                                     ? "bg-red-50 text-red-700"
                                     : item.type === "pdf"
                                       ? "bg-blue-50 text-blue-700"
@@ -852,7 +852,7 @@ export default function TrainingPage() {
                                   {item.type.toUpperCase()}
                                 </div>
                                 {item.completed && (
-                                  <span className="sm:hidden px-2 py-0.5 bg-linear-to-r from-emerald-100 to-teal-100 text-emerald-700 text-xs font-medium rounded-lg">
+                                  <span className="sm:hidden px-2 py-0.5 bg-linear-to-r from-emerald-100 to-teal-100 text-emerald-700 text-xs  font-Gordita-Medium rounded-lg">
                                     DONE
                                   </span>
                                 )}
@@ -869,7 +869,7 @@ export default function TrainingPage() {
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                             onClick={() => markAsWatched(item.id)}
-                            className="px-3 py-2 rounded-lg bg-linear-to-r from-blue-50 to-cyan-50 text-blue-700 hover:shadow transition-all duration-100 text-sm font-medium flex-1 sm:flex-none"
+                            className="px-3 py-2 rounded-lg bg-linear-to-r from-blue-50 to-cyan-50 text-blue-700 hover:shadow transition-all duration-100 text-sm  font-Gordita-Medium flex-1 sm:flex-none"
                           >
                             <span className="hidden sm:inline">
                               Mark as Watched
@@ -976,12 +976,12 @@ export default function TrainingPage() {
                 className="text-center py-10 sm:py-16"
               >
                 <div className="w-16 h-16 sm:w-20 sm:h-20 mx-auto bg-linear-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center mb-4 sm:mb-6">
-                  <BookOpen className="w-8 h-8 sm:w-10 sm:h-10 text-slate-400" />
+                  <BookOpen className="w-8 h-8 sm:w-10 sm:h-10 app-muted" />
                 </div>
-                <h3 className="text-lg sm:text-xl font-semibold text-slate-900 mb-2">
+                <h3 className="text-lg sm:text-xl  font-Gordita-Bold app-text mb-2">
                   No Training Materials Found
                 </h3>
-                <p className="text-sm text-slate-500 mb-6">
+                <p className="text-sm app-muted mb-6">
                   Try adjusting your search or filters
                 </p>
                 <button
@@ -989,7 +989,7 @@ export default function TrainingPage() {
                     setSearchQuery("");
                     setShowCompleted(true);
                   }}
-                  className="px-6 py-3 bg-linear-to-r from-purple-500 to-pink-500 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-purple-200 transition-all duration-100 text-sm sm:text-base"
+                  className="px-6 py-3 bg-linear-to-r from-purple-500 to-pink-500 text-white rounded-xl  font-Gordita-Medium hover:shadow-lg hover:shadow-purple-200 transition-all duration-100 text-sm sm:text-base"
                 >
                   Clear Filters
                 </button>
@@ -998,25 +998,25 @@ export default function TrainingPage() {
           </div>
 
           {/* Summary Footer */}
-          <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-slate-200">
+          <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t app-border">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
               <div className="flex items-center gap-3 sm:gap-4">
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-linear-to-r from-emerald-500 to-teal-500"></div>
-                  <span className="text-sm text-slate-600">Completed</span>
+                  <span className="text-sm app-text">Completed</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-3 h-3 rounded-full bg-linear-to-r from-purple-500 to-pink-500"></div>
-                  <span className="text-sm text-slate-600">In Progress</span>
+                  <span className="text-sm app-text">In Progress</span>
                 </div>
               </div>
 
-              <div className="text-sm text-slate-600 text-center sm:text-right">
-                <span className="font-bold text-slate-900">
+              <div className="text-sm app-text text-center sm:text-right">
+                <span className=" font-Gordita-Bold app-text">
                   {userProgress.totalTimeSpent}m
                 </span>{" "}
                 total •
-                <span className="font-bold text-slate-900 ml-2">
+                <span className=" font-Gordita-Bold app-text ml-2">
                   {userProgress.streakDays} day
                 </span>{" "}
                 streak
@@ -1031,13 +1031,13 @@ export default function TrainingPage() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-3 sm:p-4"
+          className="fixed inset-0 app-surface flex items-center justify-center z-50 p-3 sm:p-4"
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", damping: 25 }}
-            className="bg-white w-full max-w-md rounded-2xl p-4 sm:p-6 shadow-2xl mx-3"
+            className="app-card w-full max-w-md rounded-2xl p-4 sm:p-6 shadow-2xl mx-3"
           >
             <div className="flex items-center justify-between mb-4 sm:mb-6">
               <div className="flex items-center gap-3">
@@ -1048,7 +1048,7 @@ export default function TrainingPage() {
                     <Plus className="w-5 h-5 text-white" />
                   )}
                 </div>
-                <h3 className="text-lg sm:text-xl font-bold text-slate-900">
+                <h3 className="text-lg sm:text-xl  font-Gordita-Bold text-slate-900">
                   {editingItem ? "Edit Chapter" : "Add Chapter"}
                 </h3>
               </div>
@@ -1056,13 +1056,13 @@ export default function TrainingPage() {
                 onClick={() => setShowModal(false)}
                 className="p-2 rounded-lg hover:bg-slate-100 transition-colors duration-100"
               >
-                <X className="w-5 h-5 text-slate-500" />
+                <X className="w-5 h-5 app-text" />
               </button>
             </div>
 
             <div className="space-y-4 sm:space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm  font-Gordita-Medium app-text mb-2">
                   Chapter Title
                 </label>
                 <input
@@ -1074,7 +1074,7 @@ export default function TrainingPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm  font-Gordita-Medium text-slate-700 mb-2">
                   Content Type
                 </label>
                 <select
@@ -1091,7 +1091,7 @@ export default function TrainingPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-2">
+                <label className="block text-sm  font-Gordita-Medium text-slate-700 mb-2">
                   Enter URL
                 </label>
                 <div className="border-2 border-dashed border-slate-300 rounded-xl p-4 sm:p-6 text-center hover:border-purple-400 hover:bg-purple-50/50 transition-all duration-100">
@@ -1107,13 +1107,13 @@ export default function TrainingPage() {
               <div className="flex gap-3 pt-4">
                 <button
                   onClick={() => setShowModal(false)}
-                  className="flex-1 px-4 py-3 text-sm rounded-xl font-medium border border-slate-300 text-slate-700 hover:bg-slate-100 transition-all duration-100"
+                  className="flex-1 px-4 py-3 text-sm rounded-xl  font-Gordita-Medium border border-slate-300 text-slate-700 hover:bg-slate-100 transition-all duration-100"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSave}
-                  className="flex-1 px-4 py-3 text-sm rounded-xl font-medium bg-linear-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-200 transition-all duration-100"
+                  className="flex-1 px-4 py-3 text-sm rounded-xl  font-Gordita-Medium bg-linear-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-200 transition-all duration-100"
                 >
                   {editingItem ? "Update" : "Add"}
                 </button>
@@ -1128,7 +1128,7 @@ export default function TrainingPage() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-3 sm:p-4"
+          className="fixed inset-0 app-card flex items-center justify-center z-50 p-3 sm:p-4"
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -1140,14 +1140,14 @@ export default function TrainingPage() {
               <div className="mx-auto w-14 h-14 sm:w-16 sm:h-16 bg-linear-to-br from-red-100 to-orange-100 rounded-2xl flex items-center justify-center mb-3 sm:mb-4">
                 <Trash2 className="w-7 h-7 sm:w-8 sm:h-8 text-red-500" />
               </div>
-              <h3 className="text-lg sm:text-xl font-bold text-slate-900 mb-2">
+              <h3 className="text-lg sm:text-xl  font-Gordita-Bold text-slate-900 mb-2">
                 Delete Chapter
               </h3>
             </div>
 
             <p className="text-sm text-slate-600 text-center mb-6">
               Delete{" "}
-              <span className="font-semibold text-slate-900">
+              <span className=" font-Gordita-Bold text-slate-900">
                 {deleteTarget.title}
               </span>
               ?
@@ -1158,14 +1158,14 @@ export default function TrainingPage() {
             <div className="flex gap-3">
               <button
                 onClick={() => setDeleteTarget(null)}
-                className="flex-1 px-4 py-3 text-sm rounded-xl font-medium border border-slate-300 text-slate-700 hover:bg-slate-100 transition-all duration-100"
+                className="flex-1 px-4 py-3 text-sm rounded-xl  font-Gordita-Medium border border-slate-300 text-slate-700 hover:bg-slate-100 transition-all duration-100"
               >
                 Cancel
               </button>
 
               <button
                 onClick={confirmDelete}
-                className="flex-1 px-4 py-3 text-sm rounded-xl font-medium bg-linear-to-r from-red-600 to-orange-600 text-white hover:shadow-lg hover:shadow-red-200 transition-all duration-100"
+                className="flex-1 px-4 py-3 text-sm rounded-xl  font-Gordita-Medium bg-linear-to-r from-red-600 to-orange-600 text-white hover:shadow-lg hover:shadow-red-200 transition-all duration-100"
               >
                 Delete
               </button>

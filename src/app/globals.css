@@ -78,7 +78,7 @@
     background: rgb(var(--hover));
   }
   .app-text {
-    color: rgb(var(--text));
+    color: rgb(var(--text))!important;
   }
   .app-heading {
     color: rgb(var(--text));
@@ -141,7 +141,7 @@
  .app-input {
     background: rgb(var(--card));
     color: rgb(var(--text));
-    border: 1px solid rgb(var(--border));
+    
   }
   .app-input::placeholder {
     color: rgb(var(--muted));

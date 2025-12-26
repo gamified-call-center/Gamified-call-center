@@ -131,7 +131,7 @@ export default function AppSwitcher({
                   {/* Text Content */}
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
-                      <span className={`text-sm font-bold ${
+                      <span className={`text-sm  font-Gordita-Bold ${
                         isActive ? 'text-white' : 'text-slate-900'
                       }`}>
                         {app.label}

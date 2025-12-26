@@ -22,6 +22,7 @@ import { Textarea } from "@/commonComponents/form/Textarea";
 import { FileInput } from "@/commonComponents/form/FileInput";
 import Modal from "@/commonComponents/Modal";
 import Drawer from "@/commonComponents/Drawers";
+import Button from "@/commonComponents/Button";
 
 /** ========= Types (same file, as you asked) ========= */
 export type SelectOption = { label: string; value: string; disabled?: boolean };
@@ -174,7 +175,7 @@ export default function CreateDealModal({
     setErrors(e);
     return Object.keys(e).length === 0;
   };
-  console.log(errors)
+  
 
   const handleSubmit = async () => {
     if (!validate()) return;
@@ -195,7 +196,7 @@ export default function CreateDealModal({
       handleDrawerToggle={(v) => !v && onClose()}
       //   title={mode === "EDIT" ? "Edit Deal" : "Create Deal"}
       openVariant="right"
-panelCls=" w-[95%] md:w-[80%] lg:w-[calc(82%-190px)] bg-slate-50 dark:bg-black shadow-[0_20px_50px_rgba(0,0,0,0.18)] border-l border-slate-200 overflow-x-hidden z-[9999999] " panelInnerCls=" app-surface md:px-8 px-3 py-6" overLayCls="bg-slate-900/40  backdrop-blur-sm"
+panelCls=" w-[95%] md:w-[80%] lg:w-[calc(82%-190px)] app-card shadow-[0_20px_50px_rgba(0,0,0,0.18)] border-l border-slate-200 overflow-x-hidden z-[9999999] " panelInnerCls=" app-surface md:px-8 px-3 py-6" overLayCls="bg-slate-900/40  backdrop-blur-sm"
     >
       <div className="md:space-y-8 space-y-4">
 
@@ -221,7 +222,7 @@ panelCls=" w-[95%] md:w-[80%] lg:w-[calc(82%-190px)] bg-slate-50 dark:bg-black s
             </span>
           </div>
 
-          <p className="mt-1 text-sm font-Gordita-Medium text-slate-500">
+          <p className="mt-1 text-sm font-Gordita-Medium app-text">
             {mode === "EDIT"
               ? "Update deal information and save changes."
               : "Fill in the details to create a new deal."}
@@ -381,21 +382,21 @@ panelCls=" w-[95%] md:w-[80%] lg:w-[calc(82%-190px)] bg-slate-50 dark:bg-black s
         {/* ---------------- Footer ---------------- */}
        <div className="sticky bottom-0 app-card px-8 py-4 flex justify-end gap-3 backdrop-blur">
 
-         <button
+         <Button
   onClick={onClose}
   className="px-4 py-2 rounded-lg app-btn transition"
 >
   Cancel
-</button>
+</Button>
 
 
-      <button
+      <Button
   type="submit"
   onClick={handleSubmit}
   className="px-5 py-2 rounded-lg app-btn-active transition"
 >
   {mode === "EDIT" ? "Update Deal" : "Create Deal"}
-</button>
+</Button>
 
         </div>
       </div>
@@ -417,7 +418,7 @@ const Section = ({ title, subtitle, titleCls, children }: SectionProps) => (
         <span className="mt-1 h-5 w-1 rounded-full bg-indigo-600" />
 
         <div>
-          <h3 className={"text-lg font-semibold tracking-wide app-text"}>
+          <h3 className={"text-lg  font-Gordita-Bold tracking-wide app-text"}>
             {title}
           </h3>
 

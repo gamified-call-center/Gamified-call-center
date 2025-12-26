@@ -95,11 +95,11 @@
             
 //             <div>
 //               <div className="flex items-center gap-2">
-//                 <h3 className="text-xl font-bold bg-gradient-to-r from-purple-700 to-pink-700 bg-clip-text text-transparent">
+//                 <h3 className="text-xl  font-Gordita-Bold bg-gradient-to-r from-purple-700 to-pink-700 bg-clip-text text-transparent">
 //                   Active Boosts
 //                 </h3>
 //                 {activeBoosts.length > 0 && (
-//                   <span className="px-2 py-0.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-xs font-bold rounded-full">
+//                   <span className="px-2 py-0.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-xs  font-Gordita-Bold rounded-full">
 //                     {activeBoosts.length} ACTIVE
 //                   </span>
 //                 )}
@@ -116,7 +116,7 @@
 //             className="px-4 py-2 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl shadow-sm"
 //           >
 //             <div className="text-xs text-slate-600">Total Bonus</div>
-//             <div className="text-lg font-bold text-purple-700 flex items-center gap-1">
+//             <div className="text-lg  font-Gordita-Bold text-purple-700 flex items-center gap-1">
 //               <TrendingUp className="w-4 h-4" />
 //               +{totalBonus}%
 //             </div>
@@ -127,11 +127,11 @@
 //         <div className="grid grid-cols-2 gap-3 mb-6">
 //           <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-3 rounded-xl border border-purple-100">
 //             <div className="text-xs text-slate-600 mb-1">Active Boosts</div>
-//             <div className="text-2xl font-bold text-purple-700">{activeBoosts.length}</div>
+//             <div className="text-2xl  font-Gordita-Bold text-purple-700">{activeBoosts.length}</div>
 //           </div>
 //           <div className="bg-gradient-to-br from-blue-50 to-cyan-50 p-3 rounded-xl border border-blue-100">
 //             <div className="text-xs text-slate-600 mb-1">Max Duration</div>
-//             <div className="text-2xl font-bold text-blue-700">24h</div>
+//             <div className="text-2xl  font-Gordita-Bold text-blue-700">24h</div>
 //           </div>
 //         </div>
 
@@ -170,9 +170,9 @@
                         
 //                         <div className="flex-1">
 //                           <div className="flex items-center gap-2">
-//                             <h4 className="font-semibold text-slate-900">{boost.name}</h4>
+//                             <h4 className=" font-Gordita-Bold text-slate-900">{boost.name}</h4>
 //                             {isExpiringSoon && (
-//                               <span className="px-2 py-0.5 bg-gradient-to-r from-amber-100 to-orange-100 text-amber-700 text-xs font-bold rounded-full animate-pulse">
+//                               <span className="px-2 py-0.5 bg-gradient-to-r from-amber-100 to-orange-100 text-amber-700 text-xs  font-Gordita-Bold rounded-full animate-pulse">
 //                                 SOON
 //                               </span>
 //                             )}
@@ -184,7 +184,7 @@
 //                       {/* XP Bonus Badge */}
 //                       <motion.div
 //                         whileHover={{ scale: 1.1 }}
-//                         className={`px-4 py-2 rounded-xl bg-gradient-to-br ${gradient} text-white font-bold shadow-lg min-w-[70px] text-center`}
+//                         className={`px-4 py-2 rounded-xl bg-gradient-to-br ${gradient} text-white  font-Gordita-Bold shadow-lg min-w-[70px] text-center`}
 //                       >
 //                         +{boost.xpBonusPercent}%
 //                       </motion.div>
@@ -200,10 +200,10 @@
 //                         <div className="flex items-center gap-1">
 //                           {!timeRemaining.expired && (
 //                             <>
-//                               <div className="px-2 py-1 bg-gradient-to-r from-slate-100 to-gray-100 text-slate-700 rounded-lg text-sm font-bold">
+//                               <div className="px-2 py-1 bg-gradient-to-r from-slate-100 to-gray-100 text-slate-700 rounded-lg text-sm  font-Gordita-Bold">
 //                                 {timeRemaining.hours}h
 //                               </div>
-//                               <div className="px-2 py-1 bg-gradient-to-r from-slate-100 to-gray-100 text-slate-700 rounded-lg text-sm font-bold">
+//                               <div className="px-2 py-1 bg-gradient-to-r from-slate-100 to-gray-100 text-slate-700 rounded-lg text-sm  font-Gordita-Bold">
 //                                 {timeRemaining.minutes}m
 //                               </div>
 //                             </>
@@ -264,11 +264,11 @@
 //               <div className="w-16 h-16 mx-auto bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center mb-4">
 //                 <Gift className="w-8 h-8 text-slate-400" />
 //               </div>
-//               <h4 className="text-lg font-semibold text-slate-900 mb-2">No Active Boosts</h4>
+//               <h4 className="text-lg  font-Gordita-Bold text-slate-900 mb-2">No Active Boosts</h4>
 //               <p className="text-sm text-slate-600 mb-6">
 //                 Complete missions or achieve goals to earn XP boosts
 //               </p>
-//               <button className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-purple-200 transition-all duration-200">
+//               <button className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl  font-Gordita-Medium hover:shadow-lg hover:shadow-purple-200 transition-all duration-200">
 //                 View Available Boosts
 //               </button>
 //             </motion.div>
@@ -281,7 +281,7 @@
 //             <motion.button
 //               whileHover={{ scale: 1.02 }}
 //               whileTap={{ scale: 0.98 }}
-//               className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-purple-200 transition-all duration-200 flex items-center justify-center gap-2"
+//               className="flex-1 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl  font-Gordita-Medium hover:shadow-lg hover:shadow-purple-200 transition-all duration-200 flex items-center justify-center gap-2"
 //             >
 //               <Zap className="w-5 h-5" />
 //               Activate New Boost
@@ -290,7 +290,7 @@
 //             <motion.button
 //               whileHover={{ scale: 1.02 }}
 //               whileTap={{ scale: 0.98 }}
-//               className="px-4 py-3 bg-gradient-to-r from-slate-100 to-gray-100 text-slate-700 rounded-xl font-medium hover:shadow transition-all duration-200 flex items-center gap-2"
+//               className="px-4 py-3 bg-gradient-to-r from-slate-100 to-gray-100 text-slate-700 rounded-xl  font-Gordita-Medium hover:shadow transition-all duration-200 flex items-center gap-2"
 //             >
 //               <Shield className="w-5 h-5" />
 //               Rules

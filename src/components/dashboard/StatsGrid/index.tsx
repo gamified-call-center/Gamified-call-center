@@ -15,7 +15,7 @@ export default function StatGrid({ items }: { items: StatKpi[] }) {
           className="rounded-xl border border-white/10 bg-[#9BB4C0] p-4"
         >
           <div className="text-sm text-white">{k.label}</div>
-          <div className="mt-2 text-2xl font-semibold tracking-tight">{k.value}</div>
+          <div className="mt-2 text-2xl  font-Gordita-Bold tracking-tight">{k.value}</div>
           <div className="mt-2 flex items-center justify-between gap-3">
             <div className="text-xs text-white">{k.hint}</div>
             {k.deltaLabel && (

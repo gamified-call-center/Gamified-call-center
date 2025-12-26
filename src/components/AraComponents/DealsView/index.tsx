@@ -132,7 +132,7 @@ const AraDealsView = () => {
       setLoading(false);
     }
   };
-  console.log(items);
+  
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
@@ -166,7 +166,7 @@ const AraDealsView = () => {
       const res = await apiClient.get(`${apiClient.URLS.user}/all`, {}, true);
 
       if (res.body && Array.isArray(res.body)) {
-        console.log("Agents options:", res.body);
+     
         const options = res.body.map((d: any) => ({
           label: d.firstName,
           value: d.id,
@@ -184,7 +184,7 @@ const AraDealsView = () => {
   const createDeal = async (dto: any) => {
     await apiClient.post(apiClient.URLS.deals, dto);
   };
-  console.log(agents);
+ 
 
   const updateDeal = async (id: string | number, dto: any) => {
     await apiClient.patch(`${apiClient.URLS.deals}/${id}`, dto);
@@ -385,10 +385,10 @@ const AraDealsView = () => {
           }}
           actionsSlot={
             <>
-              <button
+              <Button
                 onClick={exportToCSV}
                 className="
-    rounded-xl flex items-center gap-2 px-4 py-2 text-sm font-semibold
+    rounded-xl flex items-center gap-2 px-4 py-2 text-sm  font-Gordita-Bold
     bg-emerald-500 text-white
     hover:bg-emerald-600
     dark:bg-emerald-400/90 dark:hover:bg-emerald-400
@@ -397,12 +397,12 @@ const AraDealsView = () => {
               >
                 <Download className="w-4 h-4" />
                 Excel
-              </button>
+              </Button>
 
-              <button
+              <Button
                 onClick={openCreate}
                 className="
-    rounded-xl px-4 py-2 text-sm font-semibold
+    rounded-xl px-4 py-2 text-sm  font-Gordita-Bold
     bg-indigo-600 text-white
     hover:bg-indigo-700
     dark:bg-indigo-500 dark:hover:bg-indigo-400
@@ -410,7 +410,7 @@ const AraDealsView = () => {
   "
               >
                 + Create New Deal
-              </button>
+              </Button>
             </>
           }
         />
@@ -419,28 +419,28 @@ const AraDealsView = () => {
           <table className="min-w-275 w-full text-sm app-text  border-collapse">
             <thead className="sticky top-0 z-10 app-table-head   ">
               <tr>
-                <th className="px-4 py-1 text-left font-bold border app-border ">
+                <th className="px-4 py-1 text-left  font-Gordita-Bold border app-border ">
                   Deal #
                 </th>
-                <th className="px-4 py-1 text-left font-bold border app-border ">
+                <th className="px-4 py-1 text-left  font-Gordita-Bold border app-border ">
                   Full Name
                 </th>
-                <th className="px-4 py-1 text-center font-bold border app-border ">
+                <th className="px-4 py-1 text-center  font-Gordita-Bold border app-border ">
                   Applicants
                 </th>
-                <th className="px-4 py-1 text-left font-bold border app-border ">
+                <th className="px-4 py-1 text-left  font-Gordita-Bold border app-border ">
                   Carrier
                 </th>
-                <th className="px-4 py-1 text-left font-bold border app-border ">
+                <th className="px-4 py-1 text-left  font-Gordita-Bold border app-border ">
                   Closed Date
                 </th>
-                <th className="px-4 py-1 text-left font-bold border app-border ">
+                <th className="px-4 py-1 text-left  font-Gordita-Bold border app-border ">
                   Agent
                 </th>
-                <th className="px-4 py-1 text-left font-bold border app-border ">
+                <th className="px-4 py-1 text-left  font-Gordita-Bold border app-border ">
                   Created By
                 </th>
-                <th className="px-4 py-1 text-center font-bold border app-border ">
+                <th className="px-4 py-1 text-center  font-Gordita-Bold border app-border ">
                   Actions
                 </th>
               </tr>
@@ -459,7 +459,7 @@ const AraDealsView = () => {
               ) : (
                 filteredItems.map((d, i) => (
                   <tr key={d.id} className="app-row-hover  transition-colors">
-                    <td className="px-4 py-1 font-medium border app-border ">
+                    <td className="px-4 py-1  font-Gordita-Medium border app-border ">
                       {d.dealNo || i + 1}
                     </td>
                     <td className="px-4 py-1 border app-border ">
@@ -483,27 +483,27 @@ const AraDealsView = () => {
                     </td>
                     <td className="px-4 py-1 text-center border app-border ">
                       <div className="inline-flex items-center gap-2">
-                        <button
+                        <Button
                           className="p-2 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-500/10 dark:hover:bg-indigo-500/20 transition"
                           title="Edit"
                           onClick={() => openEdit(d)}
                         >
                           <Pencil size={16} />
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           className="p-2 rounded-lg bg-orange-50 text-orange-600 hover:bg-orange-100 dark:bg-orange-500/10 dark:hover:bg-orange-500/20 transition"
                           title="Delete"
                           onClick={() => handleDelete(d)}
                         >
                           <Trash2 size={16} />
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           className="p-2 rounded-lg bg-cyan-50 text-cyan-600 hover:bg-cyan-100 dark:bg-cyan-500/10 dark:hover:bg-cyan-500/20 transition"
                           title="View"
                           onClick={() => handleView(d)}
                         >
                           <Eye size={16} />
-                        </button>
+                        </Button>
                       </div>
                     </td>
                   </tr>

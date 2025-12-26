@@ -51,6 +51,7 @@ import { FileInput } from "@/commonComponents/form/FileInput";
 import Modal from "@/commonComponents/Modal";
 import Loader from "@/commonComponents/Loader";
 import { uploadFile } from "@/Utils/uploadFile";
+import Button from "@/commonComponents/Button";
 
 type Designation = { id: number; name: string; levelOrder?: number };
 type UserMini = {
@@ -233,7 +234,7 @@ export default function UserProfileView() {
       setLoading(true);
       try {
         const res = await apiClient.get(`${apiClient.URLS.user}/${userId}`);
-        console.log("res", res);
+      
         setData(res.body as UserFull);
       } catch (e: any) {
         toast.error(e?.message || "Failed to load user profile");
@@ -252,7 +253,7 @@ export default function UserProfileView() {
         `${apiClient.URLS.user}/${userId}`,
         dto
       );
-      console.log(updated);
+     
       setData(updated.body as UserFull);
     } catch (error) {
       console.error("errror is", error);
@@ -456,7 +457,7 @@ export default function UserProfileView() {
   };
 
   return (
-    <div className="space-y-6 animate-fadeIn md:p-6 p-2">
+    <div className="space-y-6 animate-fadeIn app-surface md:p-6 p-2">
       {/* Header Card */}
       <div className="app-gradient rounded-2xl md:p-6 p-2 shadow-sm">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
@@ -492,15 +493,15 @@ export default function UserProfileView() {
           </div>
 
           {/* Info */}
-          <div className="flex-1">
+          <div className="flex-1 app-text">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h1 className="md:text-3xl text-[14px] font-bold app-heading">
+                <h1 className="md:text-3xl text-[14px]  font-Gordita-Bold app-heading">
                   {(data?.firstName || "-") + " " + (data?.lastName || "")}
                 </h1>
 
                 <div className="flex items-center gap-3 mt-2 flex-wrap">
-                  <span className="px-3 py-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 md:text-sm text-[12px] font-semibold rounded-full">
+                  <span className="px-3 py-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 md:text-sm text-[12px]  font-Gordita-Bold rounded-full">
                     {statusLabel}
                   </span>
 
@@ -512,7 +513,7 @@ export default function UserProfileView() {
                 {data?.employee?.designation?.name && (
                   <div className="mt-2 md:text-sm text-[12px] app-text">
                     Designation:{" "}
-                    <span className="font-semibold">
+                    <span className=" font-Gordita-Bold">
                       {data.employee.designation.name}
                     </span>
                   </div>
@@ -520,10 +521,10 @@ export default function UserProfileView() {
               </div>
 
               <div className="flex items-center gap-2">
-                {/* Keep your brand CTA gradient (looks good in both modes) */}
-                <button
+                
+                <Button
                   onClick={() => openModal("profile", mode, init)}
-                  className="flex items-center font-medium text-nowrap gap-2 px-4 py-2 bg-linear-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all shadow-lg hover:shadow-xl"
+                  className="flex items-center  font-Gordita-Medium text-nowrap gap-2 px-4 py-2 bg-linear-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all shadow-lg hover:shadow-xl"
                 >
                   {mode === "edit" ? (
                     <Pencil className="w-4 h-4" />
@@ -531,14 +532,14 @@ export default function UserProfileView() {
                     <Plus className="w-4 h-4" />
                   )}
                   {mode === "edit" ? "Edit Profile" : "Add Profile"}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Personal Info Section */}
+     
       <SectionCard
         title="Personal Information"
         icon={<Mail className="w-5 h-5 text-blue-500" />}
@@ -552,7 +553,7 @@ export default function UserProfileView() {
         }
         onAction={() => openModal("profile", mode, init)}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
           <KV icon={<UserIcon />} label="First Name" value={data?.firstName} />
           <KV icon={<UserIcon />} label="Last Name" value={data?.lastName} />
           <KV icon={<Mail className="w-4 h-4" />} label="Email" value={data?.email} />
@@ -696,14 +697,14 @@ export default function UserProfileView() {
           onAction={() => openModal("security", "edit", init)}
         >
           <div className="space-y-4">
-            <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white/70 dark:bg-slate-800/60 p-4">
-              <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+            <div className="rounded-xl border border-slate-20 app-border  app-card p-4">
+              <div className="md:text-sm text-[12px]  font-Gordita-Bold app-text">
                 Password
               </div>
-              <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+              <div className="mt-2 md:text-sm text-[12px] app-text">
                 •••••••• (hidden)
               </div>
-              <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+              <div className="mt-3 text-xs app-text">
                 For security reasons we never display your password. Click
                 “Update Password” to change it.
               </div>
@@ -754,18 +755,18 @@ export default function UserProfileView() {
               {addressList.map((addr: any, i: number) => (
                 <div
                   key={addr.id}
-                  className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 p-4 relative hover:scale-[1.01] transition-all"
+                  className="rounded-xl border app-border app-surface md:p-4 p-2 relative hover:scale-[1.01] transition-all"
                 >
                   {addr.isDefault && (
                     <div className="absolute top-2 right-2 flex items-center gap-1">
                       <CheckCircle className="w-4 h-4 text-emerald-500" />
-                      <span className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
+                      <span className="text-xs app-text  font-Gordita-Bold">
                         Primary
                       </span>
                     </div>
                   )}
 
-                  <div className="text-xs font-medium text-slate-400 mb-2">
+                  <div className="text-xs  font-Gordita-Medium text-slate-400 mb-2">
                     Address #{i + 1}
                   </div>
 
@@ -826,12 +827,12 @@ export default function UserProfileView() {
                     </div>
                   )}
 
-                  <button
-                    className="absolute bottom-2 right-2 text-slate-400 hover:text-emerald-500 transition"
+                  <Button
+                    className="absolute bottom-2 right-2 app-text  transition"
                     onClick={() => openModal("address", "edit", addr)}
                   >
                     <EyeOff className="w-4 h-4" />
-                  </button>
+                  </Button>
                 </div>
               ))}
             </div>
@@ -840,7 +841,7 @@ export default function UserProfileView() {
               <div className="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-4">
                 <MapPin className="w-10 h-10 text-slate-400" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2">
+              <h3 className="text-lg  font-Gordita-Bold text-slate-700 dark:text-slate-300 mb-2">
                 No Address Added
               </h3>
               <p className="text-slate-500 dark:text-slate-400">
@@ -866,12 +867,12 @@ export default function UserProfileView() {
 
       case "activity":
         return (
-          <div className="text-center py-12">
-            <Activity className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300">
+          <div className="text-center py-12 app-card">
+            <Activity className="w-16 h-16 app-text mx-auto mb-4" />
+            <h3 className="text-lg  font-Gordita-Bold app-text">
               Activity Log
             </h3>
-            <p className="text-slate-500 dark:text-slate-400 mt-2">
+            <p className="app-text">
               Your activity history will appear here
             </p>
           </div>
@@ -883,50 +884,50 @@ export default function UserProfileView() {
 
   return (
     <>
-      <div className="min-h-screen bg-linear-to-br from-slate-50 to-blue-50 dark:from-slate-900 dark:to-slate-800 p-4 md:p-6">
+      <div className="min-h-screen app-surface p-4 md:p-6">
         <div className="max-w-6xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold bg-linear-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">
+          <div className="md:mb-8 mb-3">
+            <h1 className="md:text-3xl text-[18px]  font-Gordita-Bold bg-linear-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">
               User Profile
             </h1>
 
-            <p className="text-slate-600 dark:text-slate-400 mt-2">
+            <p className="app-text mt-2">
               Manage your account settings and preferences
             </p>
           </div>
 
-          <div className="flex flex-col lg:flex-row gap-6">
+          <div className="flex flex-col lg:flex-row md:gap-6 gap-3">
             <div className="lg:w-1/4">
-              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 p-4 sticky top-6">
+              <div className="app-card rounded-2xl shadow-lg border app-border md:p-4 p-2 sticky top-6">
                 <div className="space-y-2">
                   {tabs.map((t) => (
-                    <button
+                    <Button
                       key={t.id}
                       onClick={() => setActiveTab(t.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
+                      className={`w-full flex items-center gap-3 font-Gordita-Medium px-4 py-3 rounded-xl transition-all duration-300 ${
                         activeTab === t.id
                           ? "bg-linear-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
-                          : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                          : " app-text"
                       }`}
                     >
                       {t.icon}
-                      <span className="font-medium">{t.label}</span>
+                      <span className=" font-Gordita-Medium">{t.label}</span>
                       <ChevronRight
                         className={`w-4 h-4 ml-auto transition-transform ${
                           activeTab === t.id ? "rotate-90" : ""
                         }`}
                       />
-                    </button>
+                    </Button>
                   ))}
                 </div>
 
-                <div className="mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
+                <div className="mt-8 pt-6 border-t app-border ">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-slate-600 dark:text-slate-400">
+                      <span className="text-sm app-text">
                         Member Since
                       </span>
-                      <span className="text-sm font-medium text-slate-900 dark:text-white">
+                      <span className="text-sm  font-Gordita-Medium app-text">
                         {createdAt
                           ? new Date(createdAt).toLocaleDateString()
                           : "-"}
@@ -934,10 +935,10 @@ export default function UserProfileView() {
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-slate-600 dark:text-slate-400">
+                      <span className="text-sm app-text">
                         Last Login
                       </span>
-                      <span className="text-sm font-medium text-slate-900 dark:text-white">
+                      <span className="text-sm  font-Gordita-Medium app-text">
                         {lastLogin
                           ? new Date(lastLogin).toLocaleDateString()
                           : "-"}
@@ -945,10 +946,10 @@ export default function UserProfileView() {
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-slate-600 dark:text-slate-400">
+                      <span className="text-sm app-text">
                         Account Status
                       </span>
-                      <span className="px-2 py-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 text-xs font-semibold rounded-full">
+                      <span className="px-2 py-1 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300 text-xs  font-Gordita-Bold rounded-full">
                         {statusLabel}
                       </span>
                     </div>
@@ -956,19 +957,19 @@ export default function UserProfileView() {
                 </div>
 
                 <div className="mt-6 space-y-2">
-                  <button
-                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+                  <Button
+                    className="w-full flex items-center gap-2 px-4 py-2 text-sm app-text rounded-lg transition-colors"
                     onClick={exportUserData}
                   >
                     <Download className="w-4 h-4" />
                     Export Data
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
 
-            <div className="lg:w-3/4">
-              <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div className="lg:w-3/4 w-full">
+              <div className="app-surface rounded-2xl shadow-lg border app-border overflow-hidden">
                 {renderTabContent()}
               </div>
             </div>
@@ -1154,18 +1155,18 @@ function ProfileModal({
   };
 
   return (
-    <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-2xl rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-700">
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+    <div className="fixed inset-0 z-100 flex items-center justify-center bg-opacity-50  md:p-4 p-2">
+      <div className="w-full max-w-2xl rounded-2xl app-card border app-border shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-4 border-b app-border">
+          <h3 className="text-lg  font-Gordita-Bold app-text">
             {title}
           </h3>
-          <button
+          <Button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="p-2 rounded-lg hover:app-text"
           >
             <X className="w-5 h-5" />
-          </button>
+          </Button>
         </div>
 
         <div className="md:p-5 p-2 md:space-y-4 space-y-2">
@@ -1301,7 +1302,7 @@ function ProfileModal({
                 />
               </Field>
 
-              {/* Primary toggle */}
+             
               <div className="pt-2">
                 <ToggleInline
                   label="Default / Primary Address"
@@ -1439,10 +1440,10 @@ function ProfileModal({
                 />
               </Field>
 
-              <button
+              <Button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200"
+                className="flex items-center gap-2 text-sm app-text hover:app-text"
               >
                 {showPassword ? (
                   <EyeOff className="w-4 h-4" />
@@ -1450,25 +1451,25 @@ function ProfileModal({
                   <Eye className="w-4 h-4" />
                 )}
                 {showPassword ? "Hide Passwords" : "Show Passwords"}
-              </button>
+              </Button>
             </div>
           )}
         </div>
 
-        <div className="px-5 py-4 border-t border-slate-200 dark:border-slate-700 flex items-center justify-end gap-2">
-          <button
+        <div className="px-5 py-4 border-t app-border flex items-center justify-end gap-2">
+          <Button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="px-4 py-2 rounded-xl btn-txt hover:app-surface app-text app-border"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleSave}
             disabled={saving}
-            className="px-4 py-2 rounded-xl bg-linear-to-r from-emerald-500 to-teal-500 text-white disabled:opacity-60"
+            className="px-4 py-2 rounded-xl btn-txt bg-linear-to-r from-emerald-500 to-teal-500 text-white disabled:opacity-60"
           >
             {saving ? "Saving..." : "Save"}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -1491,24 +1492,24 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-linear-to-r from-white to-blue-50 dark:from-slate-800 dark:to-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
+    <div className="app-card rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-700">
       <div className="flex items-center justify-between gap-3 mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-white/70 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+          <div className="p-2 app-text rounded-lg border border-slate-200 dark:border-slate-700">
             {icon}
           </div>
-          <h3 className="md:text-lg text-[14px] font-semibold text-slate-900 dark:text-white">
+          <h3 className="md:text-lg text-[14px]  font-Gordita-Bold app-text">
             {title}
           </h3>
         </div>
 
-        <button
+        <Button
           onClick={onAction}
           className="flex items-center gap-2 md:px-4 px-2 md:py-2 py-1 bg-linear-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all"
         >
           {actionIcon}
           {actionLabel}
-        </button>
+        </Button>
       </div>
 
       {children}
@@ -1526,15 +1527,15 @@ function KV({
   value: any;
 }) {
   return (
-    <div className="flex items-center md:gap-3 gap-1  md:p-3 p-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-900/40">
-      <div className="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+    <div className="flex items-center md:gap-3 gap-1  md:p-3 p-1 rounded-xl border border-slate-200 dark:border-slate-700 app-card">
+      <div className="w-9 h-9 rounded-lg app-card flex items-center justify-center">
         {icon}
       </div>
       <div className="min-w-0">
-        <div className="md:text-xs text-[12px] font-medium text-slate-500 dark:text-slate-400">
+        <div className="md:text-xs text-[12px]  font-Gordita-Medium app-text">
           {label}
         </div>
-        <div className="md:text-sm  text-[10px] font-semibold text-slate-900 dark:text-white truncate">
+        <div className="md:text-sm  text-[10px]  font-Gordita-Bold app-text truncate">
           {value ?? "-"}
         </div>
       </div>
@@ -1553,7 +1554,7 @@ function ToggleInline({
 }) {
   return (
     <div className="flex items-center justify-between p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-      <div className="font-medium text-slate-900 dark:text-white">{label}</div>
+      <div className=" font-Gordita-Medium text-slate-900 dark:text-white">{label}</div>
       <label className="relative inline-flex items-center cursor-pointer">
         <input
           type="checkbox"
