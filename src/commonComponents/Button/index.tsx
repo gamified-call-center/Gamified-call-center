@@ -11,14 +11,7 @@ interface ButtonProps
   isLoading?: boolean;
 }
 
-const variantStyles: Record<ButtonVariant, string> = {
-  primary:
-    "bg-blue-500/90 text-white hover:bg-blue-500 shadow-lg shadow-blue-500/30",
-  secondary:
-    "bg-slate-700/60 text-white hover:bg-slate-700 border border-white/10",
-  danger:
-    "bg-red-500/90 text-white hover:bg-red-500 shadow-lg shadow-red-500/30",
-};
+
 
 const sizeStyles: Record<ButtonSize, string> = {
   sm: "h-9 px-4 text-sm",
@@ -29,7 +22,6 @@ const sizeStyles: Record<ButtonSize, string> = {
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
-      variant = "primary",
       size = "md",
       isLoading = false,
       disabled,
@@ -50,7 +42,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-200",
           "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/60",
           "disabled:opacity-50 disabled:pointer-events-none",
-          variantStyles[variant],
           sizeStyles[size],
           className
         )}

@@ -13,15 +13,17 @@ import {
   CheckCheck,
   Trash2,
   Dot,
+  BellIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAppContextStore } from "@/store/appContext";
+import Button from "@/commonComponents/Button";
 
 type NotificationItem = {
   id: string;
   title: string;
   message?: string;
-  time: string; // you can store ISO and format later
+  time: string;
   read: boolean;
   type?: "info" | "success" | "warning" | "danger";
 };
@@ -50,10 +52,7 @@ export default function Topbar({
   const user = useAuthStore((st) => st.user);
   const name = user?.firstName ?? "Super Admin";
   const role = user?.employee?.designation?.name ?? "Administrator";
-
   const [notifOpen, setNotifOpen] = useState(false);
-
-  // Demo data (replace with API/Zustand later)
   const [notifications, setNotifications] = useState<NotificationItem[]>([
     {
       id: "n1",
@@ -88,7 +87,6 @@ export default function Topbar({
 
   const panelRef = useRef<HTMLDivElement | null>(null);
 
-  // Close when clicking outside
   useEffect(() => {
     if (!notifOpen) return;
 
@@ -147,14 +145,13 @@ export default function Topbar({
     <>
       <header className="h-16 border-b min-w-full border-black/10 flex flex-row justify-between items-center px-4 md:px-6 sticky top-0 z-30 bg-white">
         <div className="flex items-center gap-3">
-          <button
-            type="button"
+          <Button
             onClick={onOpenSidebar}
             className="md:hidden h-10 w-10 rounded-lg hover:bg-black/5 grid place-items-center"
             aria-label="Open sidebar"
           >
             <Menu className="h-5 w-5 text-black/70" />
-          </button>
+          </Button>
 
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5 text-black/70" />
@@ -176,18 +173,14 @@ export default function Topbar({
           />
 
           <ThemeToggle />
-
           <button
             onClick={() => setNotifOpen(true)}
-            className="relative h-10 w-10 rounded-full grid place-items-center bg-[#F3F4F6] hover:bg-[#EDEFF3] transition"
-            aria-label="Notifications"
+            className="relative h-10 w-10 rounded-full grid place-items-center   "
           >
-            <Bell className="h-5 w-5 text-black/70" />
-
+            <BellIcon className="h-6 w-6 z-100 dark:text-black" />
             {unreadCount > 0 && (
               <>
-                <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-orange-500" />
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#111827] text-white text-[10px] grid place-items-center">
+                <span className="absolute top-0 right-1 min-w-[18px] font-medium h-[18px] px-1 rounded-full bg-[#1d2027] text-white text-[10px] grid place-items-center">
                   {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
               </>
@@ -210,13 +203,9 @@ export default function Topbar({
         </div>
       </header>
 
-      {/* Overlay + Right Panel */}
       {notifOpen && (
         <div className="fixed inset-0 z-[60]">
-          {/* Backdrop */}
           <div className="absolute inset-0 bg-black/40" />
-
-          {/* Panel */}
           <div
             ref={panelRef}
             className="absolute right-0 top-0 h-full w-full sm:w-[420px] bg-white shadow-2xl flex flex-col"
@@ -224,7 +213,6 @@ export default function Topbar({
             aria-modal="true"
             aria-label="Notifications panel"
           >
-            {/* Header */}
             <div className="h-16 px-4 border-b border-black/10 flex items-center justify-between">
               <div>
                 <div className="text-[16px] font-semibold text-[#111827]">
@@ -236,41 +224,36 @@ export default function Topbar({
               </div>
 
               <div className="flex items-center gap-2">
-                <button
+                <Button
                   onClick={markAllRead}
                   className="h-9 px-3 rounded-lg text-[12px] font-medium bg-black/5 hover:bg-black/10 text-[#111827] flex items-center gap-2"
-                  type="button"
                 >
                   <CheckCheck className="h-4 w-4" />
                   Mark all read
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => setNotifOpen(false)}
                   className="h-9 w-9 rounded-lg hover:bg-black/5 grid place-items-center"
                   aria-label="Close notifications"
-                  type="button"
                 >
                   <X className="h-5 w-5 text-black/70" />
-                </button>
+                </Button>
               </div>
             </div>
 
-            {/* Actions */}
             <div className="px-4 py-3 border-b border-black/10 flex items-center justify-between">
               <div className="text-[12px] text-black/60">
                 Latest updates & alerts
               </div>
-              <button
+              <Button
                 onClick={clearAll}
-                className="h-9 px-3 rounded-lg text-[12px] font-medium bg-red-50 hover:bg-red-100 text-red-700 flex items-center gap-2"
-                type="button"
+                className="h-9 px-3 rounded-lg text-[12px] font-medium  flex items-center gap-2"
               >
                 <Trash2 className="h-4 w-4" />
                 Clear all
-              </button>
+              </Button>
             </div>
 
-            {/* List */}
             <div className="flex-1 overflow-auto">
               {notifications.length === 0 ? (
                 <div className="p-6 text-center">
@@ -312,21 +295,19 @@ export default function Topbar({
 
                           <div className="mt-3 flex items-center gap-2">
                             {!n.read && (
-                              <button
+                              <Button
                                 onClick={() => markOneRead(n.id)}
                                 className="h-8 px-3 rounded-lg text-[12px] font-medium bg-black/5 hover:bg-black/10 text-[#111827]"
-                                type="button"
                               >
                                 Mark read
-                              </button>
+                              </Button>
                             )}
-                            <button
+                            <Button
                               onClick={() => removeOne(n.id)}
                               className="h-8 px-3 rounded-lg text-[12px] font-medium bg-black/5 hover:bg-black/10 text-[#111827]"
-                              type="button"
                             >
                               Remove
-                            </button>
+                            </Button>
                           </div>
                         </div>
                       </div>
@@ -336,15 +317,13 @@ export default function Topbar({
               )}
             </div>
 
-            {/* Footer */}
             <div className="p-4 border-t border-black/10">
-              <button
-                type="button"
+              <Button
                 onClick={() => setNotifOpen(false)}
                 className="h-11 w-full rounded-xl bg-[#111827] text-white font-semibold hover:opacity-95 transition"
               >
                 Close
-              </button>
+              </Button>
             </div>
           </div>
         </div>

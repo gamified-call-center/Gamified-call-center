@@ -41,7 +41,6 @@
   }
 }
 
-/* OPTIONAL: quick utility classes so you can just "call the class name" */
 @layer components {
   .app-bg {
     @apply bg-white dark:bg-bgPrimary;
@@ -59,7 +58,6 @@
     @apply border-gray-200 dark:border-gray-700;
   }
 
-  /* Your existing typography helpers (kept) */
   .label-text {
     @apply text-[12px] md:text-[14px] font-Gordita-Medium;
   }
@@ -83,7 +81,6 @@
   }
 }
 
-/* Autofill fix (keep) */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
