@@ -885,13 +885,13 @@ export default function UserProfileView() {
   return (
     <>
       <div className="min-h-screen app-surface p-4 md:p-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="md:mb-8 mb-3">
-            <h1 className="md:text-3xl text-[18px]  font-bold bg-linear-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">
+        <div className="max-w-7xl ">
+          <div className=" mb-3">
+            <h1 className="md:text-2xl text-[18px]  font-bold bg-linear-to-r from-indigo-600 to-cyan-500 bg-clip-text text-transparent">
               User Profile
             </h1>
 
-            <p className="app-text mt-2">
+            <p className="app-text label-text ">
               Manage your account settings and preferences
             </p>
           </div>
@@ -1505,7 +1505,7 @@ function SectionCard({
 
         <Button
           onClick={onAction}
-          className="flex items-center gap-2 md:px-4 px-2 md:py-2 py-1 bg-linear-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all"
+          className="flex items-center font-medium   gap-2 md:px-4 px-2  py-1 bg-linear-to-r from-blue-500 to-cyan-500 text-white rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all"
         >
           {actionIcon}
           {actionLabel}
@@ -1527,7 +1527,7 @@ function KV({
   value: any;
 }) {
   return (
-    <div className="flex items-center md:gap-3 gap-1  md:p-3 p-1 rounded-xl border border-slate-200 dark:border-slate-700 app-card">
+    <div className="flex items-center md:gap-3 gap-1  md:px-3 md:py-[5px] p-1 rounded-xl border border-slate-200 app-card">
       <div className="w-9 h-9 rounded-lg app-card flex items-center justify-center">
         {icon}
       </div>

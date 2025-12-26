@@ -71,8 +71,8 @@ export const SectionCard = ({
     <div
       className={[
         "rounded-2xl border overflow-hidden",
-        "bg-white/95 dark:bg-slate-900/70",
-        "border-slate-200/70 dark:border-slate-700/60",
+        "bg-white/95 ",
+        "border-slate-200/70 ",
         "shadow-[0_12px_30px_-18px_rgba(0,0,0,0.25)]",
         className,
       ].join(" ")}
@@ -104,10 +104,8 @@ export const SectionCard = ({
         </div>
       </div>
 
-      {/* Divider */}
       <div className="h-px bg-slate-200/70 dark:bg-slate-700/60" />
 
-      {/* Body */}
       <div className="px-5 py-4">{children}</div>
     </div>
   );
@@ -151,7 +149,6 @@ function dedupeAddressesFromApi(list: any[]): any[] {
   });
 }
 function normalizeAddresses(list: any[]) {
-  // remove fully empty rows
   const cleaned = (list || []).filter((a) =>
     [
       a.address1,
@@ -167,7 +164,6 @@ function normalizeAddresses(list: any[]) {
 
   if (!cleaned.length) return [defaultAddress(true)];
 
-  // Ensure exactly 1 default
   let foundDefault = false;
   const normalized = cleaned.map((a: any, idx: number) => {
     const isDef = !!a.isDefault;
@@ -636,7 +632,7 @@ export default function UserOnboardModal({
                       className={[
                         "w-9 h-9 rounded-xl flex items-center justify-center border font-bold text-sm",
                         active
-                          ? "bg-blue-600 text-white border-blue-600"
+                          ? "bg-[#4274a5] text-white border-[#4274a5]"
                           : done
                             ? "bg-emerald-500/10 text-emerald-700 border-emerald-300"
                             : "app-card app-text app-border",
@@ -648,7 +644,7 @@ export default function UserOnboardModal({
                       <p
                         className={[
                           "text-sm font-bold",
-                          active ? "text-blue-600" : "app-text",
+                          active ? "text-[#4274a5]" : "app-text",
                         ].join(" ")}
                       >
                         {s.title}
@@ -663,7 +659,7 @@ export default function UserOnboardModal({
 
           <div className="mt-3 h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
             <div
-              className="h-full bg-blue-600 transition-all"
+              className="h-full bg-[#cfc91b] transition-all"
               style={{ width: `${progressPct}%` }}
             />
           </div>
@@ -1392,10 +1388,10 @@ export default function UserOnboardModal({
           </div>
         ) : null}
 
-        <div className="sticky bottom-0 app-card backdrop-blur border-t app-border pt-3">
-          <div className="flex items-center justify-between">
+        <div className="sticky bottom-0 app-card backdrop-blur border-t app-border py-1">
+          <div className="flex px-3  items-center justify-between">
             <Button
-              className="app-btn px-4 py-2 rounded-xl"
+              className="app-btn px-4 py-2 font-medium rounded-xl"
               onClick={handleBack}
             >
               ← Back
