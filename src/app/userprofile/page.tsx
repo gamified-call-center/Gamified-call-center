@@ -1,7 +1,4 @@
 "use client";
-
-import AcaAgentsView from "@/components/AraComponents/AgentsView";
-
 import withAdminLayout from "@/components/Layouts/GeneralLayout";
 import UserProfileView from "@/components/UserProfileView";
 

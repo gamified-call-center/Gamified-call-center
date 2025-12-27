@@ -115,7 +115,6 @@ type UserFull = {
   createdAt?: string;
   updatedAt?: string;
   password?: string;
-
   employee?: Employee | null;
   agentProfile?: AgentProfile | null;
   addresses?: Address[];
@@ -184,7 +183,7 @@ export default function UserProfileView() {
     (params?.id as string | undefined) 
   
   const [data, setData] = useState<UserFull | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const [activeTab, setActiveTab] = useState("profile");
   const [showPassword, setShowPassword] = useState(false);
