@@ -207,7 +207,7 @@ export default function UserOnboardModal({
   });
 
   const [employee, setEmployee] = useState<CreateEmployeeDto>({
-    designationId: 0,
+    designationId: "",
     reportsToId: undefined,
   });
 
@@ -446,8 +446,9 @@ export default function UserOnboardModal({
     if (isAdmin) return dto;
 
     dto.employee = {
-      designationId: Number(employee.designationId),
+      designationId: employee.designationId,
       reportsToId: employee.reportsToId || undefined,
+      
     };
 
     const normalized = normalizeAddresses(addresses);
@@ -549,7 +550,7 @@ export default function UserOnboardModal({
         );
         if (Array.isArray(res.body)) {
           const options = res.body.map((emp: any) => ({
-            label: `${emp.name} (${emp.designation})`,
+            label: emp.designation,
             value: String(emp.id),
           }));
 
@@ -894,6 +895,7 @@ export default function UserOnboardModal({
                           value: String(d.id),
                         })),
                     ]}
+                    placement="top"
                     placeholder="Select Designation"
                     searchable
                     error={!!errors.designationId}
@@ -917,6 +919,7 @@ export default function UserOnboardModal({
                     ]}
                     placeholder="Select Reports To"
                     searchable
+                   placement="top"
                     error={!!errors.reportsToId}
                   />
                 </Field>
@@ -1389,7 +1392,7 @@ export default function UserOnboardModal({
           </div>
         ) : null}
 
-        <div className="sticky bottom-0 app-card backdrop-blur border-t app-border py-1">
+        <div className=" app-card backdrop-blur border-t app-border py-1">
           <div className="flex px-3  items-center justify-between">
             <Button
               className="app-btn px-4 py-2 font-medium rounded-xl"

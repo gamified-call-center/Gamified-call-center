@@ -45,6 +45,7 @@ import Pagination from "@/commonComponents/Pagination";
 import Loader from "@/commonComponents/Loader";
 import Drawer from "@/commonComponents/Drawers";
 import Button from "@/commonComponents/Button";
+import { CsvUserRow } from "./helper";
 export type AgentAccess = "Training" | "FullAccess";
 
 const accessLevelMap: Record<AgentAccess, "TRAINING" | "ALL_ACCESS"> = {
@@ -59,12 +60,34 @@ type AgentsRow = {
   email: string;
   phone: string;
   employee: {
-    designation: { name: string; id: number };
+    designation: { name: string; id: string };
+    id:string;
+
   };
   agentProfile: {
-    accessLevel: string;
-    isActive: boolean;
-    id: string;
+    id:string;
+    npn: string;
+  yearsOfExperience: number;
+  ahipCertified: boolean;
+  chaseExt: string;
+
+  chaseDataUsername: string;
+  chaseDataPassword: string;
+
+  healthSherpaUsername: string;
+  healthSherpaPassword: string;
+
+  myMfgUsername: string;
+  myMfgPassword: string;
+
+  ffmUsername: string;
+
+  apps: string[];
+  accessLevel: string;
+  isActive: boolean;
+  stateLicensed: boolean;
+  stateLicenseNumber?: string;
+  
   };
   userStatus: string;
   password: string;
@@ -203,7 +226,8 @@ export default function AcaAgentsView() {
         const body = res?.body ?? res;
 
         const list = body?.data?.items || body?.items || body?.data || [];
-        const totalCount = body?.data?.total || body?.meta?.total || list.length;
+        const totalCount =
+          body?.data?.total || body?.meta?.total || list.length;
         setItems(Array.isArray(list) ? list : []);
         setTotal(totalCount);
         toast.success("Agents fetched successfully");
@@ -260,7 +284,6 @@ export default function AcaAgentsView() {
     });
   }, [filteredItems, sortKey, sortOrder]);
 
-
   const openEdit = (agent: any) => {
     setEditing(agent);
     setErrors({});
@@ -275,7 +298,7 @@ export default function AcaAgentsView() {
       password: agent.password || "",
 
       designation: agent.employee?.designation?.id ?? "",
-      reportsTo: agent.employee?.reportsTo?.id ?? "",
+      reportsTo: agent.employee?.id ?? "",
 
       npn: agent.agentProfile?.npn || "",
       yearsOfExperience: agent.agentProfile?.yearsOfExperience ?? "",
@@ -284,17 +307,17 @@ export default function AcaAgentsView() {
       access: agent.agentProfile?.accessLevel || "",
 
       chaseExt: agent.chaseExt || "",
-      chaseDataUsername: agent.chaseDataUsername || "",
-      chaseDataPassword: agent.chaseDataPassword || "",
-      healthSherpaUsername: agent.healthSherpaUsername || "",
-      healthSherpaPassword: agent.healthSherpaPassword || "",
-      myMfgUsername: agent.myMfgUsername || "",
-      myMfgPassword: agent.myMfgPassword || "",
-      ffmUsername: agent.ffmUsername || "",
-      forwarding: agent.forwarding || "",
+      chaseDataUsername: agent?.agentProfile?.chaseDataUsername || "",
+      chaseDataPassword: agent?.agentProfile?.chaseDataPassword || "",
+      healthSherpaUsername: agent?.agentProfile?.healthSherpaUsername || "",
+      healthSherpaPassword: agent?.agentProfile?.healthSherpaPassword || "",
+      myMfgUsername: agent?.agentProfile?.myMfgUsername || "",
+      myMfgPassword: agent?.agentProfile?.myMfgPassword || "",
+      ffmUsername: agent?.agentProfile?.ffmUsername || "",
+      forwarding: agent?.agentProfile?.forwarding || "",
       payStructure: agent.payStructure || "",
       role: agent.systemRole || "",
-      apps: agent.apps || [],
+      apps: agent?.agentProfile?.apps || [],
     });
 
     setOpenModal(true);
@@ -334,7 +357,7 @@ export default function AcaAgentsView() {
       e.email = "Enter valid email";
     if (!form.password) e.password = "password is required";
 
-    if (!form.dob) e.dob = "DOB is required";
+    // if (!form.dob) e.dob = "DOB is required";
 
     if (form.phone && normalizePhone(form.phone).length < 8) {
       e.phone = "Enter valid contact number";
@@ -370,8 +393,8 @@ export default function AcaAgentsView() {
       a.agentProfile?.isActive === true
         ? "Active "
         : a.agentProfile?.isActive === false
-          ? "In-Active"
-          : "-",
+        ? "In-Active"
+        : "-",
     ]);
 
     const csvContent = [headers, ...rows].map((e) => e.join(",")).join("\n");
@@ -506,7 +529,15 @@ export default function AcaAgentsView() {
         ahipCertified: Boolean(form.ahipCertified),
         stateLicensed: Boolean(form.stateLicensed),
         accessLevel: form.access === "FullAccess" ? "ALL_ACCESS" : "TRAINING",
-        apps: form.apps,
+        chaseExt:form.chaseExt,
+        chaseDataUsername:form.chaseDataUsername,
+        chaseDataPassword:form.chaseDataPassword,
+        healthSherpaUsername:form.healthSherpaUsername,
+        healthSherpaPassword:form.healthSherpaPassword,
+        myMfgUsername:form.myMfgUsername,
+        myMfgPassword:form.myMfgPassword,
+        ffmUsername:form.ffmUsername,
+       apps: form.apps?.length ? form.apps : [],
       },
     };
 
@@ -595,130 +626,64 @@ export default function AcaAgentsView() {
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const file = event.target.files?.[0];
+  if (!file) return;
 
-    if (!file.name.endsWith(".csv")) {
-      toast.error("Please upload a CSV file");
-      return;
+  if (!file.name.toLowerCase().endsWith(".csv")) {
+    toast.error("Please upload a CSV file");
+    return;
+  }
+
+  setSelectedFile(file);
+};
+
+const uploadCsvFile = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return apiClient.post(
+    `${apiClient.URLS.user}/bulk-onboard`,
+    formData,
+    true,
+    "file" 
+  );
+};
+
+const handleUpload = async () => {
+  if (!selectedFile) {
+    toast.error("Select CSV file");
+    return;
+  }
+
+  setIsAgentsLoading(true);
+  setUploadProgress(20);
+
+  try {
+    const res = await uploadCsvFile(selectedFile);
+
+    setUploadProgress(100);
+
+    const { success = [], failed = [] } = res.body || {};
+
+    if (failed.length) {
+      toast.error(`Uploaded with ${failed.length} errors`);
+      console.table(failed); // show failed rows
+    } else {
+      toast.success(`${success.length} users onboarded successfully`);
     }
 
-    setSelectedFile(file);
-  };
-  const handleUpload = async () => {
-    if (!selectedFile) return;
+    await fetchAgents?.();
+    setOpenFileModal(false);
+  } catch (e) {
+    console.error(e);
+    toast.error("Bulk upload failed");
+  } finally {
+    setIsAgentsLoading(false);
+    setSelectedFile(null);
+  }
+};
 
-    setIsAgentsLoading(true);
-    setUploadProgress(0);
 
-    try {
-      const interval = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 100) {
-            clearInterval(interval);
-            return 100;
-          }
-          return prev + 20;
-        });
-      }, 400);
-
-      const formattedData = await parseCSV(selectedFile);
-
-      await sendDataToBackend(formattedData);
-
-      setTimeout(() => {
-        setUploadProgress(100);
-        setTimeout(() => {
-          setOpenFileModal(false); // if you use modal
-        }, 800);
-      }, 500);
-    } catch (error) {
-      console.error("Error processing file:", error);
-      toast.error("Error processing CSV file");
-    } finally {
-      setIsAgentsLoading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    }
-  };
-  const parseCSV = (file: File): Promise<AgentForm[]> => {
-    return new Promise((resolve, reject) => {
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        complete: (result) => {
-          try {
-            const formattedData: AgentForm[] = result.data.map((row: any) => ({
-              firstName: row.firstName || "-",
-              lastName: row.lastName || "-",
-              email: row.email || "-",
-              dob: row.dob || "",
-              ssn: row.ssn || "-",
-              phone: row.phone || "-",
-              designation: row.designation || "-",
-              reportsTo: row.reportsTo || "-",
-              npn: row.npn || "-",
-              password: row.password || "-",
-
-              chaseExt: row.chaseExt || "-",
-              chaseDataUsername: row.chaseDataUsername || "-",
-              chaseDataPassword: row.chaseDataPassword || "-",
-
-              healthSherpaUsername: row.healthSherpaUsername || "-",
-              healthSherpaPassword: row.healthSherpaPassword || "-",
-              yearsOfExperience: row.yearsOfExperience
-                ? Number(row.yearsOfExperience)
-                : "",
-              ahipCertified: row.ahipCertified?.toLowerCase() === "true",
-              stateLicensed: row.stateLicensed?.toLowerCase() === "true",
-
-              myMfgUsername: row.myMfgUsername || "-",
-              myMfgPassword: row.myMfgPassword || "-",
-
-              ffmUsername: row.ffmUsername || "-",
-              forwarding: row.forwarding || "-",
-              payStructure: row.payStructure || "-",
-
-              role: row.role || "-",
-              access: row.access || "-",
-              apps: row.apps
-                ? row.apps.split("|").map((a: string) => a.trim())
-                : [],
-            }));
-
-            resolve(formattedData);
-          } catch (error) {
-            reject(error);
-          }
-        },
-        error: (error) => reject(error),
-      });
-    });
-  };
-  const sendDataToBackend = async (data: AgentForm[]) => {
-    try {
-      if (!data.length) {
-        toast.error("No valid data found in CSV");
-        return;
-      }
-
-      const response = await apiClient.post(
-        "/agents/bulk",
-        { agents: data },
-        true
-      );
-
-      if (response?.data) {
-        toast.success("Agents added successfully");
-        await fetchAgents();
-      }
-    } catch (error) {
-      console.error("Error uploading agents:", error);
-      toast.error("Failed to upload agents");
-      throw error;
-    }
-  };
   const totalPages = Math.ceil(total / LIMIT);
   if (loading || isAgentsLoading) {
     return (
@@ -743,24 +708,24 @@ export default function AcaAgentsView() {
         className={`px-4 md:py-1 py-1 text-left border app-border ${className}`}
       >
         <div className="flex items-center gap-1 group">
-          <span className=" font-bold app-table-head text-nowrap app-border ">{label}</span>
+          <span className=" font-bold app-table-head text-nowrap app-border ">
+            {label}
+          </span>
 
           <div className="flex flex-row opacity-0 group-hover:opacity-100 transition">
             <ArrowUp
               size={16}
-              className={`cursor-pointer ${active && sortOrder === "asc"
-                ? "text-blue-600"
-                : "app-border"
-                }`}
+              className={`cursor-pointer ${
+                active && sortOrder === "asc" ? "text-blue-600" : "app-border"
+              }`}
               onClick={() => sortData(column, "asc")}
             />
 
             <ArrowDown
               size={16}
-              className={`cursor-pointer ${active && sortOrder === "desc"
-                ? "text-blue-600"
-                : "app-border"
-                }`}
+              className={`cursor-pointer ${
+                active && sortOrder === "desc" ? "text-blue-600" : "app-border"
+              }`}
               onClick={() => sortData(column, "desc")}
             />
           </div>
@@ -809,7 +774,6 @@ export default function AcaAgentsView() {
 
           <div className="overflow-auto   rounded-md shadow-2xl border app-border app-card">
             <table className="w-full text-sm border app-border ">
-
               <thead className="app-table-head">
                 <tr>
                   <SortableTh label="First Name" column="firstName" />
@@ -822,7 +786,6 @@ export default function AcaAgentsView() {
                   <SortableTh label="Role" column="role" />
                   <SortableTh label="Status" column="userStatus" />
                   <th className="px-4 py-1 border app-border text-nowrap  font-medium ">
-
                     Actions
                   </th>
                 </tr>
@@ -856,10 +819,11 @@ export default function AcaAgentsView() {
 
                       <td className="px-4 py-1 border text-nowrap app-border  whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs  font-bold transition ${a.agentProfile?.isActive
-                            ? "bg-green-500/15 text-green-700"
-                            : "bg-orange-500/15 text-orange-700"
-                            }`}
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs  font-bold transition ${
+                            a.agentProfile?.isActive
+                              ? "bg-green-500/15 text-green-700"
+                              : "bg-orange-500/15 text-orange-700"
+                          }`}
                         >
                           {a?.agentProfile?.isActive ? (
                             <CheckCircle size={14} />
@@ -871,7 +835,6 @@ export default function AcaAgentsView() {
                       </td>
 
                       <td className="px-4 py-1 border app-border text-nowrap  font-medium ">
-
                         <div className="flex justify-center items-center gap-3">
                           <Button
                             className="p-2.5 rounded-lg bg-indigo-600/10 text-indigo-700 hover:bg-indigo-600  hover:text-white transition"
@@ -928,20 +891,22 @@ export default function AcaAgentsView() {
           </div>
           {confirmOpen && (
             <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-              <div className="relative p-6 w-[92%] max-w-md mx-auto app-card rounded-3xl shadow-2xl border app-border animate-scaleIn overflow-hidden">
+              <div className="w-full py-2 rounded-md">
                 <div
-                  className={`absolute top-0 left-0 w-full h-1.5 ${confirmType === "DEACTIVATE"
-                    ? "bg-orange-500"
-                    : "bg-green-500"
-                    }`}
+                  className={`absolute top-0 left-0 w-full h-1.5 ${
+                    confirmType === "DEACTIVATE"
+                      ? "bg-orange-500"
+                      : "bg-green-500"
+                  }`}
                 ></div>
 
                 <div className="flex justify-center mt-2">
                   <div
-                    className={`w-16 h-16 flex items-center justify-center rounded-full border-4 app-card shadow-lg ${confirmType === "DEACTIVATE"
-                      ? "border-orange-200 shadow-orange-400/30"
-                      : "border-green-200 shadow-green-400/30"
-                      }`}
+                    className={`w-16 h-16 flex items-center justify-center rounded-full border-4 app-card shadow-lg ${
+                      confirmType === "DEACTIVATE"
+                        ? "border-orange-200 shadow-orange-400/30"
+                        : "border-green-200 shadow-green-400/30"
+                    }`}
                   >
                     {confirmType === "DEACTIVATE" ? (
                       <Trash2 className="w-8 h-8 text-orange-600 animate-pulse" />
@@ -971,10 +936,11 @@ export default function AcaAgentsView() {
                   </span>
                   <div className="w-40 h-2 bg-slate-100 rounded-full overflow-hidden">
                     <div
-                      className={`h-full transition-all duration-700 ${confirmType === "DEACTIVATE"
-                        ? "w-[35%] bg-orange-600"
-                        : "w-full bg-green-600"
-                        }`}
+                      className={`h-full transition-all duration-700 ${
+                        confirmType === "DEACTIVATE"
+                          ? "w-[35%] bg-orange-600"
+                          : "w-full bg-green-600"
+                      }`}
                     ></div>
                   </div>
                   <span className="text-xs  font-bold text-slate-400">
@@ -991,10 +957,11 @@ export default function AcaAgentsView() {
                   </Button>
 
                   <Button
-                    className={`md:px-6 px-3 md:py-2.5 py-1.5 md:text-[14px] text-[12px] rounded-2xl text-white  font-bold flex items-center gap-2 shadow-lg hover:scale-110 active:scale-95 transition-all ${confirmType === "DEACTIVATE"
-                      ? "bg-linear-to-r from-orange-600 to-red-600 shadow-red-400/40"
-                      : "bg-linear-to-r from-green-600 to-emerald-600 shadow-green-400/40"
-                      }`}
+                    className={`md:px-6 px-3 md:py-2.5 py-1.5 md:text-[14px] text-[12px] rounded-2xl text-white  font-bold flex items-center gap-2 shadow-lg hover:scale-110 active:scale-95 transition-all ${
+                      confirmType === "DEACTIVATE"
+                        ? "bg-linear-to-r from-orange-600 to-red-600 shadow-red-400/40"
+                        : "bg-linear-to-r from-green-600 to-emerald-600 shadow-green-400/40"
+                    }`}
                     onClick={
                       confirmType === "DEACTIVATE"
                         ? deactivateAgent
@@ -1032,17 +999,6 @@ export default function AcaAgentsView() {
               }}
               title="Reset Password"
               className="app-text"
-            // subtitle="Enter a new password for this agent"
-            // primaryAction={{
-            //   label: updating ? "Updating..." : "Submit",
-            //   onClick: submitPassword,
-            //   disabled: updating,
-            //   loading: updating,
-            // }}
-            // secondaryAction={{
-            //   label: "Cancel",
-            //   onClick: () => setPasswordModalOpen(false),
-            // }}
             >
               <div className="space-y-4 p-2 mt-2 app-card">
                 <Field label="Password" required>
@@ -1227,9 +1183,7 @@ export default function AcaAgentsView() {
             </div>
 
             <div className="flex flex-col md:gap-3 gap-2 app-border border-gray-200 shadow-sm rounded-md md:p-4 p-2 md:mb-6 mb-3 app-btn-action">
-              <h2
-                className="font-bold text-[12px] md:text-[16px] tracking-wide app-text flex items-center gap-2"
-              >
+              <h2 className="font-bold text-[12px] md:text-[16px] tracking-wide app-text flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-indigo-600"></span>Work
                 Details
               </h2>
@@ -1242,7 +1196,6 @@ export default function AcaAgentsView() {
                     placeholder="Select Designation"
                     placement="auto"
                     searchable
-
                   />
                 </Field>
 

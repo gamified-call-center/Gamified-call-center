@@ -51,6 +51,8 @@ export default function TableToolbar({
     () => search?.widthClassName ?? "min-w-full",
     [search?.widthClassName]
   );
+  const searchWidthClass = dateRange ? "md:w-[55%] w-full" : "md:w-full w-full";
+
 
   return (
     <div
@@ -60,23 +62,23 @@ export default function TableToolbar({
       )}
     >
       <div className="flex flex-col gap-3 md:flex-row md:items-center w-full border-[2px] border-gray-400 dark:border-gray-200 rounded-xl">
-        {search ? (
-          <>
-            <div
-              className={cn(
-                "flex items-center justify-between gap-2 rounded-xl px-3 md:py-[6px] py-1    w-full app-input",
-                searchWidth
-              )}
-            >
-              <input
-                value={localSearch}
-                onChange={(e) => setLocalSearch(e.target.value)}
-                placeholder={search.placeholder ?? "Search..."}
-                className="w-full bg-transparent  text-sm outline-none app-text"
-              />
-            </div>
-          </>
-        ) : null}
+     {search ? (
+  <div
+    className={cn(
+      "flex items-center justify-between gap-2 rounded-xl px-3 py-1 md:py-[6px] app-input",
+     dateRange ? "md:w-1/2 w-full" : "w-full"
+
+    )}
+  >
+    <input
+      value={localSearch}
+      onChange={(e) => setLocalSearch(e.target.value)}
+      placeholder={search.placeholder ?? "Search..."}
+      className="w-full bg-transparent text-sm outline-none app-text"
+    />
+  </div>
+) : null}
+
 
 
         {dateRange ? (

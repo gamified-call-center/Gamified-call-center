@@ -3,6 +3,7 @@ import { getSession } from "next-auth/react";
 
 const base_url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
+
 const URLS = {
   blogs: `${base_url}/blog`,
   otp: `${base_url}/otp`,
@@ -74,26 +75,47 @@ export const retrieveToken = async (ctx = undefined) => {
   }
 };
 
-const makeHeadersAndParams = async (params, auth, type, ctx = undefined) => {
+// const makeHeadersAndParams = async (params, auth, type, ctx = undefined) => {
+//   const { headers = {}, ...restParams } = params;
+//   const baseHeaders = {
+//     "Content-Type": "application/json",
+//     Accept: "application/json",
+//   };
+//   let headerConfig = new Headers(merge(baseHeaders, headers));
+
+//   if (auth && !headerConfig.get("Authorization")) {
+//     const session = ctx ? await getSession(ctx) : await getSession();
+//     const token = session?.accessToken || session?.token || "";
+//     if (token) {
+//       headerConfig.set("Authorization", `Bearer ${token}`);
+//     }
+//   }
+
+//   return {
+//     headers: headerConfig,
+//     params: restParams || {},
+//   };
+// };
+const makeHeadersAndParams = async (params, auth, type, ctx) => {
   const { headers = {}, ...restParams } = params;
-  const baseHeaders = {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  };
+
+  const baseHeaders =
+    type === "file"
+      ? {} 
+      : {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        };
+
   let headerConfig = new Headers(merge(baseHeaders, headers));
 
   if (auth && !headerConfig.get("Authorization")) {
     const session = ctx ? await getSession(ctx) : await getSession();
-    const token = session?.accessToken || session?.token || "";
-    if (token) {
-      headerConfig.set("Authorization", `Bearer ${token}`);
-    }
+    const token = session?.accessToken || "";
+    if (token) headerConfig.set("Authorization", `Bearer ${token}`);
   }
 
-  return {
-    headers: headerConfig,
-    params: restParams || {},
-  };
+  return { headers: headerConfig, params: restParams };
 };
 
 const request = async ({

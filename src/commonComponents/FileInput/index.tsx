@@ -116,7 +116,7 @@ const FileInput = ({
   return (
   <div
     className={twMerge(
-      "w-full border rounded-2xl p-4 shadow-md bg-white dark:bg-gray-900 transition-all",
+      "w-full border rounded-2xl p-4 shadow-md app-card transition-all",
       "border-gray-300 dark:border-gray-700",
       className
     )}
@@ -139,7 +139,7 @@ const FileInput = ({
       )}
 
       {sublabel && (
-        <p className={twMerge("text-sm text-gray-500 dark:text-gray-400", sublabelClass)}>
+        <p className={twMerge("text-sm app-text", sublabelClass)}>
           {sublabel}
         </p>
       )}
@@ -148,7 +148,7 @@ const FileInput = ({
       <div
         className={twMerge(
           "flex items-center gap-3 p-3 rounded-xl",
-          "border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"
+          "border app-card app-border"
         )}
       >
         <label
@@ -161,7 +161,7 @@ const FileInput = ({
           {uploading ? "Uploading..." : "Choose File"}
         </label>
 
-        <span className="text-sm text-gray-700 dark:text-gray-300 truncate max-w-[180px]">
+        <span className="text-sm app-muted truncate max-w-[180px]">
           {fileName}
         </span>
 

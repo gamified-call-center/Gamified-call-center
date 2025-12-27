@@ -137,6 +137,10 @@ export default function DesignationsPermissionsPage() {
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
   const [isAgent, setIsAgent] = useState(false);
+  const [confirmdeleteOpen, setConfirmdeleteOpen] = useState(false);
+  const [selecteddeleteDesignation, setSelecteddeleteDesignation] = useState<
+    any | null
+  >(null);
 
   const [userCore, setUserCore] = useState<CreateUserCoreDto>({
     firstName: "",
@@ -150,7 +154,7 @@ export default function DesignationsPermissionsPage() {
   });
 
   const [employee, setEmployee] = useState<CreateEmployeeDto>({
-    designationId: 0,
+    designationId: undefined,
     reportsToId: undefined,
   });
 
@@ -283,7 +287,7 @@ export default function DesignationsPermissionsPage() {
     setFormOpen(true);
   };
   const [selectedDesignationId, setSelectedDesignationId] = useState<
-    number | null
+    any | null
   >(null);
 
   const openEditDesignation = (d: any) => {
@@ -332,7 +336,7 @@ export default function DesignationsPermissionsPage() {
         setDesignations((prev) =>
           formMode === "edit"
             ? prev.map((d) =>
-                Number(d.id) === Number(selectedDesignationId) ? res.data : d
+                (d.id) === (selectedDesignationId) ? res.data : d
               )
             : [...prev, res.data]
         );
@@ -438,7 +442,7 @@ export default function DesignationsPermissionsPage() {
       systemRole: "STANDARD",
     });
 
-    setEmployee({ designationId: 0, reportsToId: undefined });
+    setEmployee({ designationId: undefined, reportsToId: undefined });
 
     setAddresses([
       {
@@ -486,14 +490,14 @@ export default function DesignationsPermissionsPage() {
           ? u.dob.slice(0, 10)
           : String(u.dob).slice(0, 10),
       email: u.email || "",
-      password: "", 
+      password: "",
       phone: u.phone || "",
       profileImage: (u as any)?.profileImage || "",
       systemRole: u.systemRole || "STANDARD",
     });
 
     setEmployee({
-      designationId: u.employee?.designation?.id || 0,
+      designationId: u.employee?.designation?.id || undefined,
       reportsToId: (u.employee as any)?.reportsTo?.id || undefined,
     });
 
@@ -866,7 +870,7 @@ export default function DesignationsPermissionsPage() {
 
         {confirmOpen && (
           <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)}>
-            <div className="relative p-6 w-[92%] max-w-md mx-auto app-card rounded-3xl shadow-2xl border app-border animate-scaleIn overflow-hidden">
+            <div className="w-full py-2 rounded-md">
               <div
                 className={`absolute top-0 left-0 w-full h-1.5 ${
                   confirmType === "DEACTIVATE"
@@ -1062,7 +1066,8 @@ export default function DesignationsPermissionsPage() {
                               <Button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  deleteDesignation(d);
+                                  setSelecteddeleteDesignation(d);
+                                  setConfirmdeleteOpen(true);
                                 }}
                                 className="p-2 text-rose-600 hover:bg-rose-100 rounded-full transition disabled:opacity-50"
                                 disabled={saving}
@@ -1089,6 +1094,54 @@ export default function DesignationsPermissionsPage() {
           </div>
         ) : null}
       </div>
+      {confirmdeleteOpen && (
+        <Modal
+          open={confirmdeleteOpen}
+          onClose={() => setConfirmdeleteOpen(false)}
+        >
+          <div className="w-full py-2 shadow-xl  animate-scaleIn overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-1 bg-rose-500"></div>
+
+            <div className="flex justify-center">
+              <div className="w-14 h-14 flex items-center justify-center rounded-full bg-rose-50 dark:bg-rose-500/10">
+                <Trash2 className="w-6 h-6 text-rose-600 dark:text-rose-400" />
+              </div>
+            </div>
+
+            <div className="text-center mt-4 space-y-1">
+              <h3 className="text-xl font-Gordita-Medium app-text">
+                Delete Designation?
+              </h3>
+              <p className="md:text-sm text-[12px] app-muted">
+                This action cannot be undone.
+              </p>
+              <p className="md:text-sm  text-[14px] font-Gorita-Medium ">
+                {selecteddeleteDesignation?.name}
+              </p>
+            </div>
+
+            <div className="flex  justify-center  gap-2 md:gap-4 mt-5">
+              <Button
+                onClick={() => setConfirmOpen(false)}
+                className="md:px-4 px-2  md:py-2 py-1 text-sm app-card app-text font-Gordita-Medium btn-text rounded-xl transition"
+              >
+                Cancel
+              </Button>
+
+              <Button
+                onClick={() => {
+                  deleteDesignation(selecteddeleteDesignation);
+                  setConfirmdeleteOpen(false);
+                }}
+                className="md:px-4 px-2  md:py-2 py-1 text-sm  bg-rose-600 hover:bg-rose-700 text-white rounded-xl btn-text font-Gordita-Medium transition disabled:opacity-40"
+               
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       {/* Add/Edit Designation Modal */}
       <Modal

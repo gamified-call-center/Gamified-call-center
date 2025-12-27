@@ -122,7 +122,7 @@ export default function Drawer({
 
                       <VscChromeClose
                         className={twMerge(
-                          "text-slate-400 text-2xl cursor-pointer transition-all duration-200 hover:text-white hover:rotate-90 active:scale-95",
+                          "app-text text-2xl cursor-pointer transition-all duration-200 hover:app-muted hover:rotate-90 active:scale-95",
                           closeIconCls
                         )}
                         onClick={() => handleDrawerToggle(false)}

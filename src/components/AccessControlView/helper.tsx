@@ -60,7 +60,7 @@ export type CreateUserCoreDto = {
 };
 
 export type CreateEmployeeDto = {
-  designationId: number;
+  designationId: any;
   reportsToId?: string;
 };
 
@@ -113,7 +113,7 @@ export type UpdateUserCoreDto = Partial<{
 }>;
 
 export type UpdateEmployeeDto = Partial<{
-  designationId: number;
+  designationId: any;
   reportsToId?: string;
 }>;
 

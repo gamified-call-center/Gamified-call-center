@@ -9,6 +9,7 @@ import Pagination from "@/commonComponents/Pagination";
 import toast from "react-hot-toast";
 import DealViewModal from "./DealViewModal";
 import Button from "@/commonComponents/Button";
+import Modal from "@/commonComponents/Modal";
 
 type DealRow = {
   id: string | number;
@@ -44,8 +45,6 @@ type DealRow = {
     documentType: string;
     documentUrl?: string;
   }[];
-
-
 };
 
 type ListResponse = {
@@ -91,6 +90,10 @@ const AraDealsView = () => {
   // );
 
   // const [to, setTo] = useState(toDateOnly(new Date()));
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selecteddeleteDeal, setSelecteddeleteDeal] = useState<any | null>(
+    null
+  );
   const [selectedDeal, setSelectedDeal] = useState(null);
   const [viewOpen, setViewOpen] = useState(false);
 
@@ -334,10 +337,6 @@ const AraDealsView = () => {
         notes: payload.notes || "",
         status: payload.status || "OPEN",
         documents: uploadedDocs,
-
-
-
-
       };
 
       if (mode === "CREATE") {
@@ -364,7 +363,7 @@ const AraDealsView = () => {
         true
       );
       if (res.status === 200) {
-        toast.success("Agent deleted successfully");
+        toast.success("deals deleted successfully");
       }
       await fetchDeals();
     } catch (e) {
@@ -514,7 +513,11 @@ const AraDealsView = () => {
                         <Button
                           className="p-2 rounded-lg bg-orange-50 text-orange-600 hover:bg-orange-100 dark:bg-orange-500/10 dark:hover:bg-orange-500/20 transition"
                           title="Delete"
-                          onClick={() => handleDelete(d)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelecteddeleteDeal(d);
+                            setConfirmOpen(true);
+                          }}
                         >
                           <Trash2 size={16} />
                         </Button>
@@ -533,6 +536,49 @@ const AraDealsView = () => {
             </tbody>
           </table>
         </div>
+        {confirmOpen && (
+          <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+            <div className="app-card w-full py-2 rounded-md">
+              <div className="absolute top-0 left-0 w-full h-1 bg-rose-500"></div>
+
+              <div className="flex justify-center">
+                <div className="w-14 h-14 flex items-center justify-center rounded-full bg-rose-50 dark:bg-rose-500/10">
+                  <Trash2 className="w-6 h-6 text-rose-600 dark:text-rose-400" />
+                </div>
+              </div>
+
+              {/* Text */}
+              <div className="text-center mt-4 space-y-1">
+                <h3 className="md:text-[14px]  text-[12px] app-text font-Gordita-Medium">
+                  Confirm Deletion
+                </h3>
+                <p className="md:text-sm text-[12px] app-muted">
+                  Are you sure you want to delete this Deal? This action cannot
+                  be undone.
+                </p>
+              </div>
+
+              <div className="flex justify-center gap-2 md:gap-4 mt-5">
+                <Button
+                  onClick={() => setConfirmOpen(false)}
+                  className="md:px-4 px-2  md:py-2 py-1 text-sm app-card app-text font-Gordita-Medium btn-text rounded-xl transition"
+                >
+                  Cancel
+                </Button>
+
+                <Button
+                  onClick={() => {
+                    handleDelete(selecteddeleteDeal);
+                    setConfirmOpen(false);
+                  }}
+                  className="md:px-4 px-2  md:py-2 py-1 text-sm  bg-rose-600 hover:bg-rose-700 text-white rounded-xl btn-text font-Gordita-Medium transition disabled:opacity-40"
+                >
+                  Delete
+                </Button>
+              </div>
+            </div>
+          </Modal>
+        )}
 
         <div className="">
           <Pagination
