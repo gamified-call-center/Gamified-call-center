@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import apiClient from "../../Utils/apiClient"; // adjust if needed
+import toast from "react-hot-toast";
 
 type FilterMode = "period" | "single" | "range";
 type Period = "today" | "yesterday" | "last_week" | "last_month";
@@ -66,7 +67,7 @@ const AgentPerformanceLeaderboard = () => {
 
   // Data
   const [agents, setAgents] = useState<AgentViewModel[]>([]);
-  
+
   const [meta, setMeta] = useState<LeaderboardMeta>({
     page: 1,
     limit: LIMIT,
@@ -171,49 +172,42 @@ const AgentPerformanceLeaderboard = () => {
   };
 
   const fetchLeaderboard = async () => {
-  setLoading(true);
-  setErrorMsg("");
+    setLoading(true);
+    setErrorMsg("");
 
-  try {
-    const params = buildParams(); 
-    // params = { date: "2022-02-22" }
+    try {
+      const params = buildParams();
+      // params = { date: "2022-02-22" }
+      const queryString = new URLSearchParams(params).toString();
+      const url = `${apiClient.URLS.leaderboard}?${queryString}`;
+      const res = await apiClient.get(url);
+      const payload: LeaderboardResponse = res.body;
+      const rows = payload?.data ?? [];
+      const m = payload?.meta ?? { page, limit: LIMIT, total: 0, totalPages: 1 };
 
-    const queryString = new URLSearchParams(params).toString();
+      const mapped: AgentViewModel[] = rows.map((r, idx) => ({
+        id: r.rank,
+        name: r.agentName,
+        dealsClosed: r.dealCount,
+        color: colorPalette[idx % colorPalette.length],
+      }));
 
-    const url = `${apiClient.URLS.leaderboard}?${queryString}`;
-
-    console.log("Fetching leaderboard with URL:", url);
-    // ✅ http://localhost:3001/leaderboard/leaderboard?date=2022-02-22
-
-    const res = await apiClient.get(url);
-
-    const payload: LeaderboardResponse = res.body;
-    const rows = payload?.data ?? [];
-    const m = payload?.meta ?? { page, limit: LIMIT, total: 0, totalPages: 1 };
-
-    const mapped: AgentViewModel[] = rows.map((r, idx) => ({
-      id: r.rank,
-      name: r.agentName,
-      dealsClosed: r.dealCount,
-      color: colorPalette[idx % colorPalette.length],
-    }));
-
-    setAgents(mapped);
-    setMeta({
-      page: m.page ?? page,
-      limit: m.limit ?? LIMIT,
-      total: m.total ?? rows.length,
-      totalPages: m.totalPages ?? 1,
-      period: m.period ?? undefined,
-    });
-  } catch (err: any) {
-    if (err?.name === "AbortError") return;
-    setErrorMsg(err?.message || "Failed to load leaderboard");
-  } finally {
-    setLoading(false);
-  }
-};
-;
+      setAgents(mapped);
+      setMeta({
+        page: m.page ?? page,
+        limit: m.limit ?? LIMIT,
+        total: m.total ?? rows.length,
+        totalPages: m.totalPages ?? 1,
+        period: m.period ?? undefined,
+      });
+    } catch (err: any) {
+      if (err?.name === "AbortError") return;
+      toast.error(err?.message || "Failed to load leaderboard");
+    } finally {
+      setLoading(false);
+    }
+  };
+  ;
 
   // Refetch when filter inputs change
   // useEffect(() => {
@@ -385,9 +379,8 @@ const AgentPerformanceLeaderboard = () => {
               </div>
               <div className="flex items-center gap-2 mt-1">
                 <div
-                  className={`w-2 h-2 rounded-full ${
-                    isLive ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
-                  }`}
+                  className={`w-2 h-2 rounded-full ${isLive ? "bg-emerald-500 animate-pulse" : "bg-slate-400"
+                    }`}
                 ></div>
                 <div className="text-sm  font-bold text-slate-900">
                   {isLive ? "Enabled" : "Paused"}
@@ -436,9 +429,8 @@ const AgentPerformanceLeaderboard = () => {
                   {selectedLabel}
                 </span>
                 <ChevronDown
-                  className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
-                    isDropdownOpen ? "rotate-180" : ""
-                  }`}
+                  className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""
+                    }`}
                 />
               </button>
 
@@ -460,11 +452,10 @@ const AgentPerformanceLeaderboard = () => {
                       <button
                         key={opt.value}
                         onClick={() => setMode(opt.value)}
-                        className={`w-full px-4 py-3 text-left hover:bg-slate-50 transition-colors duration-150 flex items-center gap-2 ${
-                          opt.value === filterMode
-                            ? "bg-blue-50 text-blue-600"
-                            : "text-slate-700"
-                        }`}
+                        className={`w-full px-4 py-3 text-left hover:bg-slate-50 transition-colors duration-150 flex items-center gap-2 ${opt.value === filterMode
+                          ? "bg-blue-50 text-blue-600"
+                          : "text-slate-700"
+                          }`}
                       >
                         {opt.value === filterMode && (
                           <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
@@ -557,17 +548,15 @@ const AgentPerformanceLeaderboard = () => {
                       y: -2,
                       boxShadow: "0 20px 40px rgba(0, 0, 0, 0.05)",
                     }}
-                    className={`group p-6 relative bg-white md:px-4 md:py-2  rounded-2xl border transition-all duration-300 hover:border-blue-200 ${
-                      isTopThree ? "border-2" : "border border-slate-200"
-                    } ${
-                      isTopThree
+                    className={`group p-6 relative bg-white md:px-4 md:py-2  rounded-2xl border transition-all duration-300 hover:border-blue-200 ${isTopThree ? "border-2" : "border border-slate-200"
+                      } ${isTopThree
                         ? index === 0
                           ? "border-yellow-300 bg-linear-to-r from-yellow-50/30 via-white to-white"
                           : index === 1
-                          ? "border-slate-300 bg-linear-to-r from-slate-50/30 via-white to-white"
-                          : "border-amber-300 bg-linear-to-r from-amber-50/30 via-white to-white"
+                            ? "border-slate-300 bg-linear-to-r from-slate-50/30 via-white to-white"
+                            : "border-amber-300 bg-linear-to-r from-amber-50/30 via-white to-white"
                         : ""
-                    }`}
+                      }`}
                   >
                     <div className="flex flex-col md:flex-row md:items-center gap-4">
                       <div className="flex items-center gap-4">
@@ -586,15 +575,14 @@ const AgentPerformanceLeaderboard = () => {
                             </motion.div>
                           )}
                           <div
-                            className={`w-10 h-10 flex items-center justify-center rounded-xl  font-bold ${
-                              isTopThree
-                                ? index === 0
-                                  ? "bg-linear-to-br from-yellow-100 to-amber-100 text-yellow-700 shadow-sm"
-                                  : index === 1
+                            className={`w-10 h-10 flex items-center justify-center rounded-xl  font-bold ${isTopThree
+                              ? index === 0
+                                ? "bg-linear-to-br from-yellow-100 to-amber-100 text-yellow-700 shadow-sm"
+                                : index === 1
                                   ? "bg-linear-to-br from-slate-100 to-gray-100 text-slate-700 shadow-sm"
                                   : "bg-linear-to-br from-amber-100 to-orange-100 text-amber-700 shadow-sm"
-                                : "bg-slate-100 text-slate-500"
-                            }`}
+                              : "bg-slate-100 text-slate-500"
+                              }`}
                           >
                             {agent.id}
                           </div>
@@ -616,13 +604,12 @@ const AgentPerformanceLeaderboard = () => {
                               className="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-lg"
                             >
                               <Trophy
-                                className={`w-4 h-4 ${
-                                  index === 0
-                                    ? "text-yellow-500"
-                                    : index === 1
+                                className={`w-4 h-4 ${index === 0
+                                  ? "text-yellow-500"
+                                  : index === 1
                                     ? "text-slate-400"
                                     : "text-amber-600"
-                                }`}
+                                  }`}
                               />
                             </motion.div>
                           )}
@@ -729,11 +716,10 @@ const AgentPerformanceLeaderboard = () => {
             <div className="flex items-center gap-4">
               <button
                 onClick={() => setIsLive(!isLive)}
-                className={`px-6 py-2.5 rounded-xl  font-medium transition-all duration-200 flex items-center gap-2 ${
-                  isLive
-                    ? "bg-linear-to-r from-red-500 to-orange-500 text-white hover:shadow-lg hover:shadow-red-200"
-                    : "bg-linear-to-r from-emerald-500 to-teal-500 text-white hover:shadow-lg hover:shadow-emerald-200"
-                }`}
+                className={`px-6 py-2.5 rounded-xl  font-medium transition-all duration-200 flex items-center gap-2 ${isLive
+                  ? "bg-linear-to-r from-red-500 to-orange-500 text-white hover:shadow-lg hover:shadow-red-200"
+                  : "bg-linear-to-r from-emerald-500 to-teal-500 text-white hover:shadow-lg hover:shadow-emerald-200"
+                  }`}
               >
                 <Zap className="w-4 h-4" />
                 {isLive ? "Pause Live Updates" : "Enable Live Updates"}
@@ -750,11 +736,10 @@ const AgentPerformanceLeaderboard = () => {
             <button
               disabled={!canPrev || loading}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className={`px-6 py-2.5 rounded-xl  font-medium transition-all duration-200 ${
-                canPrev && !loading
-                  ? "bg-white border border-slate-200 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100/50"
-                  : "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed"
-              }`}
+              className={`px-6 py-2.5 rounded-xl  font-medium transition-all duration-200 ${canPrev && !loading
+                ? "bg-white border border-slate-200 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100/50"
+                : "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed"
+                }`}
             >
               Prev
             </button>
@@ -767,11 +752,10 @@ const AgentPerformanceLeaderboard = () => {
             <button
               disabled={!canNext || loading}
               onClick={() => setPage((p) => p + 1)}
-              className={`px-6 py-2.5 rounded-xl  font-medium transition-all duration-200 ${
-                canNext && !loading
-                  ? "bg-white border border-slate-200 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100/50"
-                  : "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed"
-              }`}
+              className={`px-6 py-2.5 rounded-xl  font-medium transition-all duration-200 ${canNext && !loading
+                ? "bg-white border border-slate-200 hover:border-blue-300 hover:shadow-lg hover:shadow-blue-100/50"
+                : "bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed"
+                }`}
             >
               Next
             </button>

@@ -143,7 +143,6 @@ export function SidebarContent({
 
       {/* List Section - Now scrollable */}
       <div className="flex-1 min-h-0 overflow-y-auto">
-        {/* Enhanced Header */}
         <div className="sticky top-0 z-10 px-5 py-3 bg-gradient-to-b from-white/95 to-white/80 backdrop-blur-sm border-b border-gray-200/60">
           <div className="flex  items-center w-full justify-between">
             <div className="flex items-center justify-between w-full  gap-2">
@@ -161,8 +160,6 @@ export function SidebarContent({
               )}
             </div>
           </div>
-
-
           <div className="text-xs flex  items-center justify-start gap-2 text-gray-400 font-medium">
             <div className="px-2 py-1 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200/50">
               <span className="text-xs font-semibold text-blue-700">

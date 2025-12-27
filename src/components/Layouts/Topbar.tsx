@@ -186,19 +186,11 @@ export default function Topbar({
               </>
             )}
           </button>
-
           <div className="hidden sm:block">
-            <AvatarMenu
-              name={name}
-              role={role}
-              onLogout={() => {
-                console.log("logout");
-              }}
-            />
+            <AvatarMenu />
           </div>
-
           <div className="sm:hidden">
-            <AvatarMenu name={name} role={role} />
+            <AvatarMenu />
           </div>
         </div>
       </header>

@@ -336,8 +336,8 @@ export default function DesignationsPermissionsPage() {
         setDesignations((prev) =>
           formMode === "edit"
             ? prev.map((d) =>
-                (d.id) === (selectedDesignationId) ? res.data : d
-              )
+              (d.id) === (selectedDesignationId) ? res.data : d
+            )
             : [...prev, res.data]
         );
 
@@ -872,20 +872,18 @@ export default function DesignationsPermissionsPage() {
           <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)}>
             <div className="w-full py-2 rounded-md">
               <div
-                className={`absolute top-0 left-0 w-full h-1.5 ${
-                  confirmType === "DEACTIVATE"
+                className={`absolute top-0 left-0 w-full h-1.5 ${confirmType === "DEACTIVATE"
                     ? "bg-orange-500"
                     : "bg-green-500"
-                }`}
+                  }`}
               ></div>
 
               <div className="flex justify-center mt-2">
                 <div
-                  className={`w-16 h-16 flex items-center justify-center rounded-full border-4 app-card shadow-lg ${
-                    confirmType === "DEACTIVATE"
+                  className={`w-16 h-16 flex items-center justify-center rounded-full border-4 app-card shadow-lg ${confirmType === "DEACTIVATE"
                       ? "border-orange-200 shadow-orange-400/30"
                       : "border-green-200 shadow-green-400/30"
-                  }`}
+                    }`}
                 >
                   {confirmType === "DEACTIVATE" ? (
                     <Trash2 className="w-8 h-8 text-orange-600 animate-pulse" />
@@ -913,11 +911,10 @@ export default function DesignationsPermissionsPage() {
                 <span className="text-xs font-bold text-slate-400">Power</span>
                 <div className="w-40 h-2 bg-slate-100 rounded-full overflow-hidden">
                   <div
-                    className={`h-full transition-all duration-700 ${
-                      confirmType === "DEACTIVATE"
+                    className={`h-full transition-all duration-700 ${confirmType === "DEACTIVATE"
                         ? "w-[35%] bg-orange-600"
                         : "w-full bg-green-600"
-                    }`}
+                      }`}
                   ></div>
                 </div>
                 <span className="text-xs font-bold text-slate-400">
@@ -934,11 +931,10 @@ export default function DesignationsPermissionsPage() {
                 </Button>
 
                 <Button
-                  className={`md:px-6 px-3 md:py-2.5 py-1.5 md:text-[14px] text-[12px] rounded-2xl text-white font-bold flex items-center gap-2 shadow-lg hover:scale-110 active:scale-95 transition-all ${
-                    confirmType === "DEACTIVATE"
+                  className={`md:px-6 px-3 md:py-2.5 py-1.5 md:text-[14px] text-[12px] rounded-2xl text-white font-bold flex items-center gap-2 shadow-lg hover:scale-110 active:scale-95 transition-all ${confirmType === "DEACTIVATE"
                       ? "bg-linear-to-r from-orange-600 to-red-600 shadow-red-400/40"
                       : "bg-linear-to-r from-green-600 to-emerald-600 shadow-green-400/40"
-                  }`}
+                    }`}
                   onClick={async () => {
                     if (!selectedUser) {
                       toast.error("No user selected");
@@ -1134,7 +1130,7 @@ export default function DesignationsPermissionsPage() {
                   setConfirmdeleteOpen(false);
                 }}
                 className="md:px-4 px-2  md:py-2 py-1 text-sm  bg-rose-600 hover:bg-rose-700 text-white rounded-xl btn-text font-Gordita-Medium transition disabled:opacity-40"
-               
+
               >
                 Delete
               </Button>
@@ -1297,6 +1293,8 @@ function DesignationPermissionsCrudModalBody({
 
   /** 2) fetch designation permissions */
   useEffect(() => {
+
+    console.log("designationId", designationId);
     if (!designationId) return;
 
     const fetchDesignationPermissions = async () => {
@@ -1304,14 +1302,10 @@ function DesignationPermissionsCrudModalBody({
       try {
         const res: any = await apiClient.get(
           `${apiClient.URLS.designationPermissions}/${designationId}/permissions`,
-          {},
-          true
         );
-
         const list: ResourceRow[] = Array.isArray(res?.body) ? res.body : [];
         list.sort((a, b) => (a.resource || "").localeCompare(b.resource || ""));
 
-        // mark clean
         setFormData({
           permissions: list.map((x) => ({ ...x, _status: "clean" })),
         });
@@ -1702,10 +1696,9 @@ function DesignationPermissionsCrudModalBody({
                 onClick={handleAddOrUpdateResourceLocal}
                 disabled={!designationId || savingAll}
                 className={`md:px-4 py-2 px-3 rounded-lg md:text-[14px] text-[12px] font-medium text-white shadow-sm transition
-                  ${
-                    !designationId || savingAll
-                      ? "bg-blue-300 cursor-not-allowed"
-                      : "bg-blue-600 hover:bg-blue-700"
+                  ${!designationId || savingAll
+                    ? "bg-blue-300 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700"
                   }`}
               >
                 {editId ? "Update Resource" : "+ Add Resource"}
@@ -1786,9 +1779,8 @@ function DesignationPermissionsCrudModalBody({
                     return (
                       <tr
                         key={perm.id || perm.resource}
-                        className={`border-t hover:app-card ${
-                          changed ? "bg-amber-50/40" : ""
-                        }`}
+                        className={`border-t hover:app-card ${changed ? "bg-amber-50/40" : ""
+                          }`}
                       >
                         <td className="py-3 px-4 text-left">
                           <div className="flex items-center gap-2">
@@ -1817,11 +1809,10 @@ function DesignationPermissionsCrudModalBody({
                                 type="button"
                                 onClick={() => toggleCellLocal(perm, action)}
                                 className={`inline-flex items-center justify-center w-8 h-8 rounded-lg border transition
-                                ${
-                                  perm[action]
+                                ${perm[action]
                                     ? "bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100"
                                     : "bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100"
-                                }`}
+                                  }`}
                                 title={action}
                                 disabled={savingAll}
                               >
@@ -1879,10 +1870,9 @@ function DesignationPermissionsCrudModalBody({
             onClick={handleSaveAllPermissions}
             disabled={savingAll || pendingChangesCount === 0}
             className={`md:px-5 md:py-2 py-2 px-4 rounded-lg md:text-[14px] text-[12px] font-medium text-white shadow-sm transition
-              ${
-                savingAll || pendingChangesCount === 0
-                  ? "bg-emerald-300 cursor-not-allowed"
-                  : "bg-emerald-600 hover:bg-emerald-700"
+              ${savingAll || pendingChangesCount === 0
+                ? "bg-emerald-300 cursor-not-allowed"
+                : "bg-emerald-600 hover:bg-emerald-700"
               }`}
           >
             {savingAll ? "Saving..." : "Save Permissions"}

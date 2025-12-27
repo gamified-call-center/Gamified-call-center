@@ -17,17 +17,18 @@ import {
   Zap,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect } from "react";
-import { useAppContextStore } from "@/store/appContext"; // <-- from step 1
+import { useEffect, useMemo } from "react";
+import { useAppContextStore } from "@/store/appContext";
+import { useSession } from "next-auth/react";
 
 const SIDEBAR_WIDTH = 280;
 
 type NavItemType = {
   label: string;
-  href: string; // must be absolute (starts with "/")
+  href: string;
   icon: any;
   badge?: string;
-  scope?: "service" | "global"; // ✅ NEW
+  scope?: "service" | "global";
 };
 
 type SectionType = {
@@ -83,9 +84,7 @@ function getSections(): SectionType[] {
     },
     {
       title: "ADMIN CONTROLS",
-      items: [
-        { label: "Access Control", href: "/access-control", icon: Shield, scope: "global" },
-      ],
+      items: [{ label: "Access Control", href: "/access-control", icon: Shield, scope: "global" }],
     },
   ];
 }
@@ -98,6 +97,7 @@ export default function Sidebar({
   onCloseMobile: () => void;
 }) {
   const pathname = usePathname();
+  const { data: session, status } = useSession();
 
   const selectedService = useAppContextStore((s) => s.selectedService);
   const setSelectedService = useAppContextStore((s) => s.setSelectedService);
@@ -109,13 +109,38 @@ export default function Sidebar({
 
   const SECTIONS = getSections();
 
+  const displayName = useMemo(() => {
+    if (status === "loading") return "Loading...";
+    const firstName = (session?.user as any)?.firstName as string | undefined;
+    const lastName = (session?.user as any)?.lastName as string | undefined;
+    const email = session?.user?.email ?? "";
+    if (firstName) return `${firstName} ${lastName ?? ""}`.trim();
+    if (email) return email.split("@")[0];
+    return "User";
+  }, [session, status]);
+
+  const displayRole = useMemo(() => {
+    if (status === "loading") return "...";
+    const sr = (session?.user as any)?.systemRole as string | undefined;
+    if (!sr) return "User";
+    if (sr === "ADMIN") return "Administrator";
+    return sr;
+  }, [session, status]);
+
+  const initials = useMemo(() => {
+    const firstName = (session?.user as any)?.firstName as string | undefined;
+    const lastName = (session?.user as any)?.lastName as string | undefined;
+    const email = session?.user?.email ?? "";
+    const first = firstName?.[0] ?? "";
+    const last = lastName?.[0] ?? "";
+    const fallback = email?.[0] ?? "U";
+    return (first || last ? `${first}${last}` : fallback).toUpperCase();
+  }, [session]);
+
   const NavItem = ({ item }: { item: NavItemType }) => {
     const Icon = item.icon;
     const finalHref = buildHref(selectedService, item);
-
-    const active =
-      pathname === finalHref || (pathname?.startsWith(finalHref + "/") ?? false);
-
+    const active = pathname === finalHref || (pathname?.startsWith(finalHref + "/") ?? false);
     const isNew = item.badge === "New";
 
     return (
@@ -140,9 +165,7 @@ export default function Sidebar({
         <div
           className={clsx(
             "relative p-2.5 rounded-lg transition-all duration-200",
-            active
-              ? "bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg"
-              : "bg-white/5 group-hover:bg-white/10"
+            active ? "bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg" : "bg-white/5 group-hover:bg-white/10"
           )}
         >
           <Icon
@@ -151,16 +174,15 @@ export default function Sidebar({
               active ? "text-white" : "text-white/70 group-hover:text-white"
             )}
           />
-
           {isNew && (
             <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full border border-[#131313]" />
           )}
         </div>
 
-        <span className="text-sm  font-medium truncate flex-1">{item.label}</span>
+        <span className="text-sm font-medium truncate flex-1">{item.label}</span>
 
         {item.badge && (
-          <span className="ml-2 px-2.5 py-0.5 text-[10px]  font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full shadow-sm">
+          <span className="ml-2 px-2.5 py-0.5 text-[10px] font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-full shadow-sm">
             {item.badge}
           </span>
         )}
@@ -183,7 +205,7 @@ export default function Sidebar({
             </div>
 
             <div>
-              <div className="text-white  font-bold text-xl bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text">
+              <div className="text-white font-bold text-xl bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
                 ThinkFirst
               </div>
               <div className="text-white/50 text-xs">Insurance Platform</div>
@@ -197,7 +219,7 @@ export default function Sidebar({
               <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
               <span className="text-xs text-white/70">Active</span>
             </div>
-            <div className="flex items-center gap-1 text-emerald-300 text-xs  font-bold">
+            <div className="flex items-center gap-1 text-emerald-300 text-xs font-bold">
               <Sparkles className="h-3 w-3" />
               <span>Premium</span>
             </div>
@@ -208,7 +230,7 @@ export default function Sidebar({
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
         {SECTIONS.map((section) => (
           <div key={section.title}>
-            <div className="text-[10px] text-white/40  font-bold tracking-widest mb-1 px-3">
+            <div className="text-[10px] text-white/40 font-bold tracking-widest mb-1 px-3">
               {section.title}
             </div>
             <div className="space-y-1.5">
@@ -224,17 +246,15 @@ export default function Sidebar({
         <div className="flex items-center gap-3">
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full blur opacity-30" />
-            <div className="relative h-11 w-11 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white  font-bold shadow-lg">
-              KR
+            <div className="relative h-11 w-11 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg">
+              {initials}
             </div>
             <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 rounded-full border-2 border-[#1e293b]" />
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="text-sm  font-bold text-white truncate">
-              Kishor Reddy
-            </div>
-            <div className="text-[11px] text-white/50 truncate">Director</div>
+            <div className="text-sm font-bold text-white truncate">{displayName}</div>
+            <div className="text-[11px] text-white/50 truncate">{displayRole}</div>
           </div>
 
           <button className="p-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors duration-200">
