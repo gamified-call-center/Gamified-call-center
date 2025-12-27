@@ -74,7 +74,7 @@ type Employee = {
 
 type AgentProfile = {
   id?: string;
-  npm?: string | null;
+  npn?: string | null;
   yearsOfExperience?: number | null;
   ahipCertified?: boolean;
   ahipProofUrl?: string | null;
@@ -142,7 +142,7 @@ function hasEmployeeData(e: Employee | null) {
 function hasAgentData(a: AgentProfile | null) {
   if (!a) return false;
   return !!(
-    a.npm ||
+    a.npn ||
     (a.yearsOfExperience ?? 0) > 0 ||
     a.stateLicensed ||
     a.ahipCertified
@@ -181,8 +181,8 @@ const toEmployeeOption = (emp?: any): Option | null => {
 export default function UserProfileView() {
   const params = useParams<{ id?: string }>();
   const userId =
-    (params?.id as string | undefined) ||
-    "5dbfc2a1-ae62-478b-9a07-7fb7b345bf41";
+    (params?.id as string | undefined) 
+  
   const [data, setData] = useState<UserFull | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -228,7 +228,7 @@ export default function UserProfileView() {
     setModalInitial({});
   };
 
-  useEffect(() => {
+  
     const load = async () => {
       if (!userId) return;
       setLoading(true);
@@ -242,6 +242,7 @@ export default function UserProfileView() {
         setLoading(false);
       }
     };
+    useEffect(() => {
     load();
   }, [userId]);
 
@@ -255,6 +256,7 @@ export default function UserProfileView() {
       );
      
       setData(updated.body as UserFull);
+      await load();
     } catch (error) {
       console.error("errror is", error);
     } finally {
@@ -278,11 +280,7 @@ export default function UserProfileView() {
     },
     { id: "address", label: "Address", icon: <MapPin className="w-4 h-4" /> },
     { id: "security", label: "Security", icon: <Lock className="w-4 h-4" /> },
-    {
-      id: "activity",
-      label: "Activity",
-      icon: <Activity className="w-4 h-4" />,
-    },
+    
   ];
 
   const [profileImage, setProfileImage] = useState<string>(
@@ -366,7 +364,7 @@ export default function UserProfileView() {
     const dto = {
       agentProfile: {
         ...(data?.agentProfile?.id ? { id: data.agentProfile.id } : {}),
-        npm: v.npm?.trim() || null,
+        npn: v.npn?.trim() || null,
         yearsOfExperience: Number(v.yearsOfExperience ?? 0),
         ahipCertified: !!v.ahipCertified,
         ahipProofUrl: v.ahipProofUrl?.trim() || null,
@@ -406,7 +404,7 @@ export default function UserProfileView() {
 
   const savePassword = async (v: any) => {
     if (v.newPassword !== v.confirmPassword) {
-      toast.error("Passwords do not match ❌");
+      toast.error("Passwords do not match ");
       return;
     }
 
@@ -426,7 +424,7 @@ export default function UserProfileView() {
 
       if (res.status === 200) {
         toast.success("Password updated ");
-      }
+      } await load()
     } catch (err: any) {
       toast.error(err?.message || "Failed to update password");
     }
@@ -616,7 +614,7 @@ export default function UserProfileView() {
     const mode: ModalMode = hasAgentData(a) ? "edit" : "add";
 
     const init = {
-      npm: a?.npm ?? "",
+      npn: a?.npn ?? "",
       yearsOfExperience: a?.yearsOfExperience ?? 0,
       ahipCertified: a?.ahipCertified ?? false,
       ahipProofUrl: a?.ahipProofUrl ?? "",
@@ -644,8 +642,8 @@ export default function UserProfileView() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <KV
               icon={<Award className="w-4 h-4" />}
-              label="NPM"
-              value={a?.npm}
+              label="NPN"
+              value={a?.npn}
             />
             <KV
               icon={<TrendingUp className="w-4 h-4" />}
@@ -1353,11 +1351,11 @@ function ProfileModal({
           {type === "professional" && (
             <div className="md:space-y-4 space-y-2">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field label="NPM">
+                <Field label="NPN">
                   <TextInput
-                    value={values.npm || ""}
-                    onChange={(e: any) => set("npm", e.target.value)}
-                    placeholder="NPM"
+                    value={values.npn || ""}
+                    onChange={(e: any) => set("npn", e.target.value)}
+                    placeholder="NPn"
                   />
                 </Field>
 

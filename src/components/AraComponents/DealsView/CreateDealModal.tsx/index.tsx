@@ -14,25 +14,30 @@ import {
   WORK_TYPE_OPTIONS,
 } from "../../../../Utils/constants/ara/constants";
 import { TextInput } from "@/commonComponents/form/TextInput";
+import FileInput from "@/commonComponents/FileInput";
 import { Field } from "@/commonComponents/form/Field";
 import { MultiSelect } from "@/commonComponents/form/MultiSelect";
 import { NumberInput } from "@/commonComponents/form/NumberInput";
 import { SingleSelect } from "@/commonComponents/form/SingleSelect";
 import { Textarea } from "@/commonComponents/form/Textarea";
-import { FileInput } from "@/commonComponents/form/FileInput";
+// import { FileInput } from "@/commonComponents/form/FileInput";
 import Modal from "@/commonComponents/Modal";
 import Drawer from "@/commonComponents/Drawers";
 import Button from "@/commonComponents/Button";
+import toast from "react-hot-toast";
+
+import { Checkbox } from "@/commonComponents/form/Checkbox";
 
 /** ========= Types (same file, as you asked) ========= */
 export type SelectOption = { label: string; value: string; disabled?: boolean };
+export type DealStatus = "OPEN" | "CLOSED" | "REJECTED";
 
 export type DealForm = {
   coverageTypes: string[]; // MultiSelect
   firstName: string;
   lastName: string;
   numberOfApplicants: string; // keep string for input
-  ffm: string;
+  ffm: boolean;
   career: string;
   typeOfWork: string;
   monthlyIncome: string;
@@ -41,30 +46,32 @@ export type DealForm = {
   customerLanguage: string;
   closedDate: string; // datetime-local
   agentId: string;
+  status: DealStatus;
   notes: string;
-  files: File[];
+  documentType: string;
+  documentUrls: string[];
 };
 
 export type CreateDealModalMode = "CREATE" | "EDIT";
+const DEAL_STATUS_OPTIONS = [
+  { label: "Open", value: "OPEN" },
+  { label: "Closed", value: "CLOSED" },
+  { label: "Rejected", value: "REJECTED" },
+] as const;
 
 export type CreateDealModalProps = {
   open: boolean;
   onClose: () => void;
 
-  /** dropdown options */
   agents?: SelectOption[];
 
-  /** CREATE or EDIT */
   mode?: CreateDealModalMode;
 
-  /** Prefill form on edit */
   initialValues?: Partial<DealForm>;
 
-  /** Called on submit with validated form */
   onSubmit?: (payload: DealForm) => Promise<void> | void;
 };
 
-/** ========= Helpers ========= */
 const pad2 = (n: number) => String(n).padStart(2, "0");
 
 const nowAsDateTimeLocal = () => {
@@ -79,7 +86,7 @@ const defaultForm = (): DealForm => ({
   firstName: "",
   lastName: "",
   numberOfApplicants: "",
-  ffm: "",
+  ffm: false,
   career: "",
   typeOfWork: "",
   monthlyIncome: "",
@@ -89,7 +96,9 @@ const defaultForm = (): DealForm => ({
   closedDate: nowAsDateTimeLocal(),
   agentId: "",
   notes: "",
-  files: [],
+  status: "OPEN",
+  documentType: "",
+  documentUrls: [],
 });
 
 export default function CreateDealModal({
@@ -115,7 +124,6 @@ export default function CreateDealModal({
       setForm({
         ...defaultForm(),
         ...initialValues,
-        files: [], // keep empty for edit
       } as DealForm);
     } else {
       setForm(defaultForm());
@@ -131,7 +139,7 @@ export default function CreateDealModal({
       form.firstName !== base.firstName ||
       form.lastName !== base.lastName ||
       form.numberOfApplicants !== base.numberOfApplicants ||
-      form.ffm !== base.ffm ||
+      // form.ffm !== base.ffm ||
       form.career !== base.career ||
       form.typeOfWork !== base.typeOfWork ||
       form.monthlyIncome !== base.monthlyIncome ||
@@ -140,7 +148,8 @@ export default function CreateDealModal({
       form.customerLanguage !== base.customerLanguage ||
       form.agentId !== base.agentId ||
       form.notes !== base.notes ||
-      form.files.length > 0
+      form.documentType !== base.documentType ||
+      form.documentUrls.length > 0
     );
   }, [form]);
 
@@ -161,7 +170,7 @@ export default function CreateDealModal({
     if (form.numberOfApplicants && Number(form.numberOfApplicants) <= 0)
       e.numberOfApplicants = "Must be > 0";
 
-    if (!form.ffm.trim()) e.ffm = "Required";
+    // if (!form.ffm) e.ffm = "FFM must be enabled";
     if (!form.career) e.career = "Required";
     if (!form.typeOfWork) e.typeOfWork = "Required";
     if (!form.monthlyIncome) e.monthlyIncome = "Required";
@@ -175,16 +184,14 @@ export default function CreateDealModal({
     setErrors(e);
     return Object.keys(e).length === 0;
   };
-
+  console.log(errors);
 
   const handleSubmit = async () => {
     if (!validate()) return;
 
-
     try {
       setSaving(true);
       if (onSubmit) await onSubmit({ ...form });
-
     } finally {
       setSaving(false);
     }
@@ -196,10 +203,11 @@ export default function CreateDealModal({
       handleDrawerToggle={(v) => !v && onClose()}
       //   title={mode === "EDIT" ? "Edit Deal" : "Create Deal"}
       openVariant="right"
-      panelCls=" w-[95%] md:w-[80%] lg:w-[calc(82%-190px)] app-card shadow-[0_20px_50px_rgba(0,0,0,0.18)] border-l border-slate-200 overflow-x-hidden z-[9999999] " panelInnerCls=" app-surface md:px-8 px-3 py-6" overLayCls="bg-slate-900/40  backdrop-blur-sm"
+      panelCls=" w-[95%] md:w-[80%] lg:w-[calc(82%-190px)] app-card shadow-[0_20px_50px_rgba(0,0,0,0.18)] border-l border-slate-200 overflow-x-hidden z-[9999999] "
+      panelInnerCls=" app-surface md:px-8 px-3 py-6"
+      overLayCls="bg-slate-900/40  backdrop-blur-sm"
     >
       <div className="md:space-y-8 space-y-4">
-
         <div className="mb-6">
           <div className="flex items-center gap-2 font-bold text-lg">
             {mode === "EDIT" ? (
@@ -229,8 +237,7 @@ export default function CreateDealModal({
           </p>
         </div>
 
-
-        <Section title="Coverage & Customer" >
+        <Section title="Coverage & Customer">
           <Field label="Coverage Type" required>
             <MultiSelect
               values={form.coverageTypes}
@@ -270,10 +277,10 @@ export default function CreateDealModal({
             </Field>
 
             <Field label="FFM">
-              <TextInput
-                value={form.ffm}
-                placeholder="Enter Number of FFM"
-                onChange={(e) => update("ffm", e.target.value)}
+              <Checkbox
+                label="FFM Applicable"
+                checked={form.ffm}
+                onChange={(e) => update("ffm", e.target.checked)}
               />
             </Field>
           </TwoCol>
@@ -340,23 +347,32 @@ export default function CreateDealModal({
 
         {/* ---------------- Deal ---------------- */}
         <Section title="Deal Details">
-          <Field label="Closed Date">
-            <TextInput
-              type="datetime-local"
-              value={form.closedDate}
-              onChange={(e) => update("closedDate", e.target.value)}
-              leftIcon={<Calendar size={16} />}
-            />
-          </Field>
+          <TwoCol>
+            <Field label="Closed Date">
+              <TextInput
+                type="datetime-local"
+                value={form.closedDate}
+                onChange={(e) => update("closedDate", e.target.value)}
+                leftIcon={<Calendar size={16} />}
+              />
+            </Field>
 
-          <Field label="Assign Agent">
-            <SingleSelect
-              value={form.agentId}
-              onChange={(v) => update("agentId", v)}
-              options={agents}
-              searchable
-            />
-          </Field>
+            <Field label="Assign Agent">
+              <SingleSelect
+                value={form.agentId}
+                onChange={(v) => update("agentId", v)}
+                options={agents}
+                searchable
+              />
+            </Field>
+            <Field label="Deal Status">
+              <SingleSelect
+                value={form.status}
+                onChange={(v) => update("status", v as DealStatus)}
+                options={DEAL_STATUS_OPTIONS as any}
+              />
+            </Field>
+          </TwoCol>
         </Section>
 
         {/* ---------------- Notes ---------------- */}
@@ -368,27 +384,39 @@ export default function CreateDealModal({
               onChange={(e) => update("notes", e.target.value)}
             />
           </Field>
+          <Field label="document Type">
+            <TextInput
+              value={form.documentType}
+              placeholder="Enter documentType "
+              onChange={(e) => update("documentType", e.target.value)}
+              leftIcon={<User size={16} />}
+            />
+          </Field>
 
           <Field label="Attachments">
             <FileInput
-              multiple
-              onChange={(e) =>
-                update("files", Array.from(e.target.files || []))
-              }
+              type="file"
+              folderName="deals"
+              initialFileUrl={form.documentUrls?.[0]}
+              requiredClass="app-border"
+              onFileChange={(url: string) => {
+                if (!url) return;
+
+                update("documentUrls", [...form.documentUrls, url]);
+                toast.success("Document uploaded successfully!");
+              }}
             />
           </Field>
         </Section>
 
         {/* ---------------- Footer ---------------- */}
         <div className="sticky bottom-0 app-card px-8 py-4 flex justify-end gap-3 backdrop-blur">
-
           <Button
             onClick={onClose}
             className="px-4 py-2 font-medium rounded-lg app-btn transition"
           >
             Cancel
           </Button>
-
 
           <Button
             type="submit"
@@ -397,7 +425,6 @@ export default function CreateDealModal({
           >
             {mode === "EDIT" ? "Update Deal" : "Create Deal"}
           </Button>
-
         </div>
       </div>
     </Drawer>
@@ -407,7 +434,7 @@ type SectionProps = {
   title: string;
   subtitle?: string;
   children: React.ReactNode;
-  titleCls?: string
+  titleCls?: string;
 };
 
 const Section = ({ title, subtitle, titleCls, children }: SectionProps) => (
@@ -435,7 +462,6 @@ const Section = ({ title, subtitle, titleCls, children }: SectionProps) => (
     </div>
   </div>
 );
-
 
 const TwoCol = ({ children }: { children: React.ReactNode }) => (
   <div

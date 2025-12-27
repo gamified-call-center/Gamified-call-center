@@ -59,12 +59,12 @@ export default function TableToolbar({
         className
       )}
     >
-      <div className="flex flex-col gap-3 md:flex-row md:items-center w-full border-[2px] border-gray-200 dark:border-gray-200 rounded-xl">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center w-full border-[2px] border-gray-400 dark:border-gray-200 rounded-xl">
         {search ? (
           <>
             <div
               className={cn(
-                "flex items-center justify-between gap-2 rounded-xl px-3 md:py-[6px] py-1 border dark:border-white   w-full app-input",
+                "flex items-center justify-between gap-2 rounded-xl px-3 md:py-[6px] py-1    w-full app-input",
                 searchWidth
               )}
             >

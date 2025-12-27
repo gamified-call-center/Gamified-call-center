@@ -50,13 +50,13 @@ type PermissionMaster = {
 
 type Crud = { view: boolean; create: boolean; edit: boolean; delete: boolean };
 
-type ResourceRow = {
-  resource: string;
-  view: boolean;
-  create: boolean;
-  edit: boolean;
-  delete: boolean;
-};
+// type ResourceRow = {
+//   resource: string;
+//   view: boolean;
+//   create: boolean;
+//   edit: boolean;
+//   delete: boolean;
+// };
 
 type DesignationPermissionApiRow = {
   id?: number;
@@ -130,7 +130,9 @@ export default function DesignationsPermissionsPage() {
   const [tableSearch, setTableSearch] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const confirmType = "DEACTIVATE";
+  const [confirmType, setConfirmType] = useState<"ACTIVATE" | "DEACTIVATE">(
+    "DEACTIVATE"
+  );
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
@@ -167,7 +169,7 @@ export default function DesignationsPermissionsPage() {
   ]);
 
   const [agentProfile, setAgentProfile] = useState<CreateAgentProfileDto>({
-    npm: "",
+    npn: "",
     yearsOfExperience: 0,
     ahipCertified: false,
     ahipProofUrl: "",
@@ -285,72 +287,70 @@ export default function DesignationsPermissionsPage() {
   >(null);
 
   const openEditDesignation = (d: any) => {
-    setSelectedDesignationId(Number(d.id));
+    setSelectedDesignationId(d.id);
     setSelectedDesignation(d);
     setForm({ name: d.name ?? "", levelOrder: Number(d.levelOrder ?? 0) });
     setFormMode("edit");
     setFormOpen(true);
   };
 
-  const updateDesignation = async () => {
-    if (!selectedDesignationId) {
-      toast.error("No designation selected");
+  const submitDesignation = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const errorsObj = validateDesignationForm(form);
+    setErrors(errorsObj);
+
+    if (Object.keys(errorsObj).length) {
+      toast.error("Please fix the errors before submitting");
       return;
     }
 
-    const id = Number(selectedDesignationId);
-    if (!Number.isInteger(id) || id <= 0) {
-      toast.error("Invalid designation id");
-      return;
-    }
+    setSaving(true);
 
     const payload = {
       name: form.name.trim(),
       levelOrder: Number(form.levelOrder),
     };
 
-
-    const res = await apiClient.put(
-      `${apiClient.URLS.designation}/${id}`,
-      payload,
-      true
-    );
-
-    setDesignations((prev) =>
-      prev
-        .map((d) => (Number(d.id) === id ? res.data : d))
-        .sort((a, b) => a.levelOrder - b.levelOrder)
-    );
-
-    toast.success("Designation updated");
-    setFormOpen(false);
-  };
-
-  const createDesignation = async () => {
-    const e = validateDesignationForm(form);
-    setErrors(e);
-    if (Object.keys(e).length) return;
     try {
-      setSaving(true);
-      const payload = {
-        name: form.name.trim(),
-        levelOrder: Number(form.levelOrder),
-      };
+      let res;
 
-      const res = await apiClient.post(
-        apiClient.URLS.designation,
-        payload,
-        true
-      );
+      if (formMode === "edit" && selectedDesignationId) {
+        const id = selectedDesignationId;
+        res = await apiClient.put(
+          `${apiClient.URLS.designation}/${id}`,
 
-      setDesignations((prev) =>
-        [...prev, res.data].sort((a, b) => a.levelOrder - b.levelOrder)
-      );
+          payload,
 
-      toast.success("Designation created");
-      setFormOpen(false);
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message || "Create failed");
+          true
+        );
+      } else {
+        res = await apiClient.post(apiClient.URLS.designation, payload, true);
+      }
+
+      if (res.status === 200 || res.status === 201) {
+        setDesignations((prev) =>
+          formMode === "edit"
+            ? prev.map((d) =>
+                Number(d.id) === Number(selectedDesignationId) ? res.data : d
+              )
+            : [...prev, res.data]
+        );
+
+        toast.success(
+          formMode === "edit"
+            ? "Designation updated successfully!"
+            : "Designation created successfully!"
+        );
+
+        await fetchDesignations();
+        setFormOpen(false);
+      }
+    } catch (error: any) {
+      console.error("Error saving designation:", error);
+      const errorMessage =
+        error?.response?.data?.message || "Failed to save designation";
+      toast.error(errorMessage);
     } finally {
       setSaving(false);
     }
@@ -455,7 +455,7 @@ export default function DesignationsPermissionsPage() {
     ]);
 
     setAgentProfile({
-      npm: "",
+      npn: "",
       yearsOfExperience: 0,
       ahipCertified: false,
       ahipProofUrl: "",
@@ -486,7 +486,7 @@ export default function DesignationsPermissionsPage() {
           ? u.dob.slice(0, 10)
           : String(u.dob).slice(0, 10),
       email: u.email || "",
-      password: "", // usually don't edit password here
+      password: "", 
       phone: u.phone || "",
       profileImage: (u as any)?.profileImage || "",
       systemRole: u.systemRole || "STANDARD",
@@ -515,7 +515,7 @@ export default function DesignationsPermissionsPage() {
 
     if (u.agentProfile) {
       setAgentProfile({
-        npm: u.agentProfile.npm || "",
+        npn: u.agentProfile.npn || "",
         yearsOfExperience: Number(u.agentProfile.yearsOfExperience || 0),
         ahipCertified: !!u.agentProfile.ahipCertified,
         ahipProofUrl: u.agentProfile.ahipProofUrl || "",
@@ -582,7 +582,7 @@ export default function DesignationsPermissionsPage() {
 
     if (payload.agentProfile) {
       update.agentProfile = {
-        npm: payload.agentProfile.npm,
+        npn: payload.agentProfile.npn,
         yearsOfExperience: payload.agentProfile.yearsOfExperience,
         ahipCertified: payload.agentProfile.ahipCertified,
         ahipProofUrl: payload.agentProfile.ahipCertified
@@ -648,6 +648,29 @@ export default function DesignationsPermissionsPage() {
     }
   };
   const totalPages = Math.ceil(total / LIMIT);
+  const openConfirmModal = (u: UserEntity) => {
+    setSelectedUser(u);
+    setConfirmType(u.userStatus === "ACTIVE" ? "DEACTIVATE" : "ACTIVATE");
+    setConfirmOpen(true);
+  };
+
+  const reactivateUser = async (u: UserEntity) => {
+    if (!u) return;
+
+    try {
+      setSavingUser(true);
+      await apiClient.patch(`${apiClient.URLS.user}/${u.id}/status`, {
+        userStatus: "ACTIVE",
+      });
+      toast.success("User reactivated");
+      await fetchUsers();
+    } catch (e: any) {
+      toast.error(e?.response?.data?.message || "Activation failed");
+    } finally {
+      setSavingUser(false);
+    }
+  };
+
   const deactivateUser = async (u: UserEntity) => {
     if (!u) return;
 
@@ -701,7 +724,6 @@ export default function DesignationsPermissionsPage() {
                     "Search users by name, email, phone, role, designation...",
                   widthClassName: "min-w-full  rounded-xl",
                   debounceMs: 300,
-
                 }}
                 actionsSlot={
                   <>
@@ -727,9 +749,10 @@ export default function DesignationsPermissionsPage() {
               />
             </div>
 
-
             {filteredUsers.length === 0 ? (
-              <div className="py-12 text-center label-text font-medium app-text">No users found</div>
+              <div className="py-12 text-center label-text font-medium app-text">
+                No users found
+              </div>
             ) : (
               <div className="grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-3">
                 {filteredUsers.map((u) => (
@@ -787,9 +810,12 @@ export default function DesignationsPermissionsPage() {
                         <div className="flex items-center gap-2">
                           {u.userStatus === "INACTIVE" ? (
                             <Button
-                              onClick={(e) => e.stopPropagation()}
-                              className="p-2 md:p-2.5 text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 
-                 rounded-full opacity-70 cursor-default"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openConfirmModal(u);
+                              }}
+                              className="p-2 md:p-2.5 text-emerald-700 bg-emerald-100 hover:bg-emerald-200
+      dark:bg-emerald-500/20 dark:hover:bg-emerald-500/30 rounded-full transition-all"
                             >
                               <Check size={16} className="md:size-[18px]" />
                             </Button>
@@ -797,12 +823,10 @@ export default function DesignationsPermissionsPage() {
                             <Button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                deactivateUser(u);
+                                openConfirmModal(u);
                               }}
-                              className="p-2 md:p-2.5 text-rose-600 bg-rose-50 hover:bg-rose-100 
-                 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 rounded-full transition-all 
-                 disabled:opacity-40"
-                              disabled={savingUser}
+                              className="p-2 md:p-2.5 text-rose-700 bg-rose-100 hover:bg-rose-200
+      dark:bg-rose-500/20 dark:hover:bg-rose-500/30 rounded-full transition-all"
                             >
                               <Trash2 size={16} className="md:size-[18px]" />
                             </Button>
@@ -820,7 +844,7 @@ export default function DesignationsPermissionsPage() {
                         <span className="mx-1.5">•</span>
                         NPN:
                         <span className="app-text ml-1">
-                          {u.agentProfile.npm}
+                          {u.agentProfile.npn}
                         </span>
                       </div>
                     )}
@@ -843,57 +867,105 @@ export default function DesignationsPermissionsPage() {
         {confirmOpen && (
           <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)}>
             <div className="relative p-6 w-[92%] max-w-md mx-auto app-card rounded-3xl shadow-2xl border app-border animate-scaleIn overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1.5 bg-orange-500"></div>
+              <div
+                className={`absolute top-0 left-0 w-full h-1.5 ${
+                  confirmType === "DEACTIVATE"
+                    ? "bg-orange-500"
+                    : "bg-green-500"
+                }`}
+              ></div>
 
               <div className="flex justify-center mt-2">
-                <div className="w-18 h-18 flex items-center justify-center rounded-full border-4 app-card shadow-lg border-orange-200 shadow-orange-400/30">
-                  <Trash2 className="w-8 h-8 text-orange-600 animate-pulse" />
+                <div
+                  className={`w-16 h-16 flex items-center justify-center rounded-full border-4 app-card shadow-lg ${
+                    confirmType === "DEACTIVATE"
+                      ? "border-orange-200 shadow-orange-400/30"
+                      : "border-green-200 shadow-green-400/30"
+                  }`}
+                >
+                  {confirmType === "DEACTIVATE" ? (
+                    <Trash2 className="w-8 h-8 text-orange-600 animate-pulse" />
+                  ) : (
+                    <Check className="w-8 h-8 text-green-600 animate-bounce" />
+                  )}
                 </div>
               </div>
 
               <div className="text-center mt-4 space-y-2">
                 <h3 className="text-[12px] md:text-[20px] font-extrabold app-text tracking-tight">
-                  Deactivate User?
+                  {confirmType === "DEACTIVATE"
+                    ? "Deactivate Agent?"
+                    : "Reactivate Agent?"}
                 </h3>
+
                 <p className="text-sm app-text font-medium">
-                  This user will lose access and go offline.
+                  {confirmType === "DEACTIVATE"
+                    ? "This agent will lose access and go offline."
+                    : "Agent will regain access and return to active duty."}
                 </p>
               </div>
 
-              {/* Progress bar */}
               <div className="flex items-center justify-center gap-2 mt-5">
-                <span className="text-xs  font-bold text-slate-400">
-                  Power
-                </span>
+                <span className="text-xs font-bold text-slate-400">Power</span>
                 <div className="w-40 h-2 bg-slate-100 rounded-full overflow-hidden">
-                  <div className="h-full w-[35%] transition-all duration-700 bg-orange-600"></div>
+                  <div
+                    className={`h-full transition-all duration-700 ${
+                      confirmType === "DEACTIVATE"
+                        ? "w-[35%] bg-orange-600"
+                        : "w-full bg-green-600"
+                    }`}
+                  ></div>
                 </div>
-                <span className="text-xs  font-bold text-slate-400">
-                  35%
+                <span className="text-xs font-bold text-slate-400">
+                  {confirmType === "DEACTIVATE" ? "35%" : "100%"}
                 </span>
               </div>
 
-              {/* Buttons */}
               <div className="flex justify-center gap-4 mt-7">
                 <Button
-                  className="md:px-5 px-3 md:py-2.5 py-1.5 md:text-[14px] text-[12px] rounded-2xl app-card app-text font-medium   hover:scale-105 active:scale-95 transition-all"
+                  className="md:px-5 px-3 md:py-2.5 py-1.5 md:text-[14px] text-[12px] rounded-2xl app-card app-text font-bold hover:scale-105 active:scale-95 transition-all"
                   onClick={() => setConfirmOpen(false)}
                 >
                   Cancel
                 </Button>
 
                 <Button
-                  className="md:px-6 px-3 md:py-2.5 py-1.5 md:text-[14px] text-[12px] rounded-2xl text-white font-medium   flex items-center gap-2 shadow-lg hover:scale-110 active:scale-95 transition-all bg-linear-to-r from-orange-600 to-red-600 shadow-red-400/40"
-                  onClick={() => {
-                    deactivateUser(selectedUser as any);
+                  className={`md:px-6 px-3 md:py-2.5 py-1.5 md:text-[14px] text-[12px] rounded-2xl text-white font-bold flex items-center gap-2 shadow-lg hover:scale-110 active:scale-95 transition-all ${
+                    confirmType === "DEACTIVATE"
+                      ? "bg-linear-to-r from-orange-600 to-red-600 shadow-red-400/40"
+                      : "bg-linear-to-r from-green-600 to-emerald-600 shadow-green-400/40"
+                  }`}
+                  onClick={async () => {
+                    if (!selectedUser) {
+                      toast.error("No user selected");
+                      return;
+                    }
+
+                    try {
+                      if (confirmType === "DEACTIVATE") {
+                        await deactivateUser(selectedUser);
+                      } else {
+                        await reactivateUser(selectedUser);
+                      }
+                    } catch (err) {
+                      toast.error("Action failed");
+                    }
+
                     setConfirmOpen(false);
                   }}
                 >
-                  <Trash2 className="w-4 h-4" /> Deactivate
+                  {confirmType === "DEACTIVATE" ? (
+                    <>
+                      <Trash2 className="w-4 h-4" /> Deactivate
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4" /> Reactivate
+                    </>
+                  )}
                 </Button>
               </div>
 
-              {/* Background decorative icons */}
               <div className="pointer-events-none absolute inset-0 opacity-10">
                 <Eye className="absolute top-8 left-10 w-6 h-6" />
                 <Download className="absolute top-16 right-12 w-5 h-5 app-text animate-ping" />
@@ -907,7 +979,7 @@ export default function DesignationsPermissionsPage() {
         {tab === "designations" ? (
           <div className="md:pt-5 pt-2 md:space-y-4 space-y-2 app-card">
             <div className="">
-              <div >
+              <div>
                 <div className="rounded-md shadow-2xl md:p-4  p-2 ">
                   <TableToolbar
                     search={{
@@ -1015,9 +1087,7 @@ export default function DesignationsPermissionsPage() {
               />
             </div>
           </div>
-
         ) : null}
-
       </div>
 
       {/* Add/Edit Designation Modal */}
@@ -1069,9 +1139,7 @@ export default function DesignationsPermissionsPage() {
             <Button
               className="md:px-4 px-2 md:py-2 py-1 font-medium md:text-[14px] text-[12px] rounded-xl bg-green-600 text-white hover:bg-green-700 transition disabled:opacity-50"
               disabled={saving || !form.name.trim() || form.levelOrder < 1}
-              onClick={
-                formMode === "add" ? createDesignation : updateDesignation
-              }
+              onClick={submitDesignation}
             >
               {saving ? "Saving..." : formMode === "add" ? "Create" : "Update"}
             </Button>
@@ -1108,6 +1176,17 @@ export default function DesignationsPermissionsPage() {
     </div>
   );
 }
+type ResourceRow = {
+  id?: string; // IMPORTANT: server id for edit/delete
+  resource: string;
+  view: boolean;
+  create: boolean;
+  edit: boolean;
+  delete: boolean;
+  _status?: "new" | "dirty" | "clean" | "deleted";
+};
+
+type ResourceApi = { tablename: string };
 
 function DesignationPermissionsCrudModalBody({
   designation,
@@ -1116,20 +1195,18 @@ function DesignationPermissionsCrudModalBody({
   designation: Designation;
   onClose: () => void;
 }) {
-  const [designationOptions, setDesignationOptions] = useState<Option[]>([]);
-  const [designationId, setDesignationId] = useState<string>(
-    String(designation.id)
-  );
+  const designationId = String(designation?.id || "");
+  const [resources, setResources] = useState<string[]>([]);
 
-  const [allPermissions, setAllPermissions] = useState<PermissionMaster[]>([]);
-  const [allowedByCode, setAllowedByCode] = useState<Record<string, boolean>>(
-    {}
-  );
+  const [loading, setLoading] = useState(false);
+  const [savingAll, setSavingAll] = useState(false);
 
-  const [formData, setFormData] = useState({
-    permissions: [] as ResourceRow[],
+  // table data
+  const [formData, setFormData] = useState<{ permissions: ResourceRow[] }>({
+    permissions: [],
   });
 
+  // editor
   const [newResource, setNewResource] = useState<ResourceRow>({
     resource: "",
     view: false,
@@ -1137,54 +1214,35 @@ function DesignationPermissionsCrudModalBody({
     edit: false,
     delete: false,
   });
-
-  const [editIndex, setEditIndex] = useState<number | null>(null);
-
+  const [editId, setEditId] = useState<string | null>(null);
   const [resourceSearch, setResourceSearch] = useState("");
   const [tableSearch, setTableSearch] = useState("");
 
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-
+  /** 1) fetch resources */
   useEffect(() => {
-    const fetchDesignations = async () => {
+    const fetchResources = async () => {
       try {
         const res: any = await apiClient.get(
-          apiClient.URLS.designation,
+          apiClient.URLS.resources,
           {},
           true
         );
-        const list = Array.isArray(res?.body) ? res.body : [];
-
-        setDesignationOptions(
-          list.map((d: any) => ({ label: d.name, value: String(d.id) }))
+        const list: ResourceApi[] = Array.isArray(res?.body) ? res.body : [];
+        setResources(
+          list
+            .map((x) => x.tablename)
+            .filter(Boolean)
+            .sort((a, b) => a.localeCompare(b))
         );
       } catch (e) {
         console.error(e);
+        toast.error("Failed to load resources");
       }
     };
-    fetchDesignations();
+    fetchResources();
   }, []);
 
-  /** fetch permissions master */
-  useEffect(() => {
-    const fetchPermissions = async () => {
-      try {
-        const res: any = await apiClient.get(
-          apiClient.URLS.permissions,
-          {},
-          true
-        );
-        const list = Array.isArray(res?.body) ? res.body : [];
-        setAllPermissions(list);
-      } catch (e) {
-        console.error(e);
-        toast.error("Failed to load permissions");
-      }
-    };
-    fetchPermissions();
-  }, []);
-
+  /** 2) fetch designation permissions */
   useEffect(() => {
     if (!designationId) return;
 
@@ -1192,81 +1250,39 @@ function DesignationPermissionsCrudModalBody({
       setLoading(true);
       try {
         const res: any = await apiClient.get(
-          `${apiClient.URLS.designationPermissions}/${designationId}`,
+          `${apiClient.URLS.designationPermissions}/${designationId}/permissions`,
           {},
           true
         );
 
-        const list: DesignationPermissionApiRow[] = Array.isArray(res?.body)
-          ? res.body
-          : [];
+        const list: ResourceRow[] = Array.isArray(res?.body) ? res.body : [];
+        list.sort((a, b) => (a.resource || "").localeCompare(b.resource || ""));
 
-        const map: Record<string, boolean> = {};
-        for (const row of list) {
-          const code =
-            row?.permission?.code ||
-            allPermissions.find((p) => p.id === row.permissionId)?.code;
-
-          if (code) map[code] = !!row.allowed;
-        }
-
-        setAllowedByCode(map);
+        // mark clean
+        setFormData({
+          permissions: list.map((x) => ({ ...x, _status: "clean" })),
+        });
       } catch (e) {
         console.error(e);
         toast.error("Failed to load designation permissions");
-        setAllowedByCode({});
+        setFormData({ permissions: [] });
       } finally {
         setLoading(false);
       }
     };
 
     fetchDesignationPermissions();
-  }, [designationId, allPermissions]);
+  }, [designationId]);
 
-  const resourceRowsFromServer = useMemo(() => {
-    const grouped: Record<string, ResourceRow> = {};
-
-    for (const p of allPermissions) {
-      const parsed = parsePermissionCode(p.code);
-      if (!parsed) continue;
-
-      const { resource, action } = parsed;
-
-      if (!grouped[resource]) {
-        grouped[resource] = {
-          resource,
-          view: false,
-          create: false,
-          edit: false,
-          delete: false,
-        };
-      }
-
-      grouped[resource][action] = !!allowedByCode[p.code];
-    }
-
-    return Object.values(grouped).sort((a, b) =>
-      a.resource.localeCompare(b.resource)
-    );
-  }, [allPermissions, allowedByCode]);
-
-  useEffect(() => {
-    setFormData({ permissions: resourceRowsFromServer });
-  }, [resourceRowsFromServer]);
-
+  /** Dropdown options */
   const filteredResourceDropdownOptions = useMemo(() => {
-    const unique = new Set<string>();
-    allPermissions.forEach((p) => {
-      const parsed = parsePermissionCode(p.code);
-      if (parsed) unique.add(parsed.resource);
-    });
-
-    let list = Array.from(unique).sort((a, b) => a.localeCompare(b));
-
+    let list = [...resources];
     if (resourceSearch.trim()) {
       const q = resourceSearch.trim().toLowerCase();
       list = list.filter(
-        (r) => r.includes(q) || formatResourceName(r).toLowerCase().includes(q)
+        (r) =>
+          r.toLowerCase().includes(q) ||
+          formatResourceName(r).toLowerCase().includes(q)
       );
     }
 
@@ -1274,47 +1290,29 @@ function DesignationPermissionsCrudModalBody({
       { label: "Select Resource", value: "" },
       ...list.map((r) => ({ label: formatResourceName(r), value: r })),
     ];
-  }, [allPermissions, resourceSearch]);
+  }, [resources, resourceSearch]);
 
+  /** Filter table */
   const filteredTableRows = useMemo(() => {
     const q = tableSearch.trim().toLowerCase();
-    if (!q) return formData.permissions;
-    return formData.permissions.filter(
+    const rows = formData.permissions.filter((r) => r._status !== "deleted");
+    if (!q) return rows;
+
+    return rows.filter(
       (r) =>
-        formatResourceName(r.resource).toLowerCase().includes(q) ||
-        r.resource.toLowerCase().includes(q)
+        r.resource.toLowerCase().includes(q) ||
+        formatResourceName(r.resource).toLowerCase().includes(q)
     );
   }, [formData.permissions, tableSearch]);
 
-  const handleCrudChange = ({
-    name,
-    checked,
-  }: {
-    name: keyof ResourceRow;
-    checked: boolean;
-  }) => {
+  /** Editor checkbox */
+  const handleCrudChange = (name: keyof ResourceRow, checked: boolean) => {
     setNewResource((prev) => ({ ...prev, [name]: checked }));
   };
 
-  const handleAddOrUpdateResource = () => {
-    if (!newResource.resource) {
-      toast.error("Please select a resource");
-      return;
-    }
-
-    if (editIndex !== null) {
-      const updated = [...formData.permissions];
-      updated[editIndex] = newResource;
-      setFormData({ permissions: updated });
-      setEditIndex(null);
-      toast.success("Permission updated successfully");
-    } else {
-      setFormData((prev) => ({
-        permissions: [...prev.permissions, newResource],
-      }));
-      toast.success("Permission added successfully");
-    }
-
+  /** Reset editor */
+  const resetEditor = () => {
+    setEditId(null);
     setNewResource({
       resource: "",
       view: false,
@@ -1325,145 +1323,278 @@ function DesignationPermissionsCrudModalBody({
     setResourceSearch("");
   };
 
-  const handleEditPermission = (index: number) => {
-    setEditIndex(index);
-    setNewResource(formData.permissions[index]);
-  };
+  /** ✅ Add/Update in LOCAL STATE only */
+  const handleAddOrUpdateResourceLocal = () => {
+    if (!designationId) return toast.error("Missing designation");
+    if (!newResource.resource) return toast.error("Please select a resource");
 
-  const handleRemovePermission = (index: number) => {
-    const updated = [...formData.permissions];
-    updated.splice(index, 1);
-    setFormData({ permissions: updated });
-    toast.success("Resource removed");
-  };
+    // prevent duplicates (resource unique)
+    const existing = formData.permissions.find(
+      (p) =>
+        p._status !== "deleted" &&
+        p.resource === newResource.resource &&
+        p.id !== editId
+    );
+    if (existing)
+      return toast.error("This resource already exists. Edit it instead.");
 
-  const toggleCell = (idx: number, action: keyof Crud) => {
-    const updated = [...formData.permissions];
-    updated[idx] = { ...updated[idx], [action]: !updated[idx][action] };
-    setFormData({ permissions: updated });
-  };
+    // if editing
+    if (editId) {
+      setFormData((prev) => ({
+        permissions: prev.permissions
+          .map((p) => {
+            if (p.id === editId) {
+              const next: ResourceRow = {
+                ...p,
+                resource: newResource.resource,
+                view: !!newResource.view,
+                create: !!newResource.create,
+                edit: !!newResource.edit,
+                delete: !!newResource.delete,
+                _status: p._status === "new" ? "new" : "dirty",
+              };
+              return next;
+            }
+            return p;
+          })
+          .sort((a, b) => a.resource.localeCompare(b.resource)),
+      }));
 
-  const buildSavePayload = () => {
-    const allowedByResourceAction = new Map<string, boolean>();
-
-    formData.permissions.forEach((r) => {
-      ACTIONS.forEach((action) => {
-        allowedByResourceAction.set(`${r.resource}__${action}`, !!r[action]);
-      });
-    });
-
-    const permissions = allPermissions
-      .map((p) => {
-        const parsed = parsePermissionCode(p.code);
-        if (!parsed) return null;
-
-        const allowed =
-          allowedByResourceAction.get(`${parsed.resource}__${parsed.action}`) ??
-          false;
-
-        return { permissionId: p.id, allowed };
-      })
-      .filter(Boolean) as { permissionId: number; allowed: boolean }[];
-
-    return { permissions };
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!designationId) {
-      toast.error("Select designation");
+      resetEditor();
       return;
     }
 
-    try {
-      setSaving(true);
-      const payload = buildSavePayload();
+    // otherwise add new row locally
+    const row: ResourceRow = {
+      resource: newResource.resource,
+      view: !!newResource.view,
+      create: !!newResource.create,
+      edit: !!newResource.edit,
+      delete: !!newResource.delete,
+      _status: "new",
+    };
 
-      await apiClient.put(
-        `${apiClient.URLS.designationPermissions}/${designationId}`,
-        payload,
+    setFormData((prev) => ({
+      permissions: [...prev.permissions, row].sort((a, b) =>
+        a.resource.localeCompare(b.resource)
+      ),
+    }));
+
+    toast.success("Added locally (not saved yet)");
+    resetEditor();
+  };
+
+  /** Load row into editor */
+  const handleEditPermission = (row: ResourceRow) => {
+    setEditId(row.id || "__local__" + row.resource); // supports local rows
+    setNewResource({
+      id: row.id,
+      resource: row.resource,
+      view: !!row.view,
+      create: !!row.create,
+      edit: !!row.edit,
+      delete: !!row.delete,
+    });
+  };
+
+  /** Delete locally (mark deleted if server row, remove if new local row) */
+  const handleRemovePermissionLocal = (row: ResourceRow) => {
+    setFormData((prev) => {
+      const next = prev.permissions
+        .map((p) => {
+          const match =
+            (row.id && p.id === row.id) ||
+            (!row.id &&
+              !p.id &&
+              p.resource === row.resource &&
+              p._status === "new");
+
+          if (!match) return p;
+
+          // new row not saved → remove completely
+          if (!p.id && p._status === "new") return null as any;
+
+          // existing row → mark deleted
+          return { ...p, _status: "deleted" as const };
+        })
+        .filter(Boolean);
+
+      return { permissions: next };
+    });
+
+    if (
+      editId &&
+      (row.id === editId || (!row.id && editId.includes(row.resource)))
+    ) {
+      resetEditor();
+    }
+
+    toast.success("Removed locally (not saved yet)");
+  };
+
+  /** Toggle table cell locally */
+  const toggleCellLocal = (
+    row: ResourceRow,
+    action: keyof Pick<ResourceRow, "view" | "create" | "edit" | "delete">
+  ) => {
+    setFormData((prev) => ({
+      permissions: prev.permissions.map((p) => {
+        const match =
+          (row.id && p.id === row.id) ||
+          (!row.id &&
+            !p.id &&
+            p.resource === row.resource &&
+            p._status === "new");
+
+        if (!match) return p;
+
+        const next = { ...p, [action]: !p[action] };
+        next._status = next._status === "new" ? "new" : "dirty";
+        return next;
+      }),
+    }));
+  };
+
+  /** ✅ Save all changes (bulk) */
+  const handleSaveAllPermissions = async () => {
+    if (!designationId) return toast.error("Missing designation");
+    const rows = formData.permissions;
+
+    const toCreate = rows.filter((r) => r._status === "new");
+    const toUpdate = rows.filter((r) => r.id && r._status === "dirty");
+    const toDelete = rows.filter((r) => r.id && r._status === "deleted");
+
+    if (
+      toCreate.length === 0 &&
+      toUpdate.length === 0 &&
+      toDelete.length === 0
+    ) {
+      return toast("No changes to save", { icon: "ℹ️" });
+    }
+
+    setSavingAll(true);
+
+    try {
+      // 1) create
+      for (const r of toCreate) {
+        await apiClient.post(
+          `${apiClient.URLS.designationPermissions}/${designationId}/permissions`,
+          {
+            resource: r.resource,
+            view: !!r.view,
+            create: !!r.create,
+            edit: !!r.edit,
+            delete: !!r.delete,
+          },
+          true
+        );
+      }
+
+      // 2) update
+      for (const r of toUpdate) {
+        await apiClient.patch(
+          `${apiClient.URLS.designationPermissions}/${designationId}/permissions/${r.id}`,
+          {
+            resource: r.resource,
+            view: !!r.view,
+            create: !!r.create,
+            edit: !!r.edit,
+            delete: !!r.delete,
+          },
+          true
+        );
+      }
+
+      // 3) delete
+      for (const r of toDelete) {
+        await apiClient.delete(
+          `${apiClient.URLS.designationPermissions}/${designationId}/permissions/${r.id}`,
+          {},
+          true
+        );
+      }
+
+      // ✅ refetch latest from server
+      const res: any = await apiClient.get(
+        `${apiClient.URLS.designationPermissions}/${designationId}/permissions`,
+        {},
         true
       );
+      const list: ResourceRow[] = Array.isArray(res?.body) ? res.body : [];
+      list.sort((a, b) => a.resource.localeCompare(b.resource));
 
-      toast.success("Permissions saved ");
-      onClose();
-    } catch (e) {
+      setFormData({
+        permissions: list.map((x) => ({ ...x, _status: "clean" })),
+      });
+
+      resetEditor();
+      toast.success("Permissions saved successfully");
+    } catch (e: any) {
       console.error(e);
-      toast.error("Failed to save permissions");
+      const msg =
+        e?.body?.message ||
+        e?.response?.data?.message ||
+        e?.message ||
+        "Failed to save permissions";
+      toast.error(String(msg));
     } finally {
-      setSaving(false);
+      setSavingAll(false);
     }
   };
 
+  const pendingChangesCount = useMemo(() => {
+    return formData.permissions.filter(
+      (r) => r._status && r._status !== "clean"
+    ).length;
+  }, [formData.permissions]);
+
   return (
     <div className="md:p-6 p-3 app-card rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.08)] w-full max-w-full border app-border">
-      <form onSubmit={handleSubmit} className="md:space-y-4 space-y-2">
+      <div className="md:space-y-4 space-y-2">
+        {/* header */}
         <div className="flex items-start justify-between gap-3">
           <div>
             <h3 className="text-[16px] md:text-[18px] font-medium text-slate-900">
               Designation Permissions
             </h3>
             <p className="text-[11px] md:text-[12px] app-text mt-1">
-              Select a designation and configure resource-wise CRUD access.
+              Add/Edit resources locally, then save once at the end.
             </p>
           </div>
 
-          <div className="hidden md:flex items-center gap-2">
-            <span className="px-2.5 py-1 rounded-full text-[11px] font-medium app-card app-text">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1 rounded-full text-[11px] font-medium app-card app-text border app-border">
               {filteredTableRows.length} Resources
+            </span>
+            <span className="px-2.5 py-1 rounded-full text-[11px] font-medium border border-amber-200 bg-amber-50 text-amber-700">
+              {pendingChangesCount} pending
             </span>
           </div>
         </div>
 
-        <div className="rounded-xl border app-card app-border md:p-3 p-1">
-          <Field label="Designation" required>
-            <SingleSelect
-              value={designationId}
-              onChange={(v: any) => setDesignationId(String(v))}
-              options={[
-                { label: "Select Designation", value: "" },
-                ...designationOptions,
-              ]}
-              placeholder="Select Designation"
-              placement="auto"
-              searchable
-            />
-          </Field>
-        </div>
-
+        {/* add/edit card */}
         <div className="rounded-xl border app-border overflow-hidden">
-          <div className="flex items-center justify-between px-3 md:px-4 md:py-3 py-1 app-card border-b">
+          <div className="flex items-center justify-between px-3 md:px-4 md:py-3 py-2 app-card border-b">
             <div>
               <p className="text-[13px] md:text-[14px] font-medium app-text">
-                {editIndex !== null
+                {editId
                   ? "Edit Resource Permission"
                   : "Add Resource Permission"}
               </p>
               <p className="text-[11px] app-text mt-0.5">
-                Search resource → choose → tick required permissions.
+                Choose resource → tick permissions → <b>Add Resource</b>.
+                Finally click <b>Save Permissions</b>.
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                className="px-3 py-1.5 rounded-lg text-[12px] font-medium border app-border app-card app-text hover:app-surface"
-                onClick={() => {
-                  setEditIndex(null);
-                  setNewResource({
-                    resource: "",
-                    view: false,
-                    create: false,
-                    edit: false,
-                    delete: false,
-                  });
-                  setResourceSearch("");
-                }}
-              >
-                Reset
-              </Button>
-            </div>
+            <Button
+              type="button"
+              className="px-3 py-1.5 rounded-lg text-[12px] font-medium border app-border app-card app-text hover:app-surface"
+              onClick={resetEditor}
+              disabled={savingAll}
+            >
+              Reset
+            </Button>
           </div>
 
           <div className="p-2 md:p-4 space-y-3">
@@ -1488,19 +1619,16 @@ function DesignationPermissionsCrudModalBody({
               </p>
 
               <div className="grid grid-cols-2 md:grid-cols-4 md:gap-2 gap-1">
-                {["view", "create", "edit", "delete"].map((perm) => (
+                {(["view", "create", "edit", "delete"] as const).map((perm) => (
                   <div
                     key={perm}
                     className="flex items-center gap-2 rounded-lg border app-border px-3 py-2 hover:app-surface"
                   >
                     <Checkbox
                       name={perm}
-                      checked={Boolean(newResource[perm as keyof ResourceRow])}
+                      checked={Boolean(newResource[perm])}
                       onChange={(e: any) =>
-                        handleCrudChange({
-                          name: perm as keyof ResourceRow,
-                          checked: !!e?.target?.checked,
-                        })
+                        handleCrudChange(perm, !!e?.target?.checked)
                       }
                       className="md:h-3.5 h-3 w-3 md:w-3.5"
                     />
@@ -1514,45 +1642,27 @@ function DesignationPermissionsCrudModalBody({
               </div>
             </div>
 
-            <div className="flex justify-between w-full gap-2">
+            {/* Add Resource button */}
+            <div className="flex justify-end gap-2">
               <Button
                 type="button"
-                onClick={() => {
-                  setEditIndex(null);
-                  setNewResource({
-                    resource: "",
-                    view: false,
-                    create: false,
-                    edit: false,
-                    delete: false,
-                  });
-                  setResourceSearch("");
-                }}
-                className=" md:px-4 py-2  px-2 rounded-lg md:text-[14px] text-[12px] font-medium
-                       border app-border app-surface app-text
-                       hover:app-surface active:bg-slate-200"
-              >
-                Cancel
-              </Button>
-
-              <Button
-                type="button"
-                onClick={handleAddOrUpdateResource}
-                disabled={!designationId}
-                className={` md:px-4 py-2  font-medium  px-2 rounded-lg md:text-[14px] text-[12px] font-medium text-white
-                        shadow-sm transition
-                        ${!designationId
-                    ? "bg-emerald-300 cursor-not-allowed"
-                    : "bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-700"
+                onClick={handleAddOrUpdateResourceLocal}
+                disabled={!designationId || savingAll}
+                className={`md:px-4 py-2 px-3 rounded-lg md:text-[14px] text-[12px] font-medium text-white shadow-sm transition
+                  ${
+                    !designationId || savingAll
+                      ? "bg-blue-300 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700"
                   }`}
               >
-                {editIndex !== null ? "Update Permission" : "Save Resource"}
+                {editId ? "Update Resource" : "+ Add Resource"}
               </Button>
             </div>
           </div>
         </div>
 
-        <div className="rounded-xl border app-card app-border md:p-3 p-1">
+        {/* search */}
+        <div className="rounded-xl border app-card app-border md:p-3 p-2">
           <Field label="Search Added Resources">
             <TextInput
               value={tableSearch}
@@ -1562,8 +1672,9 @@ function DesignationPermissionsCrudModalBody({
           </Field>
         </div>
 
+        {/* table */}
         <div className="rounded-xl border app-border overflow-hidden">
-          <div className="px-2 md:px-4 md:py-3 py-1 app-card border-b flex items-center justify-between">
+          <div className="px-3 md:px-4 md:py-3 py-2 app-card border-b flex items-center justify-between">
             <p className="text-[13px] md:text-[14px] font-medium app-text">
               Permissions Summary
             </p>
@@ -1613,92 +1724,118 @@ function DesignationPermissionsCrudModalBody({
                     </td>
                   </tr>
                 ) : (
-                  filteredTableRows.map((perm, idx) => (
-                    <tr key={perm.resource} className="border-t hover:app-card">
-                      <td className="py-3 px-4 text-left font-medium text-[#2563eb] text-[12px] md:text-[13px]">
-                        {formatResourceName(perm.resource)}
-                      </td>
+                  filteredTableRows.map((perm) => {
+                    const changed =
+                      perm._status === "new" ||
+                      perm._status === "dirty" ||
+                      perm._status === "deleted";
 
-                      {["create", "view", "edit", "delete"].map((action) => (
-                        <td
-                          key={`${perm.resource}-${action}`}
-                          className="py-2 px-4 text-center"
-                        >
-                          <Button
-                            type="button"
-                            onClick={() =>
-                              toggleCell(idx, action as keyof Crud)
-                            }
-                            className={`inline-flex items-center justify-center w-8 h-8 rounded-lg border transition
-                          ${perm[action as keyof ResourceRow]
-                                ? "bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100"
-                                : "bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100"
-                              }`}
-                            title={action}
-                          >
-                            {perm[action as keyof ResourceRow] ? "✓" : "✕"}
-                          </Button>
+                    return (
+                      <tr
+                        key={perm.id || perm.resource}
+                        className={`border-t hover:app-card ${
+                          changed ? "bg-amber-50/40" : ""
+                        }`}
+                      >
+                        <td className="py-3 px-4 text-left">
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium text-[#2563eb] text-[12px] md:text-[13px]">
+                              {formatResourceName(perm.resource)}
+                            </span>
+                            {perm._status === "new" ? (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
+                                NEW
+                              </span>
+                            ) : perm._status === "dirty" ? (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-100">
+                                EDITED
+                              </span>
+                            ) : null}
+                          </div>
                         </td>
-                      ))}
 
-                      <td className="py-2 px-4">
-                        <div className="flex justify-center gap-2">
-                          <Button
-                            type="button"
-                            onClick={() => handleEditPermission(idx)}
-                            className="inline-flex items-center justify-center w-9 h-9 rounded-lg
-                                   bg-indigo-50 text-indigo-600 border border-indigo-100
-                                   hover:bg-indigo-100"
-                            title="Edit"
-                          >
-                            <FiEdit2 className="w-4 h-4" />
-                          </Button>
+                        {(["create", "view", "edit", "delete"] as const).map(
+                          (action) => (
+                            <td
+                              key={`${perm.id || perm.resource}-${action}`}
+                              className="py-2 px-4 text-center"
+                            >
+                              <Button
+                                type="button"
+                                onClick={() => toggleCellLocal(perm, action)}
+                                className={`inline-flex items-center justify-center w-8 h-8 rounded-lg border transition
+                                ${
+                                  perm[action]
+                                    ? "bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100"
+                                    : "bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100"
+                                }`}
+                                title={action}
+                                disabled={savingAll}
+                              >
+                                {perm[action] ? "✓" : "✕"}
+                              </Button>
+                            </td>
+                          )
+                        )}
 
-                          <Button
-                            type="button"
-                            onClick={() => handleRemovePermission(idx)}
-                            className="inline-flex items-center justify-center w-9 h-9 rounded-lg
-                                   bg-rose-50 text-rose-600 border border-rose-100
-                                   hover:bg-rose-100"
-                            title="Delete"
-                          >
-                            <FiTrash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                        <td className="py-2 px-4">
+                          <div className="flex justify-center gap-2">
+                            <Button
+                              type="button"
+                              onClick={() => handleEditPermission(perm)}
+                              className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 border border-indigo-100 hover:bg-indigo-100"
+                              title="Edit"
+                              disabled={savingAll}
+                            >
+                              <FiEdit2 className="w-4 h-4" />
+                            </Button>
+
+                            <Button
+                              type="button"
+                              onClick={() => handleRemovePermissionLocal(perm)}
+                              className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-rose-50 text-rose-600 border border-rose-100 hover:bg-rose-100"
+                              title="Delete"
+                              disabled={savingAll}
+                            >
+                              <FiTrash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
           </div>
         </div>
 
-        <div className="flex justify-end gap-2 pt-1">
+        {/* ✅ bottom save + close */}
+        <div className="flex items-center justify-between gap-2 pt-1">
           <Button
             type="button"
             onClick={onClose}
-            disabled={saving}
-            className="md:px-4   md:py-2  font-medium py-1  px-2 rounded-lg md:text-[14px] text-[12px] font-medium
-                   border app-border app-card app-text
-                   hover:app-surface disabled:opacity-60"
+            disabled={savingAll}
+            className="md:px-4 md:py-2 py-2 px-3 rounded-lg md:text-[14px] text-[12px] font-medium border app-border app-card app-text hover:app-surface disabled:opacity-60"
           >
-            Cancel
+            Close
           </Button>
 
           <Button
-            type="submit"
-            disabled={saving || loading || !designationId}
-            className={`md:px-4 md:py-2 py-1  font-medium px-2 rounded-lg md:text-[14px] text-[12px] font-medium text-white shadow-sm
-          ${saving || loading || !designationId
-                ? "bg-violet-300 cursor-not-allowed"
-                : "bg-violet-600 hover:bg-violet-700 active:bg-violet-700"
+            type="button"
+            onClick={handleSaveAllPermissions}
+            disabled={savingAll || pendingChangesCount === 0}
+            className={`md:px-5 md:py-2 py-2 px-4 rounded-lg md:text-[14px] text-[12px] font-medium text-white shadow-sm transition
+              ${
+                savingAll || pendingChangesCount === 0
+                  ? "bg-emerald-300 cursor-not-allowed"
+                  : "bg-emerald-600 hover:bg-emerald-700"
               }`}
           >
-            {saving ? "Saving..." : "Save Permissions"}
+            {savingAll ? "Saving..." : "Save Permissions"}
           </Button>
         </div>
-      </form>
+      </div>
     </div>
   );
 }

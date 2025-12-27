@@ -26,20 +26,26 @@ type DealRow = {
   agentId: string;
   agent: any;
   agentName: string;
+  status:any;
   createdByName: string;
 
   socialProvider: any;
   closedDate: any;
   createdAt: string;
   coverageTypes?: string[];
-  ffm?: string;
+  ffm?: boolean;
   typeOfWork?: string;
   monthlyIncome?: number;
   documentsNeeded?: string;
   socialProvided?: string;
   customerLanguage?: string;
   notes?: string;
-  status?: string;
+  documents?: {
+    documentType: string;
+    documentUrl?: string;
+  }[];
+
+  
 };
 
 type ListResponse = {
@@ -132,7 +138,7 @@ const AraDealsView = () => {
       setLoading(false);
     }
   };
-  
+
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
 
@@ -165,9 +171,8 @@ const AraDealsView = () => {
     try {
       const res = await apiClient.get(`${apiClient.URLS.user}/all`, {}, true);
 
-      if (res.body && Array.isArray(res.body)) {
-     
-        const options = res.body.map((d: any) => ({
+      if (res.body.data && Array.isArray(res.body.data)) {
+        const options = res.body.data.map((d: any) => ({
           label: d.firstName,
           value: d.id,
         }));
@@ -184,7 +189,6 @@ const AraDealsView = () => {
   const createDeal = async (dto: any) => {
     await apiClient.post(apiClient.URLS.deals, dto);
   };
- 
 
   const updateDeal = async (id: string | number, dto: any) => {
     await apiClient.patch(`${apiClient.URLS.deals}/${id}`, dto);
@@ -271,7 +275,7 @@ const AraDealsView = () => {
 
       numberOfApplicants: String(editing.numberOfApplicants ?? ""),
 
-      ffm: editing.ffm !== undefined ? String(editing.ffm) : "",
+      ffm: editing?.ffm ?? false,
 
       career: editing.carrier ?? "",
       typeOfWork: editing.typeOfWork ?? "",
@@ -284,6 +288,7 @@ const AraDealsView = () => {
       documentsNeeded: editing.documentsNeeded ?? "",
       socialProvided: editing.socialProvider ?? "",
       customerLanguage: editing.customerLanguage ?? "",
+      status: (editing.status ?? "OPEN") as "OPEN" | "CLOSED" | "REJECTED",
 
       closedDate: editing.closedDate
         ? isoToDateTimeLocal(editing.closedDate)
@@ -292,19 +297,30 @@ const AraDealsView = () => {
       agentId: editing.agent?.user?.id ?? "",
 
       notes: editing.notes ?? "",
-      files: [],
+      documentType: editing.documents?.[0]?.documentType ?? "",
+      documentUrl: editing.documents?.[0]?.documentUrl ?? [],
     };
   }, [editing]);
 
   /** ---- submit (create or update) ---- */
   const handleSubmit = async (payload: any) => {
     try {
+      const urls = Array.isArray(payload.documentUrls)
+        ? payload.documentUrls
+        : [];
+
+      const uploadedDocs = urls.map((url: string) => ({
+        documentType: payload.documentType || "",
+        documentUrl: url || "",
+      }));
+
       const dto = {
         typeOfCoverage: payload.coverageTypes,
         applicantFirstName: payload.firstName,
         applicantLastName: payload.lastName,
         numberOfApplicants: Number(payload.numberOfApplicants || 0),
-        ffm: !!payload.ffm,
+        ffm: payload.ffm,
+
         carrier: payload.career || "",
         typeOfWork: payload.typeOfWork || "",
         monthlyIncome: Number(payload.monthlyIncome || 0),
@@ -316,7 +332,12 @@ const AraDealsView = () => {
           : null,
         agentId: payload.agentId || "",
         notes: payload.notes || "",
-        status: mode === "EDIT" && editing?.status ? editing.status : "OPEN",
+         status: payload.status || "OPEN",
+        documents: uploadedDocs,
+
+       
+
+      
       };
 
       if (mode === "CREATE") {

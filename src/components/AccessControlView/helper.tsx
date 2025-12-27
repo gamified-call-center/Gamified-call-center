@@ -15,7 +15,7 @@ export type UserEntity = {
   };
  agentProfile?: {
   id: string;
-  npm: string;
+  npn: string;
   yearsOfExperience: number;
   ahipCertified: boolean;
   ahipProofUrl?: string;
@@ -77,7 +77,7 @@ export type CreateAddressDto = {
 };
 
 export type CreateAgentProfileDto = {
-  npm: string;
+  npn: string;
   yearsOfExperience: number;
   ahipCertified: boolean;
   ahipProofUrl?: string;
@@ -139,7 +139,7 @@ export type BankAccountDto = {
 };
 
 export type UpdateAgentProfileDto = Partial<{
-  npm: string;
+  npn: string;
   yearsOfExperience: number;
   ahipCertified: boolean;
   ahipProofUrl?: string;
@@ -155,4 +155,32 @@ export type UpdateUserDto = Partial<{
   addresses: UpdateAddressDto[];
   agentProfile: UpdateAgentProfileDto;
 }>;
+// types/designation-permissions.ts
+export type CrudKey = "view" | "create" | "edit" | "delete";
+
+export type ResourceMasterRow = {
+  tablename: string;
+};
+
+export type DesignationPermissionRow = {
+  id: string;
+  resource: string;
+  view: boolean;
+  create: boolean;
+  edit: boolean;
+  delete: boolean;
+
+  // backend might also return designation or designationId depending on your serializer
+  designation?: any;
+};
+
+export type CreateDesignationPermissionDto = {
+  resource: string;
+  view: boolean;
+  create: boolean;
+  edit: boolean;
+  delete: boolean;
+};
+
+export type UpdateDesignationPermissionDto = Partial<CreateDesignationPermissionDto>;
 

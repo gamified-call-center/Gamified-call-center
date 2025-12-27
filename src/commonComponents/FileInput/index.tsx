@@ -114,82 +114,113 @@ const FileInput = ({
   };
  
   return (
-    <div className="flex flex-wrap md:flex-nowrap gap-4">
-      <div className="space-y-2">
-        {label && (
-          <label
-            className={twMerge(
-              "block text-sm  font-medium text-gray-700",
-              labelCls
-            )}
-          >
-            {label}
-            {required && (
-              <span className={twMerge("text-red-400", requiredClass)}>
-                {required}
-              </span>
-            )}
-          </label>
-        )}
-        {sublabel && (
-          <p className={twMerge("text-sm text-gray-500", sublabelClass)}>
-            {sublabel}
-          </p>
-        )}
- 
-        <div className="relative flex items-center space-x-2">
-          <label
-            htmlFor={name}
-            className="bg-[#3586FF]hover:bg-blue-700 text-white px-3 py-2 rounded-md cursor-pointer"
-          >
-            {uploading ? "Uploading..." : "Choose File"}
-          </label>
- 
-          <span className="text-gray-700 truncate max-w-37.5">
-            {fileName}
-          </span>
-          <input
-            className="hidden"
-            id={name}
-            name={name}
-            ref={inputRef}
-            type="file"
-            onChange={handleFileChange}
-            disabled={uploading}
-          />
- 
-          {errorMessage && (
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-red-500">
-              {errorMessage}
-            </div>
+  <div
+    className={twMerge(
+      "w-full border rounded-2xl p-4 shadow-md bg-white dark:bg-gray-900 transition-all",
+      "border-gray-300 dark:border-gray-700",
+      className
+    )}
+  >
+    <div className="space-y-3">
+      {label && (
+        <label
+          className={twMerge(
+            "text-base font-semibold text-gray-800 dark:text-gray-100",
+            labelCls
           )}
-        </div>
- 
-        {error && (
-          <p className={twMerge("mt-2 text-sm text-red-600", errorTextClass)}>
-            {error}
-          </p>
+        >
+          {label}
+          {required && (
+            <span className={twMerge("text-red-500 ml-1", requiredClass)}>
+              {required}
+            </span>
+          )}
+        </label>
+      )}
+
+      {sublabel && (
+        <p className={twMerge("text-sm text-gray-500 dark:text-gray-400", sublabelClass)}>
+          {sublabel}
+        </p>
+      )}
+
+      {/* Upload Row */}
+      <div
+        className={twMerge(
+          "flex items-center gap-3 p-3 rounded-xl",
+          "border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"
         )}
+      >
+        <label
+          htmlFor={name}
+          className={twMerge(
+            "px-4 py-2 text-sm font-medium text-white rounded-lg cursor-pointer transition",
+            "bg-[#3586FF] hover:bg-blue-600 focus:ring-2 focus:ring-blue-400"
+          )}
+        >
+          {uploading ? "Uploading..." : "Choose File"}
+        </label>
+
+        <span className="text-sm text-gray-700 dark:text-gray-300 truncate max-w-[180px]">
+          {fileName}
+        </span>
+
+        <input
+          hidden
+          id={name}
+          name={name}
+          ref={inputRef}
+          type="file"
+          onChange={handleFileChange}
+          disabled={uploading}
+        />
       </div>
- 
-      {imagePreview && (
-        <div className="mt-4 relative w-20 h-20">
-          <Image
-            src={imagePreview}
-            alt="Selected file preview"
-            className="w-full h-full object-cover rounded-md"
-          />
-          <Button
-            onClick={handleDeleteFile}
-            disabled={uploading}
-            className="absolute top-1 right-1 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm hover:bg-red-600 focus:outline-none"
-          >
-            ✕
-          </Button>
-        </div>
+
+      {error && (
+        <p className={twMerge("text-sm text-red-600 dark:text-red-400", errorTextClass)}>
+          {error}
+        </p>
       )}
     </div>
-  );
+
+    {/* Preview Box */}
+    {imagePreview && (
+      <div className="mt-4 flex items-center gap-4">
+        <div
+          className={twMerge(
+            "relative w-24 h-24 rounded-xl overflow-hidden border",
+            "border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800"
+          )}
+        >
+          <Image
+            src={imagePreview}
+            alt="File preview"
+            fill
+            className="object-cover"
+          />
+
+          <button
+            onClick={handleDeleteFile}
+            disabled={uploading}
+            className={twMerge(
+              "absolute top-2 right-2 w-7 h-7 rounded-full cursor-pointer flex items-center justify-center transition",
+              "bg-red-500 hover:bg-red-600 text-white text-xs shadow-md"
+            )}
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+    )}
+
+    {(errorMessage) && (
+      <p className={twMerge("text-xs text-red-500 mt-2", errorTextClass)}>
+        {errorMessage}
+      </p>
+    )}
+  </div>
+);
+
 };
  
 export default FileInput;

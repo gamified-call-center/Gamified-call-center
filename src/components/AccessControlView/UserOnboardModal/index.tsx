@@ -71,7 +71,7 @@ export const SectionCard = ({
     <div
       className={[
         "rounded-2xl border overflow-hidden",
-        "bg-white/95 ",
+        "app-surface ",
         "border-slate-200/70 ",
         "shadow-[0_12px_30px_-18px_rgba(0,0,0,0.25)]",
         className,
@@ -87,11 +87,11 @@ export const SectionCard = ({
             ) : null}
 
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
+              <p className="text-sm font-semibold app-text truncate">
                 {title}
               </p>
               {subTitle ? (
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                <p className="text-xs app-muted mt-1 leading-relaxed">
                   {subTitle}
                 </p>
               ) : null}
@@ -219,7 +219,7 @@ export default function UserOnboardModal({
   const [showPassword, setShowPassword] = useState(false);
 
   const [agentProfile, setAgentProfile] = useState<CreateAgentProfileDto>({
-    npm: "",
+    npn: "",
     yearsOfExperience: 0,
     ahipCertified: false,
     ahipProofUrl: "",
@@ -294,7 +294,7 @@ export default function UserOnboardModal({
         const agent = (initialUser as any).agentProfile;
 
         setAgentProfile({
-          npm: agent.npm || "",
+          npn: agent.npn|| "",
           yearsOfExperience: Number(agent.yearsOfExperience || 0),
           ahipCertified: !!agent.ahipCertified,
           ahipProofUrl: agent.ahipProofUrl || "",
@@ -314,7 +314,7 @@ export default function UserOnboardModal({
         });
       } else {
         setAgentProfile({
-          npm: "",
+          npn: "",
           yearsOfExperience: 0,
           ahipCertified: false,
           ahipProofUrl: "",
@@ -342,7 +342,7 @@ export default function UserOnboardModal({
     setEmployee({ designationId: 0, reportsToId: undefined });
     setAddresses([defaultAddress(true)]);
     setAgentProfile({
-      npm: "",
+      npn: "",
       yearsOfExperience: 0,
       ahipCertified: false,
       ahipProofUrl: "",
@@ -401,7 +401,7 @@ export default function UserOnboardModal({
     }
 
     if (isAgent) {
-      if (!(agentProfile as any).npm?.trim()) e.npm = "NPN is required";
+      if (!(agentProfile as any).npn?.trim()) e.npn = "NPN is required";
       if (!Number.isFinite(Number((agentProfile as any).yearsOfExperience)))
         e.yearsOfExperience = "Years must be a number";
       if (Number((agentProfile as any).yearsOfExperience) < 0)
@@ -505,7 +505,7 @@ export default function UserOnboardModal({
 
     if (isAgent) {
       dto.agentProfile = {
-        npm: (agentProfile as any).npm.trim(),
+        npn: (agentProfile as any).npn.trim(),
         yearsOfExperience: Number((agentProfile as any).yearsOfExperience),
         ahipCertified: !!(agentProfile as any).ahipCertified,
         ahipProofUrl: (agentProfile as any).ahipCertified
@@ -813,6 +813,7 @@ export default function UserOnboardModal({
                 <FileInput
                   type="file"
                   folderName="users/profile"
+                   requiredClass="app-border"
                   initialFileUrl={userCore.profileImage || ""}
                   onFileChange={(url: any) => {
                     setUserCore((p) => ({ ...p, profileImage: url }));
@@ -1149,17 +1150,17 @@ export default function UserOnboardModal({
                     subTitle="Only shown when Agent is enabled"
                   >
                     <div className="grid md:grid-cols-2 grid-cols-1 gap-3">
-                      <Field label="NPN" required error={errors.npm}>
+                      <Field label="NPN" required error={errors.npn}>
                         <TextInput
-                          value={agentProfile.npm}
+                          value={agentProfile.npn}
                           onChange={(e: any) =>
                             setAgentProfile((p: any) => ({
                               ...p,
-                              npm: e.target.value,
+                              npn: e.target.value,
                             }))
                           }
                           placeholder="NPN"
-                          error={!!errors.npm}
+                          error={!!errors.npn}
                         />
                       </Field>
 

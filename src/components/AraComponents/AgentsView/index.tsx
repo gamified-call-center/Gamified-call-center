@@ -273,7 +273,7 @@ export default function AcaAgentsView() {
       designation: agent.employee?.designation?.id ?? "",
       reportsTo: agent.employee?.reportsTo?.id ?? "",
 
-      npn: agent.agentProfile?.npm || "",
+      npn: agent.agentProfile?.npn || "",
       yearsOfExperience: agent.agentProfile?.yearsOfExperience ?? "",
       ahipCertified: Boolean(agent.agentProfile?.ahipCertified),
       stateLicensed: Boolean(agent.agentProfile?.stateLicensed),
@@ -497,11 +497,12 @@ export default function AcaAgentsView() {
       },
 
       agentProfile: {
-        npm: form.npn || "TEMP-NPM",
+        npn: form.npn || "",
         yearsOfExperience: Number(form.yearsOfExperience || 0),
         ahipCertified: Boolean(form.ahipCertified),
         stateLicensed: Boolean(form.stateLicensed),
         accessLevel: form.access === "FullAccess" ? "ALL_ACCESS" : "TRAINING",
+        apps:form.apps,
       },
     };
 
@@ -794,7 +795,7 @@ export default function AcaAgentsView() {
 
                 <Button
                   onClick={openCreate}
-                  className="rounded-xl bg-[#477891] cursor-pointer md:px-4 px-2 md:py-2 py-1.5 text-[12px] md:text-sm  font-bold text-white hover:bg-[#3d677c]"
+                  className="rounded-xl bg-[#477891] text-nowrap cursor-pointer md:px-4 px-2 md:py-2 py-1.5 text-[12px] md:text-sm  font-bold text-white hover:bg-[#3d677c]"
                 >
                   + Add New Agent
                 </Button>

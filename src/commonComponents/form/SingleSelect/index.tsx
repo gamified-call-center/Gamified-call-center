@@ -176,7 +176,7 @@ export function SingleSelect({
           error={error}
           disabled={disabled}
         >
-          <div className={cn("text-sm", selected ? "text-slate-900 " : "text-slate-400")}>
+          <div className={cn("text-sm", selected ? "app-text " : "app-muted")}>
             {selected?.label ?? placeholder}
           </div>
         </ControlShell>
@@ -185,7 +185,7 @@ export function SingleSelect({
       {open && (
         <div
           className={cn(
-            "absolute z-50 mt-2 w-full overflow-hidden rounded-xl border bg-white shadow-lg",
+            "absolute z-50 mt-2 w-full overflow-hidden rounded-xl border app-surface shadow-lg",
             " dark:border-slate-700",
             dir === "top" && "bottom-full mb-2 mt-0"
           )}
@@ -194,13 +194,13 @@ export function SingleSelect({
           {searchable && (
             <div className="border-b p-2 dark:border-slate-700">
               <div className="flex items-center gap-2 rounded-lg border px-2 py-1.5 dark:border-slate-700">
-                <Search size={16} className="text-slate-400" />
+                <Search size={16} className="app-text" />
                 <input
                   autoFocus
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={searchPlaceholder}
-                  className="w-full bg-transparent text-sm outline-none text-slate-900  placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                  className="w-full bg-transparent text-sm outline-none app-text placeholder:app-muted "
                   onKeyDown={(e) => {
                     // keep arrow nav working even inside search input
                     if (e.key === "ArrowDown" || e.key === "ArrowUp") onKeyDown(e as any);
@@ -213,7 +213,7 @@ export function SingleSelect({
 
           <div className="max-h-72 overflow-auto p-1">
             {filteredOptions.length === 0 ? (
-              <div className="px-3 py-2 text-sm text-slate-500">{noResultsText}</div>
+              <div className="px-3 py-2 text-sm app-text">{noResultsText}</div>
             ) : (
               filteredOptions.map((opt, idx) => {
                 const isSelected = opt.value === value;
@@ -232,15 +232,15 @@ export function SingleSelect({
   }}
   className={cn(
     "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm",
-    "hover:bg-slate-100 dark:hover:bg-slate-800",
+    "hover:app-surface",
     opt.disabled && "opacity-50 pointer-events-none",
-    isActive && "bg-slate-100 dark:bg-slate-800",
-    isSelected && "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-300"
+    isActive && "app-card",
+    isSelected && "app-surface text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-300"
   )}
   role="option"
   aria-selected={isSelected}
 >
-  <span className="truncate text-slate-900 dark:text-slate-100">{opt.label}</span>
+  <span className="truncate app-text">{opt.label}</span>
 </button>
                 );
               })
