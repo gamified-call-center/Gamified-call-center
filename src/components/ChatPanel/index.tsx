@@ -24,9 +24,9 @@ import { useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
 
 export default function ChatPanel() {
-  const [user, setUser] = useState<any>(null)
-  const [token, setToken] = useState<any>(null)
-  const session = useSession()
+  const [user, setUser] = useState<any>(null);
+  const [token, setToken] = useState<any>(null);
+  const session = useSession();
   const isBelow1300 = useIsBelow1300();
   const socketRef = useRef<ReturnType<typeof getSocket> | null>(null);
 
@@ -53,11 +53,12 @@ export default function ChatPanel() {
 
   useEffect(() => {
     if (session?.status === "authenticated") {
-      setUser(session.data.user)
-      setToken(session.data.token)
+      setUser(session.data.user);
+      setToken(session.data.token);
       loadAllUsers(session.data.user?.id as string);
+      loadThreads();
     }
-  }, [session?.status])
+  }, [session?.status]);
 
   const filteredUsers = useMemo(
     () =>
@@ -66,7 +67,6 @@ export default function ChatPanel() {
       ),
     [dmList, searchQuery]
   );
-  console.log(filteredUsers)
 
   const filteredChannels = useMemo(
     () =>
@@ -79,8 +79,8 @@ export default function ChatPanel() {
   const activeTitle = selectedChat
     ? selectedChat.name
     : selectedChannel
-      ? selectedChannel.name
-      : "";
+    ? selectedChannel.name
+    : "";
 
   const activeThread = useMemo(() => {
     if ((selectedChat as any)?.threadId)
@@ -196,6 +196,95 @@ export default function ChatPanel() {
       console.error("Failed to open DM", err);
     }
   };
+
+  const openChannel = async (c: Channel) => {
+  setSelectedChat(null);
+  setMessagesByThread({});
+
+  try {
+    if (!user?.id) return;
+
+    const threadId = c.id;
+    if (!threadId) throw new Error("channel threadId missing");
+
+    // select channel
+    setSelectedChannel(c);
+
+    // fetch channel messages
+    const msgRes = await apiClient.get(
+      `${apiClient.URLS.chat}/${threadId}/messages?userId=${encodeURIComponent(
+        user.id
+      )}&limit=50`
+    );
+
+    console.log("Channel history messages:", msgRes);
+
+    const history = (msgRes.body?.data ?? msgRes.body ?? []).map(
+      (m: any) => ({
+        id: m.id,
+        content: m.content,
+        senderId: m.senderId,
+        senderName: m.senderName ?? "Unknown",
+        timestamp: getTimeHour(m.timestamp),
+        isOwn: m.senderId === user.id,
+      })
+    ) as Message[];
+
+    const key = `channel:${threadId}`;
+
+    setMessagesByThread((prev) => ({
+      ...prev,
+      [key]: history,
+    }));
+  } catch (err) {
+    console.error("Failed to open channel", err);
+  }
+};
+
+
+  const loadThreads = async () => {
+    setLoading(true);
+    try {
+      const id = session.data?.user?.id;
+      if (!id) return;
+
+      const url = `${apiClient.URLS.chat}?userId=${encodeURIComponent(id)}`;
+      const res = (await apiClient.get(url)) as any;
+
+      const threads = res?.body ?? [];
+
+      const dms: ChatUser[] = threads
+        .filter((t:any) => t.kind === "dm")
+        .map((t:any) => ({
+          id: t.id,
+          name: t.name ?? "Unknown",
+          status: "offline",
+          unreadCount: t.unreadCount ?? 0,
+          lastMessage: t.lastMessage ?? "",
+          timestamp: t.timestamp ?? "",
+          avatarColor: "bg-blue-500",
+        }));
+
+      const chans: Channel[] = threads
+        .filter((t:any) => t.kind === "channel")
+        .map((t:any) => ({
+          id: t.id,
+          name: t.title ?? "Channel",
+          memberCount: t.memberCount ?? 0,
+          unreadCount: t.unreadCount ?? 0,
+          lastMessage: t.lastMessage ?? "",
+          timestamp: t.timestamp ?? "",
+        }));
+
+      setLoading(false);
+
+      setDmList(dms);
+      setChannelList(chans);
+    } catch (e) {
+      console.error("Failed to load threads", e);
+    }
+  };
+
   // use effects
   useEffect(() => {
     if (!user?.id) return;
@@ -323,11 +412,11 @@ export default function ChatPanel() {
           prev.map((u) =>
             u.id === t.id
               ? {
-                ...u,
-                lastMessage: t.lastMessage ?? u.lastMessage,
-                timestamp: t.timestamp ?? u.timestamp,
-                unreadCount: t.unreadCount ?? u.unreadCount,
-              }
+                  ...u,
+                  lastMessage: t.lastMessage ?? u.lastMessage,
+                  timestamp: t.timestamp ?? u.timestamp,
+                  unreadCount: t.unreadCount ?? u.unreadCount,
+                }
               : u
           )
         );
@@ -336,11 +425,11 @@ export default function ChatPanel() {
           prev.map((c: any) =>
             c.id === t.id
               ? {
-                ...c,
-                lastMessage: t.lastMessage ?? c.lastMessage,
-                timestamp: t.timestamp ?? c.timestamp,
-                unreadCount: t.unreadCount ?? c.unreadCount,
-              }
+                  ...c,
+                  lastMessage: t.lastMessage ?? c.lastMessage,
+                  timestamp: t.timestamp ?? c.timestamp,
+                  unreadCount: t.unreadCount ?? c.unreadCount,
+                }
               : c
           )
         );
@@ -355,49 +444,6 @@ export default function ChatPanel() {
 
   // loading threads on mount
   useEffect(() => {
-    const loadThreads = async () => {
-      setLoading(true);
-      try {
-        const userId = user?.id;
-        const res = (await apiClient.get(`${apiClient.URLS.chat}`, {
-          params: { userId },
-        })) as { data: ThreadApiItem[] };
-
-        const threads = res.data ?? [];
-
-        // Map backend thread -> your UI types
-        const dms: ChatUser[] = threads
-          .filter((t) => t.kind === "dm")
-          .map((t) => ({
-            id: t.id,
-            name: "Direct Message",
-            status: "offline",
-            unreadCount: t.unreadCount ?? 0,
-            lastMessage: t.lastMessage ?? "",
-            timestamp: t.timestamp ?? "",
-            avatarColor: "bg-blue-500",
-          }));
-
-        const chans: Channel[] = threads
-          .filter((t) => t.kind === "channel")
-          .map((t) => ({
-            id: t.id,
-            name: t.title ?? "Channel",
-            memberCount: 0,
-            unreadCount: t.unreadCount ?? 0,
-            lastMessage: t.lastMessage ?? "",
-            timestamp: t.timestamp ?? "",
-          }));
-
-        setLoading(false);
-
-        setDmList(dms);
-        setChannelList(chans);
-      } catch (e) {
-        console.error("Failed to load threads", e);
-      }
-    };
-
     loadThreads();
   }, []);
 
@@ -409,7 +455,7 @@ export default function ChatPanel() {
       const all = (res.body.data ?? []) as any[];
       if (res?.status === 200) {
         const mapped: ChatUser[] = all
-          .filter((u) => u.id !== user?.id)
+          .filter((u) => u.id !== id)
           .map((u) => ({
             id: u.id,
             name: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email,
@@ -429,7 +475,6 @@ export default function ChatPanel() {
       setLoading(false);
     }
   };
-
 
   // get Status online or offline
   useEffect(() => {
@@ -535,8 +580,7 @@ export default function ChatPanel() {
                   openDmWithUser(u);
                 }}
                 onSelectChannel={(c) => {
-                  setSelectedChannel(c);
-                  setSelectedChat(null);
+                  openChannel(c);
                 }}
                 isAdmin={user?.systemRole === "ADMIN"}
                 onClickCreateChannel={() => setAddChannelOpen(true)}

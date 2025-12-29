@@ -9,7 +9,7 @@ const URLS = {
   user: `${base_url}/users`,
   s3bucket: "s3bucket",
   training: `${base_url}/api/training`,
-  leaderboard: `${base_url}/leaderboard/leaderboard`,
+  leaderboard: `${base_url}/leaderboard`,
   agent: `${base_url}/agent`,
   deals: `${base_url}/deals`,
   designation: `${base_url}/api/designation`,
@@ -77,28 +77,6 @@ export const retrieveToken = async (ctx = undefined) => {
     return session?.accessToken || "";
   }
 };
-
-// const makeHeadersAndParams = async (params, auth, type, ctx = undefined) => {
-//   const { headers = {}, ...restParams } = params;
-//   const baseHeaders = {
-//     "Content-Type": "application/json",
-//     Accept: "application/json",
-//   };
-//   let headerConfig = new Headers(merge(baseHeaders, headers));
-
-//   if (auth && !headerConfig.get("Authorization")) {
-//     const session = ctx ? await getSession(ctx) : await getSession();
-//     const token = session?.accessToken || session?.token || "";
-//     if (token) {
-//       headerConfig.set("Authorization", `Bearer ${token}`);
-//     }
-//   }
-
-//   return {
-//     headers: headerConfig,
-//     params: restParams || {},
-//   };
-// };
 const makeHeadersAndParams = async (params, auth, type, ctx) => {
   const { headers = {}, ...restParams } = params;
 
