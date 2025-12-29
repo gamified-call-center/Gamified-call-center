@@ -383,6 +383,6 @@ export default function ChatHistory() {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   );
 }
