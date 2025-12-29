@@ -3,7 +3,6 @@ import { getSession } from "next-auth/react";
 
 const base_url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-
 const URLS = {
   blogs: `${base_url}/blog`,
   otp: `${base_url}/otp`,
@@ -23,7 +22,11 @@ const URLS = {
   chatDm: `${base_url}/chat/dm`,
   chatChannels: `${base_url}/chat/channels`,
   resources: `${base_url}/admin/resources`,
- addresses:`${base_url}/addresses`
+  addresses: `${base_url}/addresses`,
+  chatHistory: `${base_url}/chat/admin/chat-history`,
+  chatHistoryDelete: `${base_url}/chat/admin/chat-history/delete`,
+  resourcesadmin: `${base_url}/chat/admin/resources`,
+  users: `${base_url}/users`,
 };
 
 export function encodeQueryData(data = {}) {
@@ -101,7 +104,7 @@ const makeHeadersAndParams = async (params, auth, type, ctx) => {
 
   const baseHeaders =
     type === "file"
-      ? {} 
+      ? {}
       : {
           "Content-Type": "application/json",
           Accept: "application/json",

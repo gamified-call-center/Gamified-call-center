@@ -73,7 +73,7 @@ function getSections(): SectionType[] {
       title: "REPORTS",
       items: [
         { label: "Leader Board", href: "/leaderboard", icon: Trophy, scope: "service" },
-        { label: "Chat History", href: "/chat", icon: MessageSquareText, scope: "global" },
+        { label: "Chat History", href: "/chat-history", icon: MessageSquareText, scope: "global" },
       ],
     },
     {

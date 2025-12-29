@@ -1,11 +1,11 @@
 "use client";
-import DashboardPage from "@/components/dashboard"
 import withAdminLayout from "@/components/Layouts/GeneralLayout";
+import AdminDashboard from "../../../components/AdminDashboard";
 
 const Dashboard = () => {
   return (
     <div>
-      <DashboardPage />
+      <AdminDashboard />
     </div>
   )
 }
