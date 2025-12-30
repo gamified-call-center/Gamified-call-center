@@ -306,11 +306,10 @@ export default function JobApplicationWizard() {
   }
 
   return (
-    <div className="h-full overflow-y-scroll bg-slate-50">
-      <div className="mx-auto max-w-5xl px-4 py-8">
-       
+    <div className="h-screen overflow-y-scroll ">
+      <div className="mx-auto max-w-7xl px-4 py-8">
         <div className="rounded-2xl  bg-white shadow-sm overflow-hidden">
-         
+
           <div className="px-6 py-5 border-b bg-gradient-to-r from-slate-900 to-slate-700">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -326,14 +325,14 @@ export default function JobApplicationWizard() {
             </div>
           </div>
 
-         
+
           <WizardStepper
             steps={STEPS as any}
             activeStep={step}
-          
+
           />
 
-         
+
           <div className="px-6 pb-6">
             <AnimatePresence mode="wait">
               <motion.div
@@ -473,9 +472,9 @@ export default function JobApplicationWizard() {
                           value={
                             form.state
                               ? ({
-                                  label: form.state,
-                                  value: form.state,
-                                } as any)
+                                label: form.state,
+                                value: form.state,
+                              } as any)
                               : null
                           }
                           onChange={(v: any) =>

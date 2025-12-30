@@ -16,11 +16,9 @@ export default function withJobLayout<P>(
 
     return (
       <div className="min-h-screen bg-slate-50">
-        {/* ===== Navbar ===== */}
         <header className="sticky top-0 z-50 bg-slate-900 border-b border-white/10">
           <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            {/* Logo */}
-            <div>
+            <Link href={"/"}>
               <div className="flex items-center cursor-pointer gap-3">
                 <div className="relative">
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl blur opacity-30" />
@@ -38,24 +36,29 @@ export default function withJobLayout<P>(
                   </div>
                 </div>
               </div>
+            </Link>
+
+            <div className="flex flex-row gap-5">
+              <nav className="flex items-center gap-6 text-sm">
+                <div
+                  className="text-white cursor-pointer md:text-[16px] text-[14px] font-bold hover:text-white transition"
+                >
+                  About Us
+                </div>
+              </nav>
+              <nav className="flex items-center gap-6 text-sm">
+                <div
+                  className="text-white cursor-pointer md:text-[16px] text-[14px] font-bold hover:text-white transition"
+                >
+                  Jobs
+                </div>
+              </nav>
             </div>
-
-            {/* Nav links */}
-            <nav className="flex items-center gap-6 text-sm">
-              <div
-               
-                className="text-white md:text-[16px] text-[14px] font-bold hover:text-white transition"
-              >
-                About Us
-              </div>
-
-          
-            </nav>
           </div>
         </header>
 
-       
-        <main className="max-w-7xl mx-auto px-6 py-8">
+
+        <main className="max-w-7xl mx-auto h-full px-6 py-8">
           <WrappedComponent {...props} />
         </main>
       </div>
