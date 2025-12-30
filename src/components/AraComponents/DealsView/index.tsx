@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import DealViewModal from "./DealViewModal";
 import Button from "@/commonComponents/Button";
 import Modal from "@/commonComponents/Modal";
+import {DealType} from "../../../../src/Utils/constants/ara/constants"
 
 type DealRow = {
   id: string | number;
@@ -334,6 +335,7 @@ const AraDealsView = () => {
           : null,
         // agentId: String(payload.agentId )|| "",
         userId:String(payload.userId)||"",
+       dealType:DealType.ACA,
         notes: payload.notes || "",
         status: payload.status || "OPEN",
        documents: payload.documents||[],
