@@ -19,7 +19,7 @@ const URLS = {
   designationPermissions: `${base_url}/admin/designations`,
   login: `${base_url}/auth/login`,
   forgotPassword: `${base_url}/auth`,
-  chat: `${base_url}/chat/threads`,
+  chat: `${base_url}/chat`,
   chatDm: `${base_url}/chat/dm`,
   chatChannels: `${base_url}/chat/channels`,
   resources: `${base_url}/admin/resources`,

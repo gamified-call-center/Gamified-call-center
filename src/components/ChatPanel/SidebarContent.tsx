@@ -1,6 +1,5 @@
 import Button from "@/commonComponents/Button";
-import { Channel, ChatUser, MessagesByThread, PresenceStatus } from "../../lib/chat/types";
-import { useEffect, useState } from "react";
+import { Channel, ChatUser,  } from "../../lib/chat/types";
 import { motion } from "framer-motion";
 import {
   Users,
@@ -24,8 +23,6 @@ export function SidebarContent({
   selectedChannel,
   onSelectChat,
   onSelectChannel,
-  showProfileFooter = true,
-  isAdmin,
   onClickCreateChannel,
 }: {
   activeTab: "chats" | "channels";
@@ -47,7 +44,6 @@ export function SidebarContent({
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      {/* Enhanced Search Section */}
       <div className="px-5 py-4 border-b border-gray-200/60 prof-surface  backdrop-blur-sm">
         <div className="relative group">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-2xl blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -90,7 +86,6 @@ export function SidebarContent({
               }`}
             type="button"
           >
-            {/* Background highlight */}
             {activeTab === tab && (
               <motion.div
                 layoutId="activeTabBackground"
@@ -100,7 +95,6 @@ export function SidebarContent({
               />
             )}
 
-            {/* Border indicator */}
             {activeTab === tab && (
               <motion.div
                 layoutId="activeTabLine"
@@ -110,7 +104,6 @@ export function SidebarContent({
               />
             )}
 
-            {/* Icon */}
             <div
               className={`relative z-10 transition-transform duration-300 ${activeTab === tab
                 ? "transform scale-110"
@@ -124,12 +117,10 @@ export function SidebarContent({
               )}
             </div>
 
-            {/* Text */}
             <span className="relative z-10 font-medium text-sm">
               {tab === "chats" ? "Chats" : "Channels"}
             </span>
 
-            {/* Unread count badge for active tab */}
             {activeTab === tab &&
               tab === "chats" &&
               filteredUsers.some((u) => u.unreadCount) && (
@@ -141,9 +132,7 @@ export function SidebarContent({
         ))}
       </div>
 
-      {/* List Section - Now scrollable */}
       <div className="flex-1 min-h-0 overflow-y-auto">
-        {/* Enhanced Header */}
         <div className="sticky top-0 z-10 px-5 py-3 prof-surface backdrop-blur-sm border-b border-gray-200/60">
           <div className="flex  items-center w-full justify-between">
             <div className="flex items-center justify-between w-full  gap-2">
@@ -178,7 +167,6 @@ export function SidebarContent({
           </div>
         </div>
 
-        {/* List Items Container with proper scrolling */}
         <div className="p-3">
           {activeTab === "chats" ? (
             <div className="space-y-2">
@@ -219,7 +207,6 @@ export function SidebarContent({
                           </span>
                         </div>
 
-                        {/* Status indicator */}
                         <div
                           className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-3 border-white shadow-sm ${getStatusColor(
                             user.status
@@ -231,7 +218,6 @@ export function SidebarContent({
                         </div>
                       </div>
 
-                      {/* User Info */}
                       <div className="flex-1 min-w-0 ">
                         <div className="flex items-start justify-between gap-2 ">
                           <div className="flex items-center gap-2 min-w-0">
@@ -296,16 +282,13 @@ export function SidebarContent({
                       : "bg-white/80 backdrop-blur-sm hover:bg-gradient-to-r hover:from-gray-50/50 hover:to-gray-50/30 hover:shadow-sm border-2 border-transparent hover:border-gray-200/60"
                       }`}
                   >
-                    {/* Selected indicator */}
                     {selected && (
                       <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-1.5 h-14 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full" />
                     )}
 
-                    {/* Hover glow effect */}
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 to-purple-500/0 rounded-2xl opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
 
                     <div className="flex items-center gap-4 relative">
-                      {/* Enhanced Channel Icon */}
                       <div className="relative">
                         <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-50/80 to-purple-50/80 flex items-center justify-center shadow-sm border border-white/80">
                           {channel.isPrivate ? (
@@ -317,7 +300,6 @@ export function SidebarContent({
                           )}
                         </div>
 
-                        {/* Private indicator */}
                         {channel.isPrivate && (
                           <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-gradient-to-br from-gray-600 to-gray-700 flex items-center justify-center shadow-sm">
                             <Lock className="w-2.5 h-2.5 text-white" />
@@ -325,7 +307,6 @@ export function SidebarContent({
                         )}
                       </div>
 
-                      {/* Channel Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2 mb-2">
                           <div className="flex items-center gap-2 min-w-0">
@@ -333,11 +314,6 @@ export function SidebarContent({
                               {channel.name}
                             </h3>
                           </div>
-                          {channel.timestamp && (
-                            <span className="text-xs text-gray-400 font-medium flex-shrink-0">
-                              {channel.timestamp}
-                            </span>
-                          )}
                         </div>
 
                         <p className="text-sm text-gray-600 truncate mb-3 leading-tight">
