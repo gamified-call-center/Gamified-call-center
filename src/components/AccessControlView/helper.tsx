@@ -22,15 +22,8 @@ export type UserEntity = {
   stateLicenseNumber?: string;
   stateLicensed: boolean;
   accessLevel: "TRAINING" | "ALL_ACCESS" | "ALL_ACCESS";
-  bankAccounts?: Array<{
-    id?: string;
-    bankName: string;
-    accountNumber: string;
-    ifscNumber: string;
-    isPrimary?: boolean;
-    accountHolderName: string;
-    isVerified?: boolean;
-  }>;
+   apps: string[];
+  
 };
 
   addresses?: Array<{
@@ -84,14 +77,8 @@ export type CreateAgentProfileDto = {
   stateLicensed: boolean;
   stateLicenseNumber?:string;
   accessLevel: "TRAINING" | "ALL_ACCESS";
-  bankAccounts?: Array<{
-    bankName: string;
-    accountNumber: string;
-    ifscNumber: string;
-    accountHolderName: string;
-    isPrimary?: boolean;   
-    isVerified?: boolean;  
-  }>;
+   apps: string[];
+  
 };
 
 export type CreateUserDto = {
@@ -131,16 +118,6 @@ export type UpdateAddressDto = Partial<{
   isDefault?: boolean;
 }>;
 
-export type BankAccountDto = {
-  id?: string; 
-  bankName: string;
-  accountNumber: string;
-  ifscNumber: string;
-  accountHolderName: string;
-  isPrimary?: boolean;
-  isVerified?: boolean;
-};
-
 export type UpdateAgentProfileDto = Partial<{
   npn: string;
   yearsOfExperience: number;
@@ -149,7 +126,8 @@ export type UpdateAgentProfileDto = Partial<{
   stateLicensed: boolean;
   accessLevel: "TRAINING" | "ALL_ACCESS";
   isActive?: boolean;
-  bankAccounts?: BankAccountDto[];
+   apps: string[];
+
 }>;
 
 export type UpdateUserDto = Partial<{

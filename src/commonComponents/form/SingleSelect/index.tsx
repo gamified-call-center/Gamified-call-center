@@ -185,7 +185,7 @@ export function SingleSelect({
       {open && (
         <div
           className={cn(
-            "absolute z-[999] mt-2 w-full overflow-hidden rounded-xl border app-surface shadow-lg",
+            "absolute z-200 mt-2 w-full overflow-hidden rounded-xl border app-surface shadow-lg",
             " dark:border-slate-700",
             dir === "top" && "bottom-full mb-2 mt-0"
           )}
@@ -213,7 +213,7 @@ export function SingleSelect({
 
           <div className="max-h-72 overflow-auto p-1">
             {filteredOptions.length === 0 ? (
-              <div className="px-3 py-2 text-sm app-text z-[999]
+              <div className="px-3 py-2 text-sm app-text z-200
 ">{noResultsText}</div>
             ) : (
               filteredOptions.map((opt, idx) => {

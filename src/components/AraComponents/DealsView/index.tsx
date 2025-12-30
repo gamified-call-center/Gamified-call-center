@@ -25,6 +25,7 @@ type DealRow = {
   carrier: any;
   closedAt: string;
   agentId: string;
+  userId:string;
   agent: any;
   agentName: string;
   status: any;
@@ -41,10 +42,7 @@ type DealRow = {
   socialProvided?: string;
   customerLanguage?: string;
   notes?: string;
-  documents?: {
-    documentType: string;
-    documentUrl?: string;
-  }[];
+  documents?:string[];
 };
 
 type ListResponse = {
@@ -179,7 +177,7 @@ const AraDealsView = () => {
 
     if (res.body.data && Array.isArray(res.body.data)) {
       const activeAgents = res.body.data.filter(
-        (agent: any) => agent?.userStatus === "ACTIVE"
+        (agent: any) => agent?.isActive === true
       );
 
       const options = activeAgents.map((d: any) => ({
@@ -306,25 +304,18 @@ const AraDealsView = () => {
         : "",
 
       agentId: editing.agent?.user?.id ?? "",
+    userId: editing.agent?.user?.id ?? "",
 
       notes: editing.notes ?? "",
-      documentType: editing.documents?.[0]?.documentType ?? "",
-      documentUrl: editing.documents?.[0]?.documentUrl ?? [],
+     
+     documents: editing.documents?? [],
     };
   }, [editing]);
 
   /** ---- submit (create or update) ---- */
   const handleSubmit = async (payload: any) => {
     try {
-      const urls = Array.isArray(payload.documentUrls)
-        ? payload.documentUrls
-        : [];
-
-      const uploadedDocs = urls.map((url: string) => ({
-        documentType: payload.documentType || "",
-        documentUrl: url || "",
-      }));
-
+      
       const dto = {
         typeOfCoverage: payload.coverageTypes,
         applicantFirstName: payload.firstName,
@@ -341,10 +332,11 @@ const AraDealsView = () => {
         closedDate: payload.closedDate
           ? new Date(payload.closedDate).toISOString()
           : null,
-        agentId: payload.agentId || "",
+        // agentId: String(payload.agentId )|| "",
+        userId:String(payload.userId)||"",
         notes: payload.notes || "",
         status: payload.status || "OPEN",
-        documents: uploadedDocs,
+       documents: payload.documents||[],
       };
 
       if (mode === "CREATE") {

@@ -17,8 +17,18 @@ import {
 import { Checkbox } from "@/commonComponents/form/Checkbox";
 import FileInput from "@/commonComponents/FileInput";
 import toast from "react-hot-toast";
-import { Briefcase, Eye, EyeOff, MapPin, Pencil, Trash2, User } from "lucide-react";
+import {
+  Briefcase,
+  Eye,
+  EyeOff,
+  MapPin,
+  Pencil,
+  Trash2,
+  User,
+} from "lucide-react";
 import apiClient from "@/Utils/apiClient";
+import { MultiSelect } from "@/commonComponents/form/MultiSelect";
+import { DEFAULT_APPS_OPTIONS } from "@/Utils/constants/ara/constants";
 
 export type Designation = { id: number; name: string; levelOrder: number };
 
@@ -262,7 +272,12 @@ function AddressModal({
   };
 
   return (
-    <Modal open={open} onClose={onClose} title={title} className="max-w-[550px] z-[99999]">
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={title}
+      className="max-w-[550px] z-[99999]"
+    >
       <div className="space-y-3 ">
         <Field label="Address 1" required error={errs.address1}>
           <TextInput
@@ -423,7 +438,7 @@ export default function UserOnboardModal({
     ahipProofUrl: "",
     stateLicensed: false,
     accessLevel: "TRAINING",
-    bankAccounts: [],
+    apps: [],
   });
 
   // address modal state
@@ -501,16 +516,7 @@ export default function UserOnboardModal({
           stateLicensed: !!agent.stateLicensed,
           stateLicenseNumber: agent.stateLicenseNumber || "",
           accessLevel: agent.accessLevel || "TRAINING",
-          bankAccounts:
-            agent.bankAccounts?.map((b: any) => ({
-              id: b.id,
-              bankName: b.bankName,
-              accountNumber: b.accountNumber,
-              ifscNumber: b.ifscNumber,
-              accountHolderName: b.accountHolderName,
-              isPrimary: b.isPrimary ?? false,
-              isVerified: b.isVerified ?? false,
-            })) || [],
+          apps: agent.apps || [],
         });
       }
 
@@ -539,7 +545,7 @@ export default function UserOnboardModal({
       stateLicensed: false,
       stateLicenseNumber: "",
       accessLevel: "TRAINING",
-      bankAccounts: [],
+      apps: [],
     });
   }, [open, mode, initialUser]);
 
@@ -593,6 +599,8 @@ export default function UserOnboardModal({
         e.yearsOfExperience = "Years must be >= 0";
       if (!(agentProfile as any).accessLevel)
         e.accessLevel = "Access level required";
+       if (!(agentProfile as any).apps)
+        e.apps = "apps are required";
 
       if (
         (agentProfile as any).ahipCertified &&
@@ -718,16 +726,7 @@ export default function UserOnboardModal({
           ? (agentProfile as any).stateLicenseNumber?.trim() || undefined
           : undefined,
         accessLevel: (agentProfile as any).accessLevel,
-        bankAccounts:
-          (agentProfile as any).bankAccounts?.map((b: any) => ({
-            id: b.id,
-            bankName: b.bankName.trim(),
-            accountNumber: b.accountNumber.trim(),
-            ifscNumber: b.ifscNumber.trim(),
-            accountHolderName: b.accountHolderName.trim(),
-            isPrimary: b.isPrimary ?? false,
-            isVerified: b.isVerified ?? false,
-          })) || [],
+        apps: (agentProfile as any).apps || [],
       };
     }
 
@@ -1439,89 +1438,21 @@ export default function UserOnboardModal({
                       placeholder="Select access"
                     />
                   </Field>
-
-                  <div className="grid md:grid-cols-2 grid-cols-1 gap-3 mt-4">
-                    <Field label="Bank Name" required>
-                      <TextInput
-                        value={agentProfile.bankAccounts?.[0]?.bankName || ""}
-                        onChange={(e) => {
-                          const updated = [
-                            {
-                              ...(agentProfile.bankAccounts?.[0] || {}),
-                              bankName: e.target.value,
-                            },
-                          ];
-                          setAgentProfile((p: any) => ({
-                            ...p,
-                            bankAccounts: updated,
-                          }));
-                        }}
-                        placeholder="Enter bank name"
-                      />
-                    </Field>
-
-                    <Field label="Account Number" required>
-                      <TextInput
-                        value={
-                          agentProfile.bankAccounts?.[0]?.accountNumber || ""
-                        }
-                        onChange={(e) => {
-                          const updated = [
-                            {
-                              ...(agentProfile.bankAccounts?.[0] || {}),
-                              accountNumber: e.target.value,
-                            },
-                          ];
-                          setAgentProfile((p: any) => ({
-                            ...p,
-                            bankAccounts: updated,
-                          }));
-                        }}
-                        placeholder="Enter account number"
-                      />
-                    </Field>
-
-                    <Field label="IFSC Number" required>
-                      <TextInput
-                        value={agentProfile.bankAccounts?.[0]?.ifscNumber || ""}
-                        onChange={(e) => {
-                          const updated = [
-                            {
-                              ...(agentProfile.bankAccounts?.[0] || {}),
-                              ifscNumber: e.target.value,
-                            },
-                          ];
-                          setAgentProfile((p: any) => ({
-                            ...p,
-                            bankAccounts: updated,
-                          }));
-                        }}
-                        placeholder="Enter IFSC"
-                      />
-                    </Field>
-
-                    <Field label="Account Holder Name" required>
-                      <TextInput
-                        value={
-                          agentProfile.bankAccounts?.[0]?.accountHolderName ||
-                          ""
-                        }
-                        onChange={(e) => {
-                          const updated = [
-                            {
-                              ...(agentProfile.bankAccounts?.[0] || {}),
-                              accountHolderName: e.target.value,
-                            },
-                          ];
-                          setAgentProfile((p: any) => ({
-                            ...p,
-                            bankAccounts: updated,
-                          }));
-                        }}
-                        placeholder="Enter holder name"
-                      />
-                    </Field>
-                  </div>
+                  <Field label="Apps" required error={errors.apps}>
+                    <MultiSelect
+                      values={agentProfile?.apps}
+                      onChange={(v: any) =>
+                        setAgentProfile((p: any) => ({
+                          ...p,
+                          apps: v,
+                        }))
+                      }
+                      options={DEFAULT_APPS_OPTIONS}
+                      placeholder="Select"
+                      placement="auto"
+                      error={!!errors.apps}
+                    />
+                  </Field>
                 </SectionCard>
               ) : null}
 

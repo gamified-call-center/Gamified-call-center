@@ -374,7 +374,7 @@ export default function AcaAgentsView() {
     }
 
     if (!form.designation) e.role = "designation is required";
-    if (!form.reportsTo) e.reportsTo = "Reportsto is required";
+    // if (!form.reportsTo) e.reportsTo = "Reportsto is required";
     if (!form.access) e.access = "Access is required";
     if (!form.apps || form.apps.length === 0)
       e.apps = "Select at least one app";
@@ -1291,16 +1291,7 @@ const handleUpload = async () => {
                   />
                 </Field>
 
-                <Field label="SSN">
-                  <TextInput
-                    value={form.ssn}
-                    onChange={(e: any) =>
-                      update("ssn", normalizeSSN(e.target.value))
-                    }
-                    placeholder="SSN"
-                    containerClassName="md:py-[6px] py-1"
-                  />
-                </Field>
+              
 
                 <Field label="Contact Number" error={errors.phone}>
                   <TextInput

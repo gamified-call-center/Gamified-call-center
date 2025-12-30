@@ -18,6 +18,7 @@ import {
   FileText,
   Globe,
   Grid,
+  Hash,
   Home,
   Key,
   Landmark,
@@ -56,6 +57,7 @@ import Loader from "@/commonComponents/Loader";
 import { uploadFile } from "@/Utils/uploadFile";
 import Button from "@/commonComponents/Button";
 import { DEFAULT_APPS_OPTIONS } from "@/Utils/constants/ara/constants";
+import { twMerge } from "tailwind-merge";
 
 type Designation = { id: number; name: string; levelOrder?: number };
 type UserMini = {
@@ -111,6 +113,14 @@ type Address = {
   isDefault?: boolean;
   isPrimary?: boolean;
 };
+export type BankAccount = {
+  id: string;
+  bankName: string;
+  accountNumber: string;
+  ifscNumber: string;
+  accountHolderName: string;
+  isPrimary: boolean;
+};
 
 type UserFull = {
   id: string;
@@ -128,6 +138,7 @@ type UserFull = {
   employee?: Employee | null;
   agentProfile?: AgentProfile | null;
   addresses?: Address[];
+  bankAccounts?: BankAccount[];
 };
 
 type ModalType =
@@ -135,7 +146,8 @@ type ModalType =
   | "employee"
   | "professional"
   | "address"
-  | "security";
+  | "security"
+  | "bank";
 type ModalMode = "add" | "edit";
 
 function hasProfileData(u: UserFull | null) {
@@ -191,7 +203,7 @@ export default function UserProfileView() {
   const params = useParams<{ id?: string }>();
   const userId =
     (params?.id as string | undefined) 
-    
+ 
 
   const [data, setData] = useState<UserFull | null>(null);
   const [loading, setLoading] = useState(false);
@@ -288,14 +300,21 @@ export default function UserProfileView() {
       icon: <Shield className="w-4 h-4" />,
     },
     { id: "address", label: "Address", icon: <MapPin className="w-4 h-4" /> },
+    {
+      id: "bank",
+      label: "Bank Details",
+      icon: <Landmark className="w-4 h-4" />,
+    },
     { id: "security", label: "Security", icon: <Lock className="w-4 h-4" /> },
   ];
   const visibleTabs = useMemo(() => {
-  if (data?.systemRole === "ADMIN") {
-    return tabs.filter(tab => tab.id !== "employee" && tab.id !== "professional");
-  }
-  return tabs;
-}, [data]);
+    if (data?.systemRole === "ADMIN") {
+      return tabs.filter(
+        (tab) => tab.id !== "employee" && tab.id !== "professional"
+      );
+    }
+    return tabs;
+  }, [data]);
 
   const [profileImage, setProfileImage] = useState<string>(
     data?.profileImage || ""
@@ -359,19 +378,31 @@ export default function UserProfileView() {
     await patchUser(dto);
     toast.success("Profile saved ");
   };
+  const getId = (x: any) => {
+    if (!x) return null;
+
+    // if select returns uuid directly
+    if (typeof x === "string") return x;
+
+    // common select shapes
+    return x.id ?? x.value ?? null;
+  };
 
   const saveEmployee = async (v: any) => {
+    const reportsToId = getId(v.reportsTo);
+    const designationId = getId(v.designation); 
+
     const dto = {
       employee: {
         ...(data?.employee?.id ? { id: data.employee.id } : {}),
-        designationId: v.designation ? Number(v.designation) : null,
-        reportsToId: String(v.reportsTo.id) || v?.reportsTo.id|| v?.reportsTo ||null,
+        designationId: designationId, 
+        reportsToId: reportsToId,
         isActive: v.isActive ?? true,
       },
     };
 
     await patchUser(dto);
-    toast.success("Employee details saved ");
+    toast.success("Employee details saved");
   };
 
   const saveProfessional = async (v: any) => {
@@ -404,28 +435,7 @@ export default function UserProfileView() {
     toast.success("Professional details saved");
   };
 
-  // const saveAddress = async (v: any) => {
-  //   const dto = {
-  //     addresses: [
-  //       {
-  //         ...(v.id ? { id: v.id } : {}),
-  //         address1: v.address1.trim(),
-  //         address2: v.address2?.trim() || null,
-  //         city: v.city.trim(),
-  //         state: v.state.trim(),
-  //         zip: v.zip.trim(),
-  //         country: v.country.trim(),
-  //         locality: v.locality?.trim() || null,
-  //         landmark: v.landmark?.trim() || null,
-  //         isDefault: v.isPrimary ?? true,
-  //       },
-  //     ],
-  //   };
-
-  //   await patchUser(dto);
-  //   toast.success("Address saved ");
-  // };
-
+  
   const savePassword = async (v: any) => {
     if (v.newPassword !== v.confirmPassword) {
       toast.error("Passwords do not match ");
@@ -641,8 +651,13 @@ export default function UserProfileView() {
             <KV
               icon={<UserIcon />}
               label="Reports To"
-              value={emp?.reportsTo?.designation?.name ?? "-"}
+              value={
+                emp?.reportsTo?.user
+                  ? `${emp.reportsTo.user.firstName} ${emp.reportsTo.user.lastName}`
+                  : "-"
+              }
             />
+
             <KV
               icon={<CheckCircle className="w-4 h-4" />}
               label="Active"
@@ -728,12 +743,6 @@ export default function UserProfileView() {
                 value={a?.stateLicenseNumber ?? "-"}
               />
             )}
-
-            <KV
-              icon={<CheckCircle className="w-4 h-4" />}
-              label="Active"
-              value={a?.isActive ? "Yes" : "No"}
-            />
 
             <KV
               icon={<Phone className="w-4 h-4" />}
@@ -828,163 +837,462 @@ export default function UserProfileView() {
       </div>
     );
   };
-const saveAddress = async (v: any) => {
-  if (!userId) return;
 
-  const payload = {
-    address1: v.address1?.trim(),
-    address2: v.address2?.trim() || null,
-    city: v.city?.trim(),
-    state: v.state?.trim(),
-    zip: v.zip?.trim(),
-    country: v.country?.trim(),
-    locality: v.locality?.trim() || null,
-    landmark: v.landmark?.trim() || null,
-    isDefault: v.isDefault ?? true, 
-  };
+  const saveBank = async (v: any) => {
+    if (!userId) return;
 
-  try {
-    setLoading(true);
-    let res;
+    const payload = {
+      bankName: v.bankName?.trim(),
+      accountNumber: v.accountNumber?.trim(),
+      ifscNumber: v.ifscNumber?.trim(),
+      accountHolderName: v.accountHolderName?.trim(),
+      isPrimary: !!v.isPrimary,
+    };
 
-    if (v?.id) {
-     let res= await apiClient.patch(`${apiClient.URLS.user}/${userId}/addresses/${v?.id}`, payload);
-     if (res.status===200){
-       toast.success("Address updated");
-
-     }
-     
-    } else {
-     let res= await apiClient.post(`${apiClient.URLS.user}/${userId}/addresses`,payload);
-     if(res.statas===200){
-       toast.success("Address added");
-     }
+    // optimistic primary change
+    if (payload.isPrimary && v?.id) {
+      setData((prev: any) => {
+        const list = prev?.bankAccounts ?? [];
+        return {
+          ...prev,
+          bankAccounts: list.map((b: any) => ({
+            ...b,
+            isPrimary: b.id === v.id,
+          })),
+        };
+      });
     }
 
-    await load(); 
-  } catch (e: any) {
-    console.error("saveAddress error", e);
-    toast.error(e?.message || "Failed to save address");
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      setLoading(true);
 
-// ---- Delete Address using endpoint ----
-const handleDeleteAddress = async (addr: any) => {
-  if (!userId || !addr?.id) return;
+      const res = v?.id
+        ? await apiClient.patch(
+            `${apiClient.URLS.user}/${userId}/bank-accounts/${v.id}`,
+            payload,
+            true
+          )
+        : await apiClient.post(
+            `${apiClient.URLS.user}/${userId}/bank-accounts`,
+            payload,
+            true
+          );
 
-  
+      if (res?.status === 200 || res?.status === 201) {
+        toast.success(v?.id ? "Bank updated" : "Bank added");
+      } else {
+        toast.success(v?.id ? "Bank updated" : "Bank added");
+      }
 
-  try {
-    setLoading(true);
-    let res=await apiClient.delete(`${apiClient.URLS.user}/${userId}/addresses/${addr.id}`,{});
-    toast.success("Address deleted");
-    await load();
-  } catch (e: any) {
-    console.error("deleteAddress error", e);
-    toast.error(e?.message || "Failed to delete address");
-  } finally {
-    setLoading(false);
-  }
-};
-const renderAddressTab = () => {
-  const addressList = data?.addresses ?? [];
-
-  // ✅ Always add new address from top button
-  const mode: ModalMode = "add";
-
-  const emptyInit = {
-    address1: "",
-    address2: null,
-    city: "",
-    state: "",
-    zip: "",
-    country: "",
-    locality: null,
-    landmark: null,
-    isDefault: addressList.length === 0, // first one auto primary (optional)
+      await load();
+    } catch (e: any) {
+      console.error("saveBank error", e);
+      toast.error(e?.body?.message || e?.message || "Failed to save bank");
+      await load(); // rollback optimistic
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return (
-    <div className="space-y-6 animate-fadeIn p-6">
-      <SectionCard
-        title="Address Information"
-        icon={<MapPin className="w-5 h-5 text-emerald-500" />}
-        actionLabel="Add Address" 
-        actionIcon={<Plus className="w-4 h-4" />}
-        onAction={() => openModal("address", "add", emptyInit)} 
-      >
-        {addressList.length > 0 ? (
-          <div className="space-y-4">
-            {addressList.map((addr: any, i: number) => (
-              <div
-                key={addr.id}
-                className="rounded-xl border app-border app-surface md:p-4 p-2 relative hover:scale-[1.01] transition-all"
-              >
-                {addr.isDefault && (
-                  <div className="absolute top-2 right-2 flex items-center gap-1">
-                    <CheckCircle className="w-4 h-4 text-emerald-500" />
-                    <span className="text-xs app-text font-bold">Primary</span>
+  const deleteBank = async (bankId: string) => {
+    if (!userId || !bankId) return;
+
+    try {
+      setLoading(true);
+      const res = await apiClient.delete(
+        `${apiClient.URLS.user}/${userId}/bank-accounts/${bankId}`,
+        {},
+        true
+      );
+
+      if (res?.status === 200 || res?.status === 204) {
+        toast.success("Bank deleted");
+      } else {
+        toast.success("Bank deleted");
+      }
+      await load();
+    } catch (e: any) {
+      console.error("deleteBank error", e);
+      toast.error(e?.body?.message || e?.message || "Failed to delete bank");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const setPrimaryBank = async (bankId: string) => {
+    if (!userId || !bankId) return;
+
+    // optimistic UI
+    setData((prev: any) => {
+      const list = prev?.bankAccounts ?? [];
+      return {
+        ...prev,
+        bankAccounts: list.map((b: any) => ({
+          ...b,
+          isPrimary: b.id === bankId,
+        })),
+      };
+    });
+
+    try {
+      setLoading(true);
+
+      const res = await apiClient.patch(
+        `${apiClient.URLS.user}/${userId}/bank-accounts/${bankId}/primary`,
+        {},
+        true
+      );
+
+      if (res?.status === 200) toast.success("Primary bank updated");
+
+      await load();
+    } catch (e: any) {
+      console.error("setPrimaryBank error", e);
+      toast.error(e?.body?.message || e?.message || "Failed to set primary");
+      await load(); // rollback by reload
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveAddress = async (v: any) => {
+    if (!userId) return;
+
+    const payload = {
+      address1: v.address1?.trim(),
+      address2: v.address2?.trim() || null,
+      city: v.city?.trim(),
+      state: v.state?.trim(),
+      zip: v.zip?.trim(),
+      country: v.country?.trim(),
+      locality: v.locality?.trim() || null,
+      landmark: v.landmark?.trim() || null,
+      isDefault: v.isDefault ?? true,
+    };
+
+    try {
+      setLoading(true);
+      let res;
+
+      if (v?.id) {
+        let res = await apiClient.patch(
+          `${apiClient.URLS.user}/${userId}/addresses/${v?.id}`,
+          payload
+        );
+        if (res.status === 200) {
+          toast.success("Address updated");
+        }
+      } else {
+        let res = await apiClient.post(
+          `${apiClient.URLS.user}/${userId}/addresses`,
+          payload
+        );
+        if (res.statas === 200) {
+          toast.success("Address added");
+        }
+      }
+
+      await load();
+    } catch (e: any) {
+      console.error("saveAddress error", e);
+      toast.error(e?.message || "Failed to save address");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteAddress = async (addr: any) => {
+    if (!userId || !addr?.id) return;
+
+    try {
+      setLoading(true);
+      let res = await apiClient.delete(
+        `${apiClient.URLS.user}/${userId}/addresses/${addr.id}`,
+        {}
+      );
+
+      if (res.status === 200) {
+        toast.success("Address deleted");
+      }
+
+      await load();
+    } catch (e: any) {
+      console.error("deleteAddress error", e);
+      toast.error(e?.message || "Failed to delete address");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const renderBankTab = () => {
+    const bankList = (
+      (data as any)?.bankAccounts ??
+      (data as any)?.bank_accounts ??
+      []
+    ).sort((a: any, b: any) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0));
+
+    const emptyInit = {
+      bankName: "",
+      accountNumber: "",
+      ifscNumber: "",
+      accountHolderName: "",
+      isPrimary: bankList.length === 0,
+    };
+
+    return (
+      <div className="space-y-6 animate-fadeIn p-6">
+        <SectionCard
+          title="Bank Accounts"
+          icon={<Landmark className="w-5 h-5 text-emerald-500" />}
+          actionLabel="Add Bank"
+          actionIcon={<Plus className="w-4 h-4" />}
+          onAction={() => openModal("bank", "add", emptyInit)}
+        >
+          {bankList.length > 0 ? (
+            <div className="space-y-4">
+              {bankList.map((b: any, i: number) => (
+                <div
+                  key={b.id}
+                  className="rounded-xl border app-border app-surface md:p-4 p-2 relative hover:scale-[1.01] transition-all"
+                >
+                  {b.isPrimary && (
+                    <div className="absolute top-2 right-2 flex items-center gap-1">
+                      <CheckCircle className="w-4 h-4 text-emerald-500" />
+                      <span className="text-xs app-text font-bold">
+                        Primary
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="text-xs font-medium text-slate-400 mb-2">
+                    Bank #{i + 1}
                   </div>
-                )}
 
-                <div className="text-xs font-medium text-slate-400 mb-2">
-                  Address #{i + 1}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <KV
+                      label="Bank Name"
+                      value={b.bankName}
+                      icon={<Landmark className="w-4 h-4" />}
+                    />
+                    <KV
+                      label="Holder Name"
+                      value={b.accountHolderName}
+                      icon={<UserIcon />}
+                    />
+                    <KV
+                      label="Account No"
+                      value={b.accountNumber}
+                      icon={<FileText className="w-4 h-4" />}
+                    />
+                    <KV
+                      label="IFSC"
+                      value={b.ifscNumber}
+                      icon={<Hash className="w-4 h-4" />}
+                    />
+                    <KV
+                      label="Verified"
+                      value={b.isVerified ? "Yes" : "No"}
+                      icon={<Shield className="w-4 h-4" />}
+                    />
+                  </div>
+
+                  <div className="mt-3">
+                    {!b.isPrimary && (
+                      <Button
+                        onClick={() => setPrimaryBank(b.id)}
+                        className="
+        inline-flex items-center gap-1.5
+        px-3.5 py-2 rounded-xl btn-txt font-medium
+        app-surface hover:app-card
+        app-text
+        border border-gray-300 dark:border-gray-600
+        transition-all cursor-pointer
+        shadow-xs hover:shadow-md
+      "
+                      >
+                        <Star className="w-4 h-4 text-emerald-500" />
+                        Set Primary
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="absolute bottom-2 right-2 flex items-center gap-2">
+                    <Button
+                      type="button"
+                      className="app-text transition"
+                      onClick={() => openModal("bank", "edit", b)}
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+
+                    <Button
+                      type="button"
+                      className="text-red-600 hover:text-red-700 transition"
+                      onClick={() => deleteBank(b.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <KV icon={<Home className="w-4 h-4" />} label="Address 1" value={addr.address1} />
-                  <KV icon={<Building className="w-4 h-4" />} label="City" value={addr.city} />
-                  <KV icon={<MapIcon className="w-4 h-4" />} label="State" value={addr.state} />
-                  <KV icon={<FileText className="w-4 h-4" />} label="ZIP" value={addr.zip} />
-                  <KV icon={<Globe className="w-4 h-4" />} label="Country" value={addr.country} />
-                  {addr.address2 && ( <div className="mt-2"> <KV icon={<Plus className="w-3 h-3" />} label="Address 2" value={addr.address2} /> </div> )} {(addr.locality || addr.landmark) && ( <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2"> {addr.locality && ( <KV label="Locality" value={addr.locality} icon={<MapPinHouse size={16} />} /> )} {addr.landmark && ( <KV label="Landmark" value={addr.landmark} icon={<Landmark size={16} />} /> )} </div> )}
-                </div>
-
-               
-                <div className="absolute bottom-2 right-2 flex items-center gap-2">
-                  <Button
-                    type="button"
-                    className="app-text transition"
-                    onClick={() => openModal("address", "edit", addr)} // ✅ edit only here
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </Button>
-
-                  <Button
-                    type="button"
-                    className="text-red-600 hover:text-red-700 transition"
-                    onClick={() => handleDeleteAddress(addr)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-10">
-            <div className="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-4">
-              <MapPin className="w-10 h-10 text-slate-400" />
+              ))}
             </div>
-            <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-2">
-              No Address Added
-            </h3>
-            <p className="text-slate-500 dark:text-slate-400">
-              Add your address to complete your profile
-            </p>
-          </div>
-        )}
-      </SectionCard>
-    </div>
-  );
-};
+          ) : (
+            <div className="text-center py-10">
+              <div className="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-4">
+                <Landmark className="w-10 h-10 text-slate-400" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-2">
+                No Bank Accounts Added
+              </h3>
+              <p className="text-slate-500 dark:text-slate-400">
+                Add a bank account to receive payouts.
+              </p>
+            </div>
+          )}
+        </SectionCard>
+      </div>
+    );
+  };
 
+  const renderAddressTab = () => {
+    const addressList = data?.addresses ?? [];
 
+    const mode: ModalMode = "add";
 
+    const emptyInit = {
+      address1: "",
+      address2: null,
+      city: "",
+      state: "",
+      zip: "",
+      country: "",
+      locality: null,
+      landmark: null,
+      isDefault: addressList.length === 0,
+    };
 
-  
+    return (
+      <div className="space-y-6 animate-fadeIn p-6">
+        <SectionCard
+          title="Address Information"
+          icon={<MapPin className="w-5 h-5 text-emerald-500" />}
+          actionLabel="Add Address"
+          actionIcon={<Plus className="w-4 h-4" />}
+          onAction={() => openModal("address", "add", emptyInit)}
+        >
+          {addressList.length > 0 ? (
+            <div className="space-y-4">
+              {addressList.map((addr: any, i: number) => (
+                <div
+                  key={addr.id}
+                  className="rounded-xl border app-border app-surface md:p-4 p-2 relative hover:scale-[1.01] transition-all"
+                >
+                  {addr.isDefault && (
+                    <div className="absolute top-2 right-2 flex items-center gap-1">
+                      <CheckCircle className="w-4 h-4 text-emerald-500" />
+                      <span className="text-xs app-text font-bold">
+                        Primary
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="text-xs font-medium text-slate-400 mb-2">
+                    Address #{i + 1}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <KV
+                      icon={<Home className="w-4 h-4" />}
+                      label="Address 1"
+                      value={addr.address1}
+                    />
+                    <KV
+                      icon={<Building className="w-4 h-4" />}
+                      label="City"
+                      value={addr.city}
+                    />
+                    <KV
+                      icon={<MapIcon className="w-4 h-4" />}
+                      label="State"
+                      value={addr.state}
+                    />
+                    <KV
+                      icon={<FileText className="w-4 h-4" />}
+                      label="ZIP"
+                      value={addr.zip}
+                    />
+                    <KV
+                      icon={<Globe className="w-4 h-4" />}
+                      label="Country"
+                      value={addr.country}
+                    />
+                    {addr.address2 && (
+                      <div className="mt-2">
+                        {" "}
+                        <KV
+                          icon={<Plus className="w-3 h-3" />}
+                          label="Address 2"
+                          value={addr.address2}
+                        />{" "}
+                      </div>
+                    )}{" "}
+                    {(addr.locality || addr.landmark) && (
+                      <div className="mt-2 grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {" "}
+                        {addr.locality && (
+                          <KV
+                            label="Locality"
+                            value={addr.locality}
+                            icon={<MapPinHouse size={16} />}
+                          />
+                        )}{" "}
+                        {addr.landmark && (
+                          <KV
+                            label="Landmark"
+                            value={addr.landmark}
+                            icon={<Landmark size={16} />}
+                          />
+                        )}{" "}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="absolute bottom-2 right-2 flex items-center gap-2">
+                    <Button
+                      type="button"
+                      className="app-text transition"
+                      onClick={() => openModal("address", "edit", addr)} // ✅ edit only here
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+
+                    <Button
+                      type="button"
+                      className="text-red-600 hover:text-red-700 transition"
+                      onClick={() => handleDeleteAddress(addr)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-10">
+              <div className="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-4">
+                <MapPin className="w-10 h-10 text-slate-400" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-2">
+                No Address Added
+              </h3>
+              <p className="text-slate-500 dark:text-slate-400">
+                Add your address to complete your profile
+              </p>
+            </div>
+          )}
+        </SectionCard>
+      </div>
+    );
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -996,6 +1304,8 @@ const renderAddressTab = () => {
         return renderSecurityTab();
       case "address":
         return renderAddressTab();
+      case "bank":
+        return renderBankTab();
 
       case "activity":
         return (
@@ -1130,6 +1440,7 @@ const renderAddressTab = () => {
           if (modalType === "professional") return saveProfessional(values);
           if (modalType === "address") return saveAddress(values);
           if (modalType === "security") return savePassword(values);
+          if (modalType === "bank") return saveBank(values);
         }}
       />
     </>
@@ -1219,6 +1530,10 @@ function ProfileModal({
       ? mode === "edit"
         ? "Edit Profile"
         : "Add Profile"
+      : type === "bank"
+      ? mode === "edit"
+        ? "Edit Bank Account"
+        : "Add Bank Account"
       : type === "employee"
       ? mode === "edit"
         ? "Edit Employee"
@@ -1256,6 +1571,13 @@ function ProfileModal({
       if (!values.state?.trim()) return "State is required";
       if (!values.zip?.trim()) return "ZIP is required";
       if (!values.country?.trim()) return "Country is required";
+    }
+    if (type === "bank") {
+      if (!values.bankName?.trim()) return "Bank name is required";
+      if (!values.accountHolderName?.trim())
+        return "Account holder name is required";
+      if (!values.accountNumber?.trim()) return "Account number is required";
+      if (!values.ifscNumber?.trim()) return "IFSC is required";
     }
 
     return null;
@@ -1353,6 +1675,71 @@ function ProfileModal({
           </Field>
         </div>
       )}
+      {type === "bank" && (
+        <div className="md:space-y-4 space-y-2">
+          <Field label="Bank Name" required>
+            <TextInput
+              value={values.bankName || ""}
+              onChange={(e: any) => set("bankName", e.target.value)}
+              placeholder="HDFC / SBI / ICICI..."
+              className="w-full"
+            />
+          </Field>
+
+          <Field label="Account Holder Name" required>
+            <TextInput
+              value={values.accountHolderName || ""}
+              onChange={(e: any) => set("accountHolderName", e.target.value)}
+              placeholder="Name as per bank"
+              className="w-full"
+            />
+          </Field>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Field label="Account Number" required>
+              <TextInput
+                value={values.accountNumber || ""}
+                onChange={(e: any) => set("accountNumber", e.target.value)}
+                placeholder="XXXXXXXXXXXX"
+                className="w-full"
+              />
+            </Field>
+
+            <Field label="IFSC" required>
+              <TextInput
+                value={values.ifscNumber || ""}
+                onChange={(e: any) => set("ifscNumber", e.target.value)}
+                placeholder="IFSC Code"
+                className="w-full"
+              />
+            </Field>
+          </div>
+
+          <div className="pt-2">
+            <ToggleInline
+              label="Set as Primary"
+              checked={!!values.isPrimary}
+              onChange={(v) => set("isPrimary", v)}
+            />
+          </div>
+          {!values.isPrimary && (
+            <p className="md:text-xs text-[10px] mt-1 font-medium app-muted">
+              If you set this as Primary, existing primary account will be
+              unmarked.
+            </p>
+          )}
+
+          {values?.isVerified !== undefined ? (
+            <p className="text-xs app-muted">
+              Verification:{" "}
+              <span className="font-semibold">
+                {values.isVerified ? "Verified" : "Not verified"}
+              </span>
+            </p>
+          ) : null}
+        </div>
+      )}
+
       {type === "address" && (
         <div className="md:space-y-4 space-y-2">
           <Field label="Address Line 1" required>
@@ -1775,8 +2162,9 @@ function ToggleInline({
   onChange: (v: boolean) => void;
 }) {
   return (
-    <div className="flex items-center justify-between p-3 rounded-xl borderapp-border app-card">
-      <div className=" font-medium app-text">{label}</div>
+    <div className="flex items-center justify-between p-3 rounded-xl border app-border app-card">
+      <div className="font-medium label-text app-text">{label}</div>
+
       <label className="relative inline-flex items-center cursor-pointer">
         <input
           type="checkbox"
@@ -1784,7 +2172,15 @@ function ToggleInline({
           onChange={(e) => onChange(e.target.checked)}
           className="sr-only peer"
         />
-        <div className="w-11 h-6 app-surface rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500" />
+
+        <div
+          className={twMerge(
+            "w-11 h-6 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all",
+            "bg-gray-300 dark:bg-gray-700", // ✅ Unchecked gray based on theme
+            checked &&
+              "peer-checked:bg-emerald-500 peer-checked:after:translate-x-full"
+          )}
+        />
       </label>
     </div>
   );

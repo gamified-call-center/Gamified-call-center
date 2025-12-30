@@ -187,7 +187,7 @@ export default function DesignationsPermissionsPage() {
     ahipProofUrl: "",
     stateLicensed: false,
     accessLevel: "TRAINING",
-    bankAccounts: [],
+     apps: []
   });
   const [page, setPage] = useState(1);
   const LIMIT = 10;
@@ -471,7 +471,7 @@ export default function DesignationsPermissionsPage() {
       ahipProofUrl: "",
       stateLicensed: false,
       accessLevel: "TRAINING",
-      bankAccounts: [],
+       apps: [],
     });
   };
 
@@ -531,94 +531,75 @@ export default function DesignationsPermissionsPage() {
         ahipProofUrl: u.agentProfile.ahipProofUrl || "",
         stateLicensed: !!u.agentProfile.stateLicensed,
         accessLevel: u.agentProfile.accessLevel || "TRAINING",
-        bankAccounts:
-          u.agentProfile.bankAccounts?.map((b) => ({
-            id: b.id,
-            bankName: b.bankName,
-            accountNumber: b.accountNumber,
-            ifscNumber: b.ifscNumber,
-            accountHolderName: b.accountHolderName,
-            isPrimary: b.isPrimary ?? false,
-            isVerified: b.isVerified ?? false,
-          })) || [],
+        apps:u.agentProfile.apps||[]
       });
     }
 
     setUserFormOpen(true);
   };
 
- const convertToUpdateDto = (payload: CreateUserDto): UpdateUserDto => {
-  const role = payload.user?.systemRole ?? "STANDARD";
+  const convertToUpdateDto = (payload: CreateUserDto): UpdateUserDto => {
+    const role = payload.user?.systemRole ?? "STANDARD";
 
-  const update: UpdateUserDto = {
-    user: {
-      firstName: payload.user.firstName,
-      lastName: payload.user.lastName,
-      dob: payload.user.dob,
-      email: payload.user.email,
-      phone: payload.user.phone,
-      profileImage: payload.user.profileImage,
-      systemRole: payload.user.systemRole,
+    const update: UpdateUserDto = {
+      user: {
+        firstName: payload.user.firstName,
+        lastName: payload.user.lastName,
+        dob: payload.user.dob,
+        email: payload.user.email,
+        phone: payload.user.phone,
+        profileImage: payload.user.profileImage,
+        systemRole: payload.user.systemRole,
 
-      ...(payload.user.password?.trim()
-        ? { password: payload.user.password.trim() }
-        : {}),
-    },
+        ...(payload.user.password?.trim()
+          ? { password: payload.user.password.trim() }
+          : {}),
+      },
+    };
+
+    // ✅ addresses should be allowed for BOTH ADMIN + STANDARD
+    if (payload.addresses?.length) {
+      update.addresses = payload.addresses.map((a: any) => ({
+        ...(a.id ? { id: a.id } : {}),
+        ...(a.delete ? { delete: true } : {}),
+        address1: a.address1,
+        address2: a.address2,
+        city: a.city,
+        state: a.state,
+        zip: a.zip,
+        country: a.country,
+        locality: a.locality,
+        landmark: a.landmark,
+        isDefault: a.isDefault,
+      }));
+    }
+
+    // ✅ only skip employee/agent for ADMIN
+    if (role === "ADMIN") return update;
+
+    if (payload.employee) {
+      update.employee = {
+        designationId: payload.employee.designationId,
+        reportsToId: payload.employee.reportsToId,
+      };
+    }
+
+    if (payload.agentProfile) {
+      update.agentProfile = {
+        npn: payload.agentProfile.npn,
+        yearsOfExperience: payload.agentProfile.yearsOfExperience,
+        ahipCertified: payload.agentProfile.ahipCertified,
+        ahipProofUrl: payload.agentProfile.ahipCertified
+          ? payload.agentProfile.ahipProofUrl
+          : undefined,
+        stateLicensed: payload.agentProfile.stateLicensed,
+        accessLevel: payload.agentProfile.accessLevel,
+        apps:payload.agentProfile.apps||[]
+      };
+    }
+
+    return update;
   };
-
-  // ✅ addresses should be allowed for BOTH ADMIN + STANDARD
-  if (payload.addresses?.length) {
-    update.addresses = payload.addresses.map((a: any) => ({
-      ...(a.id ? { id: a.id } : {}),
-      ...(a.delete ? { delete: true } : {}),
-      address1: a.address1,
-      address2: a.address2,
-      city: a.city,
-      state: a.state,
-      zip: a.zip,
-      country: a.country,
-      locality: a.locality,
-      landmark: a.landmark,
-      isDefault: a.isDefault,
-    }));
-  }
-
-  // ✅ only skip employee/agent for ADMIN
-  if (role === "ADMIN") return update;
-
-  if (payload.employee) {
-    update.employee = {
-      designationId: payload.employee.designationId,
-      reportsToId: payload.employee.reportsToId,
-    };
-  }
-
-  if (payload.agentProfile) {
-    update.agentProfile = {
-      npn: payload.agentProfile.npn,
-      yearsOfExperience: payload.agentProfile.yearsOfExperience,
-      ahipCertified: payload.agentProfile.ahipCertified,
-      ahipProofUrl: payload.agentProfile.ahipCertified
-        ? payload.agentProfile.ahipProofUrl
-        : undefined,
-      stateLicensed: payload.agentProfile.stateLicensed,
-      accessLevel: payload.agentProfile.accessLevel,
-      bankAccounts: payload.agentProfile.bankAccounts?.map((b: any) => ({
-        ...(b.id ? { id: b.id } : {}),
-        bankName: b.bankName,
-        accountNumber: b.accountNumber,
-        ifscNumber: b.ifscNumber,
-        accountHolderName: b.accountHolderName,
-        isPrimary: b.isPrimary ?? false,
-        isVerified: b.isVerified ?? false,
-      })),
-    };
-  }
-
-  return update;
-};
-
-
 
   const handleUserSubmit = async (payload: CreateUserDto) => {
     // const ok1 = validateStep1();
@@ -1050,18 +1031,20 @@ export default function DesignationsPermissionsPage() {
           <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)}>
             <div className="w-full py-2 rounded-md">
               <div
-                className={`absolute top-0 left-0 w-full h-1.5 ${confirmType === "DEACTIVATE"
+                className={`absolute top-0 left-0 w-full h-1.5 ${
+                  confirmType === "DEACTIVATE"
                     ? "bg-orange-500"
                     : "bg-green-500"
-                  }`}
+                }`}
               ></div>
 
               <div className="flex justify-center mt-2">
                 <div
-                  className={`w-16 h-16 flex items-center justify-center rounded-full border-4 app-card shadow-lg ${confirmType === "DEACTIVATE"
+                  className={`w-16 h-16 flex items-center justify-center rounded-full border-4 app-card shadow-lg ${
+                    confirmType === "DEACTIVATE"
                       ? "border-orange-200 shadow-orange-400/30"
                       : "border-green-200 shadow-green-400/30"
-                    }`}
+                  }`}
                 >
                   {confirmType === "DEACTIVATE" ? (
                     <Trash2 className="w-8 h-8 text-orange-600 animate-pulse" />
@@ -1089,10 +1072,11 @@ export default function DesignationsPermissionsPage() {
                 <span className="text-xs font-bold text-slate-400">Power</span>
                 <div className="w-40 h-2 bg-slate-100 rounded-full overflow-hidden">
                   <div
-                    className={`h-full transition-all duration-700 ${confirmType === "DEACTIVATE"
+                    className={`h-full transition-all duration-700 ${
+                      confirmType === "DEACTIVATE"
                         ? "w-[35%] bg-orange-600"
                         : "w-full bg-green-600"
-                      }`}
+                    }`}
                   ></div>
                 </div>
                 <span className="text-xs font-bold text-slate-400">
@@ -1109,10 +1093,11 @@ export default function DesignationsPermissionsPage() {
                 </Button>
 
                 <Button
-                  className={`md:px-6 px-3 md:py-2.5 py-1.5 md:text-[14px] text-[12px] rounded-2xl text-white font-bold flex items-center gap-2 shadow-lg hover:scale-110 active:scale-95 transition-all ${confirmType === "DEACTIVATE"
+                  className={`md:px-6 px-3 md:py-2.5 py-1.5 md:text-[14px] text-[12px] rounded-2xl text-white font-bold flex items-center gap-2 shadow-lg hover:scale-110 active:scale-95 transition-all ${
+                    confirmType === "DEACTIVATE"
                       ? "bg-linear-to-r from-orange-600 to-red-600 shadow-red-400/40"
                       : "bg-linear-to-r from-green-600 to-emerald-600 shadow-green-400/40"
-                    }`}
+                  }`}
                   onClick={async () => {
                     if (!selectedUser) {
                       toast.error("No user selected");
@@ -1585,9 +1570,7 @@ function DesignationPermissionsCrudModalBody({
     fetchResources();
   }, []);
 
- 
   useEffect(() => {
-
     console.log("designationId", designationId);
     if (!designationId) return;
 
@@ -1595,7 +1578,7 @@ function DesignationPermissionsCrudModalBody({
       setLoading(true);
       try {
         const res: any = await apiClient.get(
-          `${apiClient.URLS.designationPermissions}/${designationId}/permissions`,
+          `${apiClient.URLS.designationPermissions}/${designationId}/permissions`
         );
         const list: ResourceRow[] = Array.isArray(res?.body) ? res.body : [];
         list.sort((a, b) => (a.resource || "").localeCompare(b.resource || ""));
@@ -1615,7 +1598,6 @@ function DesignationPermissionsCrudModalBody({
     fetchDesignationPermissions();
   }, [designationId]);
 
- 
   const filteredResourceDropdownOptions = useMemo(() => {
     let list = [...resources];
     if (resourceSearch.trim()) {
@@ -1904,10 +1886,10 @@ function DesignationPermissionsCrudModalBody({
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 rounded-full text-[11px] font-medium app-card app-text border app-border">
+            <span className="md:px-2.5 px-1.5 py-1 tex-nowrap rounded-full md:text-[11px] text-[9px] font-medium app-card app-text border app-border">
               {filteredTableRows.length} Resources
             </span>
-            <span className="px-2.5 py-1 rounded-full text-[11px] font-medium border border-amber-200 bg-amber-50 text-amber-700">
+            <span className="md:px-2.5 px-1.5 py-1 tex-nowrap rounded-full md:text-[11px] text-[9px] font-medium border border-amber-200 bg-amber-50 text-amber-700">
               {pendingChangesCount} pending
             </span>
           </div>
@@ -1990,9 +1972,10 @@ function DesignationPermissionsCrudModalBody({
                 onClick={handleAddOrUpdateResourceLocal}
                 disabled={!designationId || savingAll}
                 className={`md:px-4 py-2 px-3 rounded-lg md:text-[14px] text-[12px] font-medium text-white shadow-sm transition
-                  ${!designationId || savingAll
-                    ? "bg-blue-300 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700"
+                  ${
+                    !designationId || savingAll
+                      ? "bg-blue-300 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700"
                   }`}
               >
                 {editId ? "Update Resource" : "+ Add Resource"}
@@ -2073,8 +2056,9 @@ function DesignationPermissionsCrudModalBody({
                     return (
                       <tr
                         key={perm.id || perm.resource}
-                        className={`border-t hover:app-card ${changed ? "bg-amber-50/40" : ""
-                          }`}
+                        className={`border-t hover:app-card ${
+                          changed ? "bg-amber-50/40" : ""
+                        }`}
                       >
                         <td className="py-3 px-4 text-left">
                           <div className="flex items-center gap-2">
@@ -2103,10 +2087,11 @@ function DesignationPermissionsCrudModalBody({
                                 type="button"
                                 onClick={() => toggleCellLocal(perm, action)}
                                 className={`inline-flex items-center justify-center w-8 h-8 rounded-lg border transition
-                                ${perm[action]
+                                ${
+                                  perm[action]
                                     ? "bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100"
                                     : "bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100"
-                                  }`}
+                                }`}
                                 title={action}
                                 disabled={savingAll}
                               >
@@ -2164,9 +2149,10 @@ function DesignationPermissionsCrudModalBody({
             onClick={handleSaveAllPermissions}
             disabled={savingAll || pendingChangesCount === 0}
             className={`md:px-5 md:py-2 py-2 px-4 rounded-lg md:text-[14px] text-[12px] font-medium text-white shadow-sm transition
-              ${savingAll || pendingChangesCount === 0
-                ? "bg-emerald-300 cursor-not-allowed"
-                : "bg-emerald-600 hover:bg-emerald-700"
+              ${
+                savingAll || pendingChangesCount === 0
+                  ? "bg-emerald-300 cursor-not-allowed"
+                  : "bg-emerald-600 hover:bg-emerald-700"
               }`}
           >
             {savingAll ? "Saving..." : "Save Permissions"}

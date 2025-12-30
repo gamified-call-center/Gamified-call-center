@@ -42,10 +42,11 @@ export type DealForm = {
   customerLanguage: string;
   closedDate: string; // datetime-local
   agentId: string;
+  userId:string;
   status: DealStatus;
   notes: string;
-  documentType: string;
-  documentUrls: string[];
+ 
+documents: string[];
 };
 
 export type CreateDealModalMode = "CREATE" | "EDIT";
@@ -91,10 +92,11 @@ const defaultForm = (): DealForm => ({
   customerLanguage: "",
   closedDate: nowAsDateTimeLocal(),
   agentId: "",
+  userId:"",
   notes: "",
   status: "OPEN",
-  documentType: "",
-  documentUrls: [],
+ 
+  documents: [],
 });
 
 export default function CreateDealModal({
@@ -144,8 +146,9 @@ export default function CreateDealModal({
       form.customerLanguage !== base.customerLanguage ||
       form.agentId !== base.agentId ||
       form.notes !== base.notes ||
-      form.documentType !== base.documentType ||
-      form.documentUrls.length > 0
+      form.userId!==base.userId||
+     
+      form.documents!==base.documents
     );
   }, [form]);
 
@@ -175,7 +178,7 @@ export default function CreateDealModal({
     if (!form.socialProvided) e.socialProvided = "Required";
     if (!form.customerLanguage) e.customerLanguage = "Required";
     if (!form.closedDate) e.closedDate = "Required";
-    if (!form.agentId) e.agentId = "Select an agent";
+    if (!form.userId) e.userId = "Select an agent";
 
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -355,8 +358,8 @@ export default function CreateDealModal({
 
             <Field label="Assign Agent">
               <SingleSelect
-                value={form.agentId}
-                onChange={(v) => update("agentId", v)}
+                value={form.userId}
+                onChange={(v) => update("userId", v)}
                 options={agents}
                 searchable
               />
@@ -380,27 +383,19 @@ export default function CreateDealModal({
               onChange={(e) => update("notes", e.target.value)}
             />
           </Field>
-          <Field label="document Type">
-            <TextInput
-              value={form.documentType}
-              placeholder="Enter documentType "
-              onChange={(e) => update("documentType", e.target.value)}
-              leftIcon={<User size={16} />}
-            />
-          </Field>
+         
 
-          <Field label="Attachments">
+          <Field label="Documents">
             <FileInput
               type="file"
               folderName="deals"
-              initialFileUrl={form.documentUrls?.[0]}
+              initialFileUrl={form.documents?.[0]}
               requiredClass="app-border"
               onFileChange={(url: string) => {
-                if (!url) return;
-
-                update("documentUrls", [...form.documentUrls, url]);
-                toast.success("Document uploaded successfully!");
-              }}
+    if (!url) return;
+    setForm(prev => ({ ...prev, documents: [...prev.documents, url] })); 
+    toast.success("Document uploaded successfully!");
+  }}
             />
           </Field>
         </Section>
