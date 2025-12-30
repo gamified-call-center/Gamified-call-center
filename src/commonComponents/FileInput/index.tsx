@@ -3,7 +3,7 @@ import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import Button from "../Button";
 import Image from "next/image";
- 
+
 export interface FileInputProps {
   label?: string;
   type: "file";
@@ -20,7 +20,7 @@ export interface FileInputProps {
   folderName?: string;
   initialFileUrl?: string;
 }
- 
+
 const FileInput = ({
   label,
   labelCls,
@@ -41,7 +41,6 @@ const FileInput = ({
   const [fileName, setFileName] = useState<string>("No file chosen");
   const [uploading, setUploading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -55,61 +54,57 @@ const FileInput = ({
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     if (uploading) return;
     setError(null);
+    const file = event.target.files?.[0];
 
-    const files = Array.from(event.target.files || []);
-    if (!files.length) return;
+    if (file) {
+      setSelectedFile(file);
+      setFileName(file.name);
+      setImagePreview(URL.createObjectURL(file));
 
-    try {
-      setUploading(true);
+      try {
+        setUploading(true);
+        const uploadedURL = await uploadFile(file, folderName);
 
-      const uploadedURLs = await Promise.all(files.map(file => uploadFile(file, folderName)));
-
-      uploadedURLs.forEach(url => {
-        if (url && onFileChange) {
-          onFileChange(url);
+        if (uploadedURL) {
+          setImagePreview(uploadedURL);
+          onFileChange?.(uploadedURL);
+        } else {
+          throw new Error("File upload failed.");
         }
-      });
-
-      const lastURL = uploadedURLs[uploadedURLs.length - 1];
-      if (lastURL) {
-        setImagePreview(lastURL);
-        setFileName(lastURL.split("/").pop() || "Uploaded file");
-      } else {
-        throw new Error("File upload failed.");
+      } catch (err) {
+        console.error("Upload error:", err);
+        setError("Failed to upload file.");
+      } finally {
+        setUploading(false);
       }
-
-    } catch (error) {
-      console.error("Upload error:", error);
-      setError("Failed to upload file(s).");
-    } finally {
-      setUploading(false);
-      setSelectedFile(null);
-      setImagePreview(null);
-      setFileName("No file chosen");
-      if (inputRef.current) inputRef.current.value = "";
     }
   };
 
   const handleDeleteFile = async () => {
     if (!imagePreview) return;
     setUploading(true);
+
     try {
       const success = await deleteFile(imagePreview);
-
       if (success) {
-        setImagePreview(null);
-        setFileName("No file chosen");
-        if (inputRef.current) inputRef.current.value = "";
-        onFileChange?.("");
+        resetFileInput();
       } else {
         throw new Error("Failed to delete file.");
       }
-    } catch (error) {
-      console.error("Delete error:", error);
+    } catch (err) {
+      console.error("Delete error:", err);
       setError("Failed to delete file.");
     } finally {
       setUploading(false);
     }
+  };
+
+  const resetFileInput = () => {
+    setSelectedFile(null);
+    setImagePreview(null);
+    setFileName("No file chosen");
+    if (inputRef.current) inputRef.current.value = "";
+    onFileChange?.("");
   };
 
   return (
@@ -122,7 +117,7 @@ const FileInput = ({
     >
       <div className="space-y-3">
         {label && (
-          <label className={twMerge("text-base font-semibold app-text", labelCls)}>
+          <label className={twMerge("text-base font-semibold text-gray-800 dark:text-gray-100", labelCls)}>
             {label}
             {required && (
               <span className={twMerge("text-red-500 ml-1", requiredClass)}>
@@ -132,33 +127,23 @@ const FileInput = ({
           </label>
         )}
 
-        {sublabel && (
-          <p className={twMerge("text-sm app-text", sublabelClass)}>
-            {sublabel}
-          </p>
-        )}
+        {sublabel && <p className={twMerge("text-sm app-text", sublabelClass)}>{sublabel}</p>}
 
-        <div
-          className={twMerge(
-            "flex items-center gap-3 p-3 rounded-xl border app-card app-border"
-          )}
-        >
+        {/* Upload Row */}
+        <div className={twMerge("flex items-center gap-3 p-3 rounded-xl", "border app-card app-border")}>
           <label
             htmlFor={name}
             className={twMerge(
               "px-4 py-2 text-sm font-medium text-white rounded-lg cursor-pointer transition",
-              "bg-[#3586FF] hover:bg-blue-600"
+              "bg-[#3586FF] hover:bg-blue-600 focus:ring-2 focus:ring-blue-400"
             )}
           >
             {uploading ? "Uploading..." : "Choose File"}
           </label>
 
-          <span className="text-sm app-muted truncate max-w-[180px]">
-            {fileName}
-          </span>
+          <span className="text-sm app-muted truncate max-w-[180px]">{fileName}</span>
 
           <input
-            multiple               
             hidden
             id={name}
             name={name}
@@ -176,26 +161,22 @@ const FileInput = ({
         )}
       </div>
 
+      {/* Preview Box */}
       {imagePreview && (
         <div className="mt-4 flex items-center gap-4">
           <div
             className={twMerge(
-              "relative w-24 h-24 rounded-xl overflow-hidden border bg-gray-100 dark:bg-gray-800",
-              "border-gray-300 dark:border-gray-700"
+              "relative w-24 h-24 rounded-xl overflow-hidden border",
+              "border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800"
             )}
           >
-            <Image
-              src={imagePreview}
-              alt="File preview"
-              fill
-              className="object-cover"
-            />
+            <Image src={imagePreview} alt="File preview" fill className="object-cover" />
 
             <button
               onClick={handleDeleteFile}
               disabled={uploading}
               className={twMerge(
-                "absolute top-2 right-2 w-7 h-7 rounded-full cursor-pointer flex items-center justify-center transition",
+                "absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center transition",
                 "bg-red-500 hover:bg-red-600 text-white text-xs shadow-md"
               )}
             >
@@ -214,6 +195,4 @@ const FileInput = ({
   );
 };
 
- 
 export default FileInput;
- 

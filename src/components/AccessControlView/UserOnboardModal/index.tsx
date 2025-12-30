@@ -60,7 +60,8 @@ const STEPS = [
     desc: "Designation & reporting manager",
     icon: Briefcase,
   },
-  { id: 3, title: "Extras", desc: "Addresses & agent profile", icon: MapPin },
+  { id: 3, title: "Profile & Addresses", desc: "Optional addresses & role-based profiles", icon: MapPin }
+
 ] as const;
 
 type SectionCardProps = {
@@ -1208,7 +1209,7 @@ export default function UserOnboardModal({
             </SectionCard>
           ) : null}
 
-          {/* Step 3 - Extras */}
+          
           {step === 3 ? (
             <div className="space-y-4">
               <SectionCard
@@ -1216,7 +1217,7 @@ export default function UserOnboardModal({
                 subTitle="Optional. Add multiple addresses. Mark one as default."
                 right={
                   <Button
-                    className="px-3 py-2 rounded-xl bg-[#541796] text-white"
+                    className="md:px-3 px-2 md:py-2 py-1 font-medium btn-text rounded-xl bg-[#541796] text-white"
                     onClick={openAddAddress}
                   >
                     + Add Address
@@ -1337,9 +1338,9 @@ export default function UserOnboardModal({
                   </div>
 
                   <div className="grid md:grid-cols-2 grid-cols-1 gap-3 pt-2">
-                    <div className="rounded-2xl border app-border p-4 flex items-center justify-between">
+                    <div className="rounded-2xl border app-border md:p-4 p-2 flex items-center justify-between">
                       <div>
-                        <p className="app-text font-bold text-sm">
+                        <p className="app-text font-bold  text-sm">
                           AHIP Certified
                         </p>
                         <p className="app-muted text-xs mt-1">
@@ -1357,12 +1358,12 @@ export default function UserOnboardModal({
                       />
                     </div>
 
-                    <div className="rounded-2xl border app-border p-4 flex items-center justify-between">
+                    <div className="rounded-2xl border app-border md:p-4 p-2 flex items-center justify-between">
                       <div>
-                        <p className="app-text font-bold text-sm">
+                        <p className="app-text font-bold  label-text">
                           State Licensed
                         </p>
-                        <p className="app-muted text-xs mt-1">
+                        <p className="app-muted text-xs  mt-1">
                           Enable if agent has state license
                         </p>
                       </div>
@@ -1472,15 +1473,16 @@ export default function UserOnboardModal({
             </div>
           ) : null}
 
-          {/* footer */}
+        
           <div className="app-card backdrop-blur border-t app-border py-1">
             <div className="flex px-3 items-center justify-between">
-              <Button
+              {step !== 1 &&  <Button
                 className="app-btn px-4 py-2 font-medium rounded-xl"
                 onClick={handleBack}
               >
                 ← Back
-              </Button>
+              </Button> } 
+             
 
               <div className="flex items-center gap-2">
                 {step !== 3 ? (

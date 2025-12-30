@@ -557,7 +557,7 @@ export default function DesignationsPermissionsPage() {
       },
     };
 
-    // ✅ addresses should be allowed for BOTH ADMIN + STANDARD
+   
     if (payload.addresses?.length) {
       update.addresses = payload.addresses.map((a: any) => ({
         ...(a.id ? { id: a.id } : {}),
@@ -574,7 +574,7 @@ export default function DesignationsPermissionsPage() {
       }));
     }
 
-    // ✅ only skip employee/agent for ADMIN
+   
     if (role === "ADMIN") return update;
 
     if (payload.employee) {
@@ -725,7 +725,7 @@ export default function DesignationsPermissionsPage() {
                   <div className="flex items-center md:gap-2 gap-1">
                     <div className="flex items-center gap-1">
                       <Button
-                        className={`md:px-2 px-1 md:py-[7px] py-[5px] rounded-md border ${
+                        className={`md:px-2 px-2 md:py-[7px] py-[5px] rounded-md border ${
                           view === "cards"
                             ? "bg-purple-600 text-white"
                             : "bg-white text-gray-800"
@@ -733,11 +733,11 @@ export default function DesignationsPermissionsPage() {
                         onClick={() => setView("cards")}
                         title="Cards view"
                       >
-                        <LayoutGrid className="md:w-4 w-3 md:h-4 h-3" />
+                        <LayoutGrid className="md:w-4 w-4 md:h-4 h-4" />
                       </Button>
 
                       <Button
-                        className={`md:px-2 px-1 md:py-[7px] py-[5px] rounded-md border ${
+                        className={`md:px-2 px-2 md:py-[7px] py-[5px] rounded-md border ${
                           view === "compact"
                             ? "bg-purple-600 text-white"
                             : "bg-white text-gray-800"
@@ -745,7 +745,7 @@ export default function DesignationsPermissionsPage() {
                         onClick={() => setView("compact")}
                         title="Compact view"
                       >
-                        <Rows className="md:w-4 w-3 md:h-4 h-3" />
+                        <Rows className="md:w-4 w-4 md:h-4 h-4" />
                       </Button>
                     </div>
                   </div>
@@ -1418,7 +1418,7 @@ export default function DesignationsPermissionsPage() {
         </Modal>
       )}
 
-      {/* Add/Edit Designation Modal */}
+     
       <Modal
         open={formOpen}
         onClose={() => setFormOpen(false)}
@@ -1505,7 +1505,7 @@ export default function DesignationsPermissionsPage() {
   );
 }
 type ResourceRow = {
-  id?: string; // IMPORTANT: server id for edit/delete
+  id?: string; 
   resource: string;
   view: boolean;
   create: boolean;
@@ -1628,12 +1628,12 @@ function DesignationPermissionsCrudModalBody({
     );
   }, [formData.permissions, tableSearch]);
 
-  /** Editor checkbox */
+
   const handleCrudChange = (name: keyof ResourceRow, checked: boolean) => {
     setNewResource((prev) => ({ ...prev, [name]: checked }));
   };
 
-  /** Reset editor */
+  
   const resetEditor = () => {
     setEditId(null);
     setNewResource({
@@ -1875,12 +1875,12 @@ function DesignationPermissionsCrudModalBody({
     <div className="md:p-6 p-3 app-card rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.08)] w-full max-w-full border app-border">
       <div className="md:space-y-4 space-y-2">
         {/* header */}
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start md:flex-row flex-col justify-between md:gap-3 gap-2">
           <div>
-            <h3 className="text-[16px] md:text-[18px] font-medium text-slate-900">
+            <h3 className="text-[14px] md:text-[18px] font-medium app-text">
               Designation Permissions
             </h3>
-            <p className="text-[11px] md:text-[12px] app-text mt-1">
+            <p className="text-[10px] md:text-[12px] app-text mt-1">
               Add/Edit resources locally, then save once at the end.
             </p>
           </div>
@@ -1899,7 +1899,7 @@ function DesignationPermissionsCrudModalBody({
         <div className="rounded-xl border app-border overflow-hidden">
           <div className="flex items-center justify-between px-3 md:px-4 md:py-3 py-2 app-card border-b">
             <div>
-              <p className="text-[13px] md:text-[14px] font-medium app-text">
+              <p className="text-[12px] md:text-[14px] font-medium app-text">
                 {editId
                   ? "Edit Resource Permission"
                   : "Add Resource Permission"}
@@ -2021,7 +2021,7 @@ function DesignationPermissionsCrudModalBody({
                       {h}
                     </th>
                   ))}
-                  <th className="text-center py-3 px-4 text-[12px] font-medium app-text">
+                  <th className="text-center py-3 px-4 md:text-[12px] text-[10px] font-medium app-text">
                     Actions
                   </th>
                 </tr>
@@ -2081,12 +2081,12 @@ function DesignationPermissionsCrudModalBody({
                           (action) => (
                             <td
                               key={`${perm.id || perm.resource}-${action}`}
-                              className="py-2 px-4 text-center"
+                              className="md:py-2 py-1 md:px-4 px-2 text-center"
                             >
                               <Button
                                 type="button"
                                 onClick={() => toggleCellLocal(perm, action)}
-                                className={`inline-flex items-center justify-center w-8 h-8 rounded-lg border transition
+                                className={`inline-flex items-center justify-center md:w-8 w-5 h-5 md:h-8 rounded-lg border transition
                                 ${
                                   perm[action]
                                     ? "bg-emerald-50 border-emerald-200 text-emerald-600 hover:bg-emerald-100"

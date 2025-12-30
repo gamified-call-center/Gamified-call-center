@@ -205,6 +205,7 @@ export default function AcaAgentsView() {
   const isEditMode = Boolean(editing?.id);
 
   const [isAgentsLoading, setIsAgentsLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false);
 
   const [uploadProgress, setUploadProgress] = useState(0);
   const [openFileModal, setOpenFileModal] = useState(false);
@@ -693,7 +694,15 @@ const handleUpload = async () => {
   }
 };
 
-
+const PasswordToggle = () => (
+  <Button
+    type="button"
+    onClick={() => setShowPass((p) => !p)}
+    className="cursor-pointer p-1"
+  >
+    {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+  </Button>
+);
   const totalPages = Math.ceil(total / LIMIT);
   if (loading || isAgentsLoading) {
     return (
@@ -1270,11 +1279,12 @@ const handleUpload = async () => {
 
                 <Field label="Password" required>
                   <TextInput
-                    type="password"
+                      type={showPass ? "text" : "password"}
                     value={form.password}
                     onChange={(e: any) => update("password", e.target.value)}
                     placeholder="Password"
                     leftIcon={<Lock size={16} />}
+                    rightIcon={<PasswordToggle />}
                     containerClassName="md:py-[6px] py-1"
                   />
                 </Field>
@@ -1378,13 +1388,14 @@ const handleUpload = async () => {
 
                 <Field label="Chase Data Password">
                   <TextInput
-                    type="password"
+                     type={showPass ? "text" : "password"}
                     value={form.chaseDataPassword}
                     onChange={(e: any) =>
                       update("chaseDataPassword", e.target.value)
                     }
                     placeholder="Chase Data Password"
                     leftIcon={<Lock size={16} />}
+                    rightIcon={<PasswordToggle />}
                     containerClassName="md:py-[6px] py-1"
                   />
                 </Field>
@@ -1402,19 +1413,21 @@ const handleUpload = async () => {
 
                 <Field label="HealthSherpa Password">
                   <TextInput
-                    type="password"
+                     type={showPass ? "text" : "password"}
                     value={form.healthSherpaPassword}
                     onChange={(e: any) =>
                       update("healthSherpaPassword", e.target.value)
                     }
                     placeholder="HealthSherpa Password"
                     leftIcon={<Lock size={16} />}
+                    rightIcon={<PasswordToggle />}
                     containerClassName="md:py-[6px] py-1"
                   />
                 </Field>
 
                 <Field label="MyMFG Username">
                   <TextInput
+                  type="text"
                     value={form.myMfgUsername}
                     onChange={(e: any) =>
                       update("myMfgUsername", e.target.value)
@@ -1426,13 +1439,14 @@ const handleUpload = async () => {
 
                 <Field label="MyMFG Password">
                   <TextInput
-                    type="password"
+                   type={showPass ? "text" : "password"}
                     value={form.myMfgPassword}
                     onChange={(e: any) =>
                       update("myMfgPassword", e.target.value)
                     }
                     placeholder="MyMFG Password"
                     leftIcon={<Lock size={16} />}
+                    rightIcon={<PasswordToggle />}
                     containerClassName="md:py-[6px] py-1"
                   />
                 </Field>

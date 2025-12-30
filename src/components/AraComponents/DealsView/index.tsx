@@ -176,11 +176,11 @@ const AraDealsView = () => {
     const res = await apiClient.get(`${apiClient.URLS.user}`, {}, true);
 
     if (res.body.data && Array.isArray(res.body.data)) {
-      const activeAgents = res.body.data.filter(
-        (agent: any) => agent?.isActive === true
-      );
+      // const activeAgents = res.body.data.filter(
+      //   (agent: any) => agent?.isActive === true
+      // );
 
-      const options = activeAgents.map((d: any) => ({
+      const options = res.body.data.map((d: any) => ({
         label: d.firstName,
         value: d.id,
       }));
@@ -312,7 +312,7 @@ const AraDealsView = () => {
     };
   }, [editing]);
 
-  /** ---- submit (create or update) ---- */
+ 
   const handleSubmit = async (payload: any) => {
     try {
       

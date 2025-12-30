@@ -59,24 +59,9 @@ import Button from "@/commonComponents/Button";
 import { DEFAULT_APPS_OPTIONS } from "@/Utils/constants/ara/constants";
 import { twMerge } from "tailwind-merge";
 
-type Designation = { id: number; name: string; levelOrder?: number };
-type UserMini = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  designation: any;
-};
 
-type Employee = {
-  id?: string;
-  designation?: Designation | null;
-  reportsTo?: {
-    id: string;
-    user: UserMini;
-    designation?: Designation | null;
-  } | null;
-  isActive?: boolean;
-};
+
+
 
 type AgentProfile = {
   id?: string;
@@ -135,7 +120,7 @@ type UserFull = {
   createdAt?: string;
   updatedAt?: string;
   password?: string;
-  employee?: Employee | null;
+ 
   agentProfile?: AgentProfile | null;
   addresses?: Address[];
   bankAccounts?: BankAccount[];
@@ -143,7 +128,7 @@ type UserFull = {
 
 type ModalType =
   | "profile"
-  | "employee"
+ 
   | "professional"
   | "address"
   | "security"
@@ -155,10 +140,7 @@ function hasProfileData(u: UserFull | null) {
   return !!(u.firstName || u.lastName || u.email || u.phone || u.dob);
 }
 
-function hasEmployeeData(e: Employee | null) {
-  if (!e) return false;
-  return !!(e.designation?.id || e.reportsTo?.id);
-}
+
 
 function hasAgentData(a: AgentProfile | null) {
   if (!a) return false;
@@ -182,22 +164,8 @@ function normalizeSSN(v: string) {
   return `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5)}`;
 }
 
-const toDesignationOption = (d?: any): Option | null => {
-  if (!d?.id) return null;
-  return { label: d?.name ?? "-", value: String(d.id) };
-};
 
-const toEmployeeOption = (emp?: any): Option | null => {
-  if (!emp?.id) return null;
 
-  const name = emp?.user
-    ? `${emp.user.firstName ?? ""} ${emp.user.lastName ?? ""}`.trim()
-    : "Employee";
-
-  const desg = emp?.designation?.name ? ` • ${emp.designation.name}` : "";
-
-  return { label: `${name}${desg}`, value: String(emp.id) };
-};
 
 export default function UserProfileView() {
   const params = useParams<{ id?: string }>();
@@ -211,6 +179,7 @@ export default function UserProfileView() {
   const [activeTab, setActiveTab] = useState("profile");
   const [showPassword, setShowPassword] = useState(false);
 
+
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<ModalType>("profile");
   const [modalMode, setModalMode] = useState<ModalMode>("edit");
@@ -222,28 +191,9 @@ export default function UserProfileView() {
     setModalInitial(initial ?? {});
     setModalOpen(true);
   };
-  const [designationOptions, setDesignationOptions] = useState<Option[]>([]);
+ 
 
-  useEffect(() => {
-    const fetchDesignations = async () => {
-      try {
-        const res = await apiClient.get(apiClient.URLS.designation, {}, true);
-        const body = (res as any)?.body ?? res;
-
-        if (Array.isArray(body)) {
-          const options: Option[] = body.map((d: any) => ({
-            label: d.name,
-            value: String(d.id),
-          }));
-          setDesignationOptions(options);
-        }
-      } catch (err) {
-        console.error("Failed to fetch designations", err);
-      }
-    };
-
-    fetchDesignations();
-  }, []);
+  
 
   const closeModal = () => {
     setModalOpen(false);
@@ -289,11 +239,7 @@ export default function UserProfileView() {
 
   const tabs = [
     { id: "profile", label: "Profile", icon: <UserIcon /> },
-    {
-      id: "employee",
-      label: "Employee",
-      icon: <Briefcase className="w-4 h-4" />,
-    },
+    
     {
       id: "professional",
       label: "Professional",
@@ -310,7 +256,7 @@ export default function UserProfileView() {
   const visibleTabs = useMemo(() => {
     if (data?.systemRole === "ADMIN") {
       return tabs.filter(
-        (tab) => tab.id !== "employee" && tab.id !== "professional"
+        (tab) =>  tab.id !== "professional"
       );
     }
     return tabs;
@@ -387,23 +333,18 @@ export default function UserProfileView() {
     // common select shapes
     return x.id ?? x.value ?? null;
   };
+  const PasswordToggle = ({ show, toggle }: { show: boolean; toggle: () => void }) => (
+  <Button
+    type="button"
+    onClick={toggle}
+    className="cursor-pointer p-1 bg-transparent hover:bg-transparent"
+  >
+    {show ? <EyeOff size={16} /> : <Eye size={16} />}
+  </Button>
+);
 
-  const saveEmployee = async (v: any) => {
-    const reportsToId = getId(v.reportsTo);
-    const designationId = getId(v.designation); 
 
-    const dto = {
-      employee: {
-        ...(data?.employee?.id ? { id: data.employee.id } : {}),
-        designationId: designationId, 
-        reportsToId: reportsToId,
-        isActive: v.isActive ?? true,
-      },
-    };
-
-    await patchUser(dto);
-    toast.success("Employee details saved");
-  };
+ 
 
   const saveProfessional = async (v: any) => {
     const dto = {
@@ -543,14 +484,7 @@ export default function UserProfileView() {
                     </span>
                   </div>
 
-                  {data?.employee?.designation?.name && (
-                    <div className="mt-2 md:text-sm text-[12px] app-text">
-                      Designation:{" "}
-                      <span className=" font-bold">
-                        {data.employee.designation.name}
-                      </span>
-                    </div>
-                  )}
+                  
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -617,57 +551,7 @@ export default function UserProfileView() {
     );
   };
 
-  const renderEmployeeTab = () => {
-    const emp = data?.employee || null;
-    const mode: ModalMode = emp?.id ? "edit" : "add";
-
-    const init = {
-      designation: emp?.designation?.id ? String(emp.designation.id) : "",
-      reportsTo: emp?.reportsTo?.id ? String(emp.reportsTo.id) : "",
-      isActive: emp?.isActive ?? true,
-    };
-
-    return (
-      <div className="space-y-6 animate-fadeIn md:p-6 p-2">
-        <SectionCard
-          title="Employee Details"
-          icon={<Briefcase className="w-5 h-5 text-purple-500" />}
-          actionLabel={mode === "edit" ? "Edit" : "Add"}
-          actionIcon={
-            mode === "edit" ? (
-              <Pencil className="w-4 h-4" />
-            ) : (
-              <Plus className="w-4 h-4" />
-            )
-          }
-          onAction={() => openModal("employee", mode, init)}
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <KV
-              icon={<Award className="w-4 h-4" />}
-              label="Designation"
-              value={emp?.designation?.name ?? "-"}
-            />
-            <KV
-              icon={<UserIcon />}
-              label="Reports To"
-              value={
-                emp?.reportsTo?.user
-                  ? `${emp.reportsTo.user.firstName} ${emp.reportsTo.user.lastName}`
-                  : "-"
-              }
-            />
-
-            <KV
-              icon={<CheckCircle className="w-4 h-4" />}
-              label="Active"
-              value={emp?.isActive ? "Yes" : "No"}
-            />
-          </div>
-        </SectionCard>
-      </div>
-    );
-  };
+  
 
   const renderProfessionalTab = () => {
     const a = data?.agentProfile || null;
@@ -1296,8 +1180,7 @@ export default function UserProfileView() {
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case "employee":
-        return renderEmployeeTab();
+     
       case "professional":
         return renderProfessionalTab();
       case "security":
@@ -1433,10 +1316,11 @@ export default function UserProfileView() {
         initialValues={modalInitial}
         showPassword={showPassword}
         setShowPassword={setShowPassword}
-        designationOptions={designationOptions}
+        PasswordToggle={PasswordToggle}
+       
         onSave={async (values) => {
           if (modalType === "profile") return saveProfile(values);
-          if (modalType === "employee") return saveEmployee(values);
+          
           if (modalType === "professional") return saveProfessional(values);
           if (modalType === "address") return saveAddress(values);
           if (modalType === "security") return savePassword(values);
@@ -1458,68 +1342,30 @@ function ProfileModal({
   onSave,
   showPassword,
   setShowPassword,
-  designationOptions,
+ 
+  PasswordToggle
 }: {
   open: boolean;
   onClose: () => void;
   type: ModalType;
   mode: ModalMode;
   initialValues: any;
+  PasswordToggle: React.ComponentType<any>;
+
   onSave: (values: any) => Promise<void>;
   showPassword: boolean;
   setShowPassword: (v: boolean) => void;
 
-  designationOptions: Option[];
+ 
 }) {
   const [values, setValues] = useState<any>(initialValues || {});
   const [saving, setSaving] = useState(false);
 
-  const [reportsToOptions, setReportsToOptions] = useState<Option[]>([]);
+  
 
   useEffect(() => setValues(initialValues || {}), [initialValues]);
 
-  useEffect(() => {
-    if (!open) return;
-    if (type !== "employee") return;
 
-    const designationId = values?.designation;
-    if (!designationId) {
-      setReportsToOptions([]);
-      return;
-    }
-
-    const fetchReportsTo = async () => {
-      try {
-        const res = await apiClient.get(
-          `${apiClient.URLS.employee}/report-to/${designationId}`,
-          {},
-          true
-        );
-
-        const body = (res as any)?.body ?? res;
-
-        if (Array.isArray(body)) {
-          const options = body.map((emp: any) => ({
-            label: emp.fullName,
-            value: String(emp.id),
-          }));
-
-          setReportsToOptions(options);
-
-          if (
-            values?.reportsTo &&
-            !options.some((o: any) => o.value === values.reportsTo)
-          ) {
-            setValues((p: any) => ({ ...p, reportsTo: "" }));
-          }
-        }
-      } catch (err) {
-        console.error("Failed to fetch reports-to employees", err);
-      }
-    };
-
-    fetchReportsTo();
-  }, [open, type, values?.designation]);
 
   if (!open) return null;
 
@@ -1534,11 +1380,7 @@ function ProfileModal({
       ? mode === "edit"
         ? "Edit Bank Account"
         : "Add Bank Account"
-      : type === "employee"
-      ? mode === "edit"
-        ? "Edit Employee"
-        : "Add Employee"
-      : type === "professional"
+      :type === "professional"
       ? mode === "edit"
         ? "Edit Professional"
         : "Add Professional"
@@ -1554,9 +1396,7 @@ function ProfileModal({
       if (!values.email?.trim()) return "Email is required";
     }
 
-    if (type === "employee") {
-      if (!values.designation) return "Designation is required";
-    }
+    
 
     if (type === "security") {
       if (!values.password || !values.newPassword || !values.confirmPassword)
@@ -1826,42 +1666,7 @@ function ProfileModal({
         </div>
       )}
 
-      {type === "employee" && (
-        <div className="md:space-y-4 space-y-2">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-            <Field label="Designation" required>
-              <SingleSelect
-                value={values.designation}
-                onChange={(v: string) => {
-                  set("designation", v);
-                  set("reportsTo", "");
-                }}
-                options={designationOptions}
-                placeholder="Select Designation"
-                placement="auto"
-                searchable
-              />
-            </Field>
-
-            <Field label="Reports To">
-              <SingleSelect
-                value={values.reportsTo}
-                onChange={(v: string) => set("reportsTo", v)}
-                options={reportsToOptions}
-                placeholder="Select Manager"
-                placement="auto"
-                searchable
-              />
-            </Field>
-          </div>
-
-          <ToggleInline
-            label="Is Active"
-            checked={values.isActive ?? true}
-            onChange={(v) => set("isActive", v)}
-          />
-        </div>
-      )}
+    
 
       {type === "professional" && (
         <div className="md:space-y-4 space-y-2">
@@ -1951,11 +1756,12 @@ function ProfileModal({
 
               <Field label="Chase Data Password">
                 <TextInput
-                  type="password"
+                   type={showPassword ? "text" : "password"}
                   value={values.chaseDataPassword || ""}
                   onChange={(e: any) =>
                     set("chaseDataPassword", e.target.value)
                   }
+                  rightIcon={<PasswordToggle />}
                   placeholder="Password"
                 />
               </Field>
@@ -1972,12 +1778,13 @@ function ProfileModal({
 
               <Field label="HealthSherpa Password">
                 <TextInput
-                  type="password"
+                 type={showPassword ? "text" : "password"}
                   value={values.healthSherpaPassword || ""}
                   onChange={(e: any) =>
                     set("healthSherpaPassword", e.target.value)
                   }
                   placeholder="Password"
+                  rightIcon={<PasswordToggle />}
                 />
               </Field>
 
@@ -1991,10 +1798,11 @@ function ProfileModal({
 
               <Field label="myMFG Password">
                 <TextInput
-                  type="password"
+                type={showPassword ? "text" : "password"}
                   value={values.myMfgPassword || ""}
                   onChange={(e: any) => set("myMfgPassword", e.target.value)}
                   placeholder="Password"
+                  rightIcon={<PasswordToggle />}
                 />
               </Field>
 
@@ -2008,8 +1816,8 @@ function ProfileModal({
             </div>
           </div>
 
-          {/* Apps */}
-          {/* Apps */}
+         
+        
           <Field label="Apps">
             <MultiSelect
               values={values.apps || []}

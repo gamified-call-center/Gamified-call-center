@@ -455,7 +455,7 @@ export default function TrainingPage() {
               <motion.div whileHover={{ scale: 1.05 }} className="relative">
                 <div className="absolute inset-0 bg-linear-to-br from-purple-400 to-pink-400 rounded-xl blur opacity-20"></div>
                 <div className="relative bg-linear-to-br from-purple-500 to-pink-500 p-3 rounded-xl">
-                  <GraduationCap className="w-6 h-6 app-text" />
+                  <GraduationCap className="w-6 h-6 text-white" />
                 </div>
               </motion.div>
 
