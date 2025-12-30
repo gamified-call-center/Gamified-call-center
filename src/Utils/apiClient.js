@@ -3,7 +3,6 @@ import { getSession } from "next-auth/react";
 
 const base_url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-
 const URLS = {
   blogs: `${base_url}/blog`,
   otp: `${base_url}/otp`,
@@ -28,8 +27,9 @@ const URLS = {
   chatHistoryDelete: `${base_url}/chat/admin/chat-history/delete`,
   resourcesadmin: `${base_url}/chat/admin/resources`,
   users: `${base_url}/users`,
- applications:`${base_url}/public/applications`,
- adminapplications:`${base_url}/admin/applications`
+  applications: `${base_url}/public/applications`,
+  adminapplications: `${base_url}/admin/applications`,
+  dashboard: `${base_url}/dashboard`,
 };
 
 export function encodeQueryData(data = {}) {

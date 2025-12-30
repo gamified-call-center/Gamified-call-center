@@ -10,6 +10,7 @@ import {
 import { getStatusColor, getStatusText, initials } from "@/lib/chat/utilFunctions";
 
 
+
 export function SidebarContent({
   activeTab,
   setActiveTab,
