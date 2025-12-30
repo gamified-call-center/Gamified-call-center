@@ -84,3 +84,13 @@ export type ThreadApiItem = {
 };
 
 export type DmUser = ChatUser & { threadId?: string };
+
+
+export type ChannelMember = { userId: string; name: string; role: string };
+export type ChannelDetails = {
+  id: string;
+  kind: "channel" | "dm";
+  title: string | null;
+  isAdmin?: boolean;
+  members?: ChannelMember[];
+};

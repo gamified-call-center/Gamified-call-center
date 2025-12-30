@@ -13,7 +13,7 @@ import {
   ServerMessageAck,
   ServerThreadUpdate,
   MessagesByThread,
-  ThreadApiItem,
+  ChannelDetails,
   DmUser,
 } from "@/lib/chat/types";
 import Loader from "@/commonComponents/Loader";
@@ -37,41 +37,43 @@ export default function ChatPanel() {
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
 
   const [newMessage, setNewMessage] = useState("");
-
   const [messagesByThread, setMessagesByThread] = useState<MessagesByThread>(
     {}
   );
   const [loading, setLoading] = useState(false);
 
   const [dmList, setDmList] = useState<DmUser[]>([] as any);
-  const [channelList, setChannelList] = useState([] as any);
+  const [channelList, setChannelList] = useState<Channel[]>([] as any);
   const [addChannelOpen, setAddChannelOpen] = useState(false);
 
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [channelDetails, setChannelDetails] = useState<ChannelDetails | null>(
+    null
+  );
 
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    if (session?.status === "authenticated") {
-      setUser(session.data.user);
-      setToken(session.data.token);
-      loadAllUsers(session.data.user?.id as string);
-      loadThreads();
-    }
-  }, [session?.status]);
+  const safeUserId = user?.id || session.data?.user?.id;
+
+  const closeActive = () => {
+    setSelectedChat(null);
+    setSelectedChannel(null);
+    setChannelDetails(null);
+  };
+
 
   const filteredUsers = useMemo(
     () =>
-      dmList.filter((user) =>
-        user.name.toLowerCase().includes(searchQuery.toLowerCase())
+      dmList.filter((u) =>
+        (u.name || "").toLowerCase().includes(searchQuery.toLowerCase())
       ),
     [dmList, searchQuery]
   );
 
   const filteredChannels = useMemo(
     () =>
-      channelList.filter((channel: any) =>
-        channel.name.toLowerCase().includes(searchQuery.toLowerCase())
+      channelList.filter((c: any) =>
+        (c.name || "").toLowerCase().includes(searchQuery.toLowerCase())
       ),
     [channelList, searchQuery]
   );
@@ -96,14 +98,145 @@ export default function ChatPanel() {
 
   const messages = useMemo(() => {
     if (!threadKey) return [];
-    return messagesByThread[threadKey] ?? []; // fallback for demo
+    return messagesByThread[threadKey] ?? [];
   }, [messagesByThread, threadKey]);
 
   const isDrawerOpen = Boolean(selectedChat || selectedChannel);
 
-  const closeActive = () => {
-    setSelectedChat(null);
-    setSelectedChannel(null);
+  const fetchChannelDetails = async (threadId: string) => {
+    if (!safeUserId) return null;
+
+
+    const url =
+      `${apiClient.URLS.chat}/threads/${threadId}` +
+      `?userId=${encodeURIComponent(safeUserId)}`;
+
+    const res = await apiClient.get(url);
+
+    return res.body?.data ?? res.body;
+  };
+
+  const refreshChannelDetails = async (threadId: string) => {
+    const details = await fetchChannelDetails(threadId);
+    if (!details) return null;
+
+    setChannelDetails(details);
+
+    const memberCount = details?.members?.length ?? 0;
+
+    setSelectedChannel((prev) =>
+      prev?.id === threadId ? { ...prev, memberCount } : prev
+    );
+    setChannelList((prev: any) =>
+      prev.map((c: any) => (c.id === threadId ? { ...c, memberCount } : c))
+    );
+
+    return details;
+  };
+
+  const handleAddMembers = async (threadId: string,selectedIds: string[]) => {
+    if (!safeUserId) return;
+
+    console.log("member ids", selectedIds);
+    await addMembersToChannel(threadId, selectedIds);
+  };
+
+  const addMembersToChannel = async (threadId: string, selectedIds: string[]) => {
+    if (!safeUserId || !selectedIds.length) return;
+
+    try {
+      await apiClient.post(
+        `${
+          apiClient.URLS.chat
+        }/channels/${threadId}/members?userId=${encodeURIComponent(
+          safeUserId
+        )}`,
+        { selectedIds }
+      );
+
+      await refreshChannelDetails(threadId);
+      toast.success("Members added");
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to add members");
+    }
+  };
+
+  const removeMemberFromChannel = async (
+    threadId: string,
+    removeUserId: string
+  ) => {
+    if (!safeUserId) return;
+
+    try {
+      await apiClient.delete(
+        `${
+          apiClient.URLS.chat
+        }/channels/${threadId}/members/${removeUserId}?userId=${encodeURIComponent(
+          safeUserId
+        )}`
+      );
+
+      await refreshChannelDetails(threadId);
+
+      toast.success("Member removed");
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to remove member");
+    }
+  };
+
+  const editChannelTitle = async (threadId: string, title: string) => {
+    if (!safeUserId) return;
+    const newTitle = title.trim();
+    if (!newTitle) {
+      toast.error("Title cannot be empty");
+      return;
+    }
+
+    try {
+      await apiClient.patch(
+        `${
+          apiClient.URLS.chat
+        }/channels/${threadId}/title?userId=${encodeURIComponent(safeUserId)}`,
+        { title: newTitle }
+      );
+
+      const details = await fetchChannelDetails(threadId);
+      if (details) setChannelDetails(details);
+
+      setSelectedChannel((prev) =>
+        prev?.id === threadId ? { ...prev, name: newTitle } : prev
+      );
+      setChannelList((prev: any) =>
+        prev.map((c: any) => (c.id === threadId ? { ...c, name: newTitle } : c))
+      );
+
+      toast.success("Channel title updated");
+    } catch (err) {
+      console.error("Failed to update channel title", err);
+      toast.error("Failed to update channel title");
+    }
+  };
+
+  const deleteChannel = async (threadId: string) => {
+    if (!safeUserId) return;
+
+    try {
+      await apiClient.delete(
+        `${
+          apiClient.URLS.chat
+        }/channels/${threadId}?userId=${encodeURIComponent(safeUserId)}`
+      );
+
+      setSelectedChannel(null);
+      setChannelDetails(null);
+      setChannelList((prev: any) => prev.filter((c: any) => c.id !== threadId));
+      toast.success("Channel deleted");
+    } catch (e) {
+      console.error(e);
+      toast.error("Failed to delete channel");
+    }
   };
 
   const handleSendMessage = () => {
@@ -118,7 +251,7 @@ export default function ChatPanel() {
     const optimistic: Message = {
       id: clientId,
       content: newMessage.trim(),
-      senderId: user?.id || "me",
+      senderId: safeUserId || "me",
       senderName: "You",
       timestamp: getTimeHour(new Date().toISOString()),
       isOwn: true,
@@ -129,7 +262,6 @@ export default function ChatPanel() {
       return { ...prev, [threadKey]: [...list, optimistic] };
     });
 
-    // 2) Emit to server
     socket.emit("message:send", {
       threadKind: activeThread.kind,
       threadId: activeThread.id,
@@ -149,13 +281,14 @@ export default function ChatPanel() {
 
   const openDmWithUser = async (u: ChatUser) => {
     setSelectedChannel(null);
+    setChannelDetails(null);
     setMessagesByThread({});
 
     try {
-      if (!user?.id) return;
+      if (!safeUserId) return;
 
       const dmRes = await apiClient.post(
-        `${apiClient.URLS.chatDm}?userId=${user.id}`,
+        `${apiClient.URLS.chatDm}?userId=${encodeURIComponent(safeUserId)}`,
         { otherUserId: u.id }
       );
 
@@ -170,10 +303,12 @@ export default function ChatPanel() {
       );
 
       const msgRes = await apiClient.get(
-        `${apiClient.URLS.chat}/${threadId}/messages`,
-        { params: { userId: user.id, limit: 50 } }
+        `${
+          apiClient.URLS.chat
+        }/threads/${threadId}/messages?userId=${encodeURIComponent(
+          safeUserId
+        )}&limit=50`
       );
-      console.log("DM history messages:", msgRes);
 
       const history = (msgRes.body?.data ?? msgRes.body ?? []).map(
         (m: any) => ({
@@ -182,65 +317,75 @@ export default function ChatPanel() {
           senderId: m.senderId,
           senderName: m.senderName ?? "Unknown",
           timestamp: getTimeHour(m.timestamp),
-          isOwn: m.senderId === user.id,
+          isOwn: m.senderId === safeUserId,
         })
       ) as Message[];
 
       const key = `dm:${threadId}`;
+      setMessagesByThread((prev) => ({ ...prev, [key]: history }));
+    } catch (err) {
+      console.error("Failed to open DM", err);
+      toast.error("Failed to open DM");
+    }
+  };
+
+  const openChannel = async (c: Channel) => {
+    setSelectedChat(null);
+    setChannelDetails(null);
+    setMessagesByThread({});
+
+    try {
+      if (!safeUserId) return;
+
+      console.log("Channel details 1");
+      const threadId = c.id;
+      if (!threadId) throw new Error("channel threadId missing");
+      console.log("Channel details 2");
+
+      setSelectedChannel(c);
+      console.log("Channel details 3");
+
+      const details = await fetchChannelDetails(threadId);
+      console.log("Channel details", details);
+
+      if (details) {
+        setChannelDetails(details);
+
+        const memberCount = details?.members?.length ?? c.memberCount ?? 0;
+
+        setSelectedChannel((prev) => (prev ? { ...prev, memberCount } : prev));
+        setChannelList((prev: any) =>
+          prev.map((x: any) => (x.id === threadId ? { ...x, memberCount } : x))
+        );
+      }
+
+      const msgRes = await apiClient.get(
+        `${apiClient.URLS.chat}/threads/${threadId}/messages`,
+        { params: { userId: safeUserId, limit: 50 } }
+      );
+
+      const history = (msgRes.body?.data ?? msgRes.body ?? []).map(
+        (m: any) => ({
+          id: m.id,
+          content: m.content,
+          senderId: m.senderId,
+          senderName: m.senderName ?? "Unknown",
+          timestamp: getTimeHour(m.timestamp),
+          isOwn: m.senderId === safeUserId,
+        })
+      ) as Message[];
+
+      const key = `channel:${threadId}`;
 
       setMessagesByThread((prev) => ({
         ...prev,
         [key]: history,
       }));
     } catch (err) {
-      console.error("Failed to open DM", err);
+      console.error("Failed to open channel", err);
+      toast.error("Failed to open channel");
     }
   };
-
-  const openChannel = async (c: Channel) => {
-  setSelectedChat(null);
-  setMessagesByThread({});
-
-  try {
-    if (!user?.id) return;
-
-    const threadId = c.id;
-    if (!threadId) throw new Error("channel threadId missing");
-
-    // select channel
-    setSelectedChannel(c);
-
-    // fetch channel messages
-    const msgRes = await apiClient.get(
-      `${apiClient.URLS.chat}/${threadId}/messages?userId=${encodeURIComponent(
-        user.id
-      )}&limit=50`
-    );
-
-    console.log("Channel history messages:", msgRes);
-
-    const history = (msgRes.body?.data ?? msgRes.body ?? []).map(
-      (m: any) => ({
-        id: m.id,
-        content: m.content,
-        senderId: m.senderId,
-        senderName: m.senderName ?? "Unknown",
-        timestamp: getTimeHour(m.timestamp),
-        isOwn: m.senderId === user.id,
-      })
-    ) as Message[];
-
-    const key = `channel:${threadId}`;
-
-    setMessagesByThread((prev) => ({
-      ...prev,
-      [key]: history,
-    }));
-  } catch (err) {
-    console.error("Failed to open channel", err);
-  }
-};
-
 
   const loadThreads = async () => {
     setLoading(true);
@@ -248,26 +393,15 @@ export default function ChatPanel() {
       const id = session.data?.user?.id;
       if (!id) return;
 
-      const url = `${apiClient.URLS.chat}?userId=${encodeURIComponent(id)}`;
+      const url = `${apiClient.URLS.chat}/threads/?userId=${encodeURIComponent(
+        id
+      )}`;
       const res = (await apiClient.get(url)) as any;
 
       const threads = res?.body ?? [];
-
-      const dms: ChatUser[] = threads
-        .filter((t:any) => t.kind === "dm")
-        .map((t:any) => ({
-          id: t.id,
-          name: t.name ?? "Unknown",
-          status: "offline",
-          unreadCount: t.unreadCount ?? 0,
-          lastMessage: t.lastMessage ?? "",
-          timestamp: t.timestamp ?? "",
-          avatarColor: "bg-blue-500",
-        }));
-
       const chans: Channel[] = threads
-        .filter((t:any) => t.kind === "channel")
-        .map((t:any) => ({
+        .filter((t: any) => t.kind === "channel")
+        .map((t: any) => ({
           id: t.id,
           name: t.title ?? "Channel",
           memberCount: t.memberCount ?? 0,
@@ -276,35 +410,67 @@ export default function ChatPanel() {
           timestamp: t.timestamp ?? "",
         }));
 
-      setLoading(false);
-
-      setDmList(dms);
       setChannelList(chans);
     } catch (e) {
       console.error("Failed to load threads", e);
+      toast.error("Failed to load channels");
+    } finally {
+      setLoading(false);
     }
   };
 
-  // use effects
-  useEffect(() => {
-    if (!user?.id) return;
+  const loadAllUsers = async (id: string) => {
+    if (!id) return;
+    setLoading(true);
+    try {
+      const res = await apiClient.get(apiClient.URLS.user);
+      const all = (res.body.data ?? []) as any[];
+      if (res?.status === 200) {
+        const mapped: ChatUser[] = all
+          .filter((u) => u.id !== id)
+          .map((u) => ({
+            id: u.id,
+            name: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email,
+            status: "offline",
+            unreadCount: 0,
+            lastMessage: "",
+            timestamp: "",
+            avatarColor: "bg-blue-500",
+          }));
+        setDmList(mapped as any);
+        toast.success("Users loaded");
+      }
+    } catch (e) {
+      console.error("Failed to load users", e);
+      toast.error("Failed to load users");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const socket = getSocket({ userId: user.id, token: token || undefined });
+  useEffect(() => {
+    if (session?.status === "authenticated") {
+      setUser(session.data.user);
+      setToken(session.data.token);
+      loadAllUsers(session.data.user?.id as string);
+      loadThreads();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.status]);
+
+  useEffect(() => {
+    if (!safeUserId) return;
+
+    const socket = getSocket({ userId: safeUserId, token: token || undefined });
     socketRef.current = socket;
 
     if (!socket) return;
 
-    const onConnect = () => {
-      console.log("🟢 Socket connected:", socket.id);
-    };
-
-    const onDisconnect = (reason: string) => {
+    const onConnect = () => console.log("🟢 Socket connected:", socket.id);
+    const onDisconnect = (reason: string) =>
       console.log("🔴 Socket disconnected:", reason);
-    };
-
-    const onConnectError = (err: any) => {
+    const onConnectError = (err: any) =>
       console.error("❌ Socket connect error:", err?.message || err);
-    };
 
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
@@ -315,20 +481,15 @@ export default function ChatPanel() {
       socket.off("disconnect", onDisconnect);
       socket.off("connect_error", onConnectError);
     };
-  }, [user?.id, token]);
+  }, [safeUserId, token]);
 
   useEffect(() => {
     if (isBelow1300) {
       setSelectedChat(null);
       setSelectedChannel(null);
+      setChannelDetails(null);
     }
   }, [isBelow1300]);
-
-  useEffect(() => {
-    if (!user?.id) return;
-    const params = { userId: user.id, token: token || undefined };
-    socketRef.current = getSocket(params);
-  }, [user?.id, token]);
 
   // receiving Messages
   useEffect(() => {
@@ -336,13 +497,12 @@ export default function ChatPanel() {
     if (!socket) return;
     if (!activeThread) return;
 
-    // 1) join thread room
+    // join
     socket.emit("thread:join", {
       kind: activeThread.kind,
       id: activeThread.id,
     });
 
-    // 2) listeners
     const onMessageNew = (payload: ServerMessageNew) => {
       const key = `${payload.threadKind}:${payload.threadId}`;
 
@@ -352,17 +512,15 @@ export default function ChatPanel() {
         senderId: payload.message.senderId,
         senderName:
           payload.message.senderName ??
-          (payload.message.senderId === user?.id ? "You" : "Unknown"),
+          (payload.message.senderId === safeUserId ? "You" : "Unknown"),
         timestamp:
           getTimeHour(payload.message.timestamp) ?? payload.message.timestamp,
-        isOwn: payload.message.senderId === user?.id,
+        isOwn: payload.message.senderId === safeUserId,
       };
 
       setMessagesByThread((prev) => {
         const list = prev[key] ?? [];
-
         if (list.some((m) => m.id === incoming.id)) return prev;
-
         return { ...prev, [key]: [...list, incoming] };
       });
     };
@@ -385,7 +543,6 @@ export default function ChatPanel() {
     socket.on("message:new", onMessageNew);
     socket.on("message:ack", onMessageAck);
 
-    // cleanup
     return () => {
       socket.emit("thread:leave", {
         kind: activeThread.kind,
@@ -394,7 +551,7 @@ export default function ChatPanel() {
       socket.off("message:new", onMessageNew);
       socket.off("message:ack", onMessageAck);
     };
-  }, [activeThread]);
+  }, [activeThread, safeUserId]);
 
   useEffect(() => {
     if (selectedChat || selectedChannel) {
@@ -442,41 +599,6 @@ export default function ChatPanel() {
     };
   }, []);
 
-  // loading threads on mount
-  useEffect(() => {
-    loadThreads();
-  }, []);
-
-  const loadAllUsers = async (id: string) => {
-    if (!id) return;
-    setLoading(true);
-    try {
-      const res = await apiClient.get(apiClient.URLS.user);
-      const all = (res.body.data ?? []) as any[];
-      if (res?.status === 200) {
-        const mapped: ChatUser[] = all
-          .filter((u) => u.id !== id)
-          .map((u) => ({
-            id: u.id,
-            name: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email,
-            status: "offline",
-            unreadCount: 0,
-            lastMessage: "",
-            timestamp: "",
-            avatarColor: "bg-blue-500",
-          }));
-        setLoading(false);
-        toast.success("Users loaded");
-        setDmList(mapped);
-      }
-    } catch (e) {
-      console.error("Failed to load users", e);
-      toast.error("Failed to load users");
-      setLoading(false);
-    }
-  };
-
-  // get Status online or offline
   useEffect(() => {
     const socket = socketRef.current;
     if (!socket) return;
@@ -536,7 +658,7 @@ export default function ChatPanel() {
         <div className="flex items-center justify-center gap-2">
           <a
             href="/aca/dashboard"
-            className="flex items-center gap-2 px-4 py-1 rounded-xl  hover:border-blue-200 hover:bg-gradient-to-r hover:from-white hover:to-blue-50/50 transition-all duration-300 group shadow-sm hover:shadow-md"
+            className="flex items-center gap-2 px-4 py-1 rounded-xl hover:border-blue-200 hover:bg-gradient-to-r hover:from-white hover:to-blue-50/50 transition-all duration-300 group shadow-sm hover:shadow-md"
           >
             <Home className="w-4 h-4 app-text group-hover:text-blue-600 transition-colors duration-300" />
             <span className="text-sm font-semibold app-textgroup-hover:text-blue-800 transition-colors duration-300">
@@ -559,9 +681,7 @@ export default function ChatPanel() {
         </div>
       </div>
 
-      {/* Main Area with fixed height */}
       <div className="flex h-[calc(100vh-theme(spacing.16)-5.5rem)] min-h-0">
-        {/* Sidebar - Fixed */}
         <div className="w-full min-[1300px]:w-96 shrink-0 app-surface flex flex-col h-full min-h-0 border-r app-border">
           <div className="flex flex-col h-full min-h-0">
             <div className="flex-1 min-h-0 overflow-hidden">
@@ -576,12 +696,8 @@ export default function ChatPanel() {
                 filteredChannels={filteredChannels}
                 selectedChat={selectedChat}
                 selectedChannel={selectedChannel}
-                onSelectChat={(u) => {
-                  openDmWithUser(u);
-                }}
-                onSelectChannel={(c) => {
-                  openChannel(c);
-                }}
+                onSelectChat={(u) => openDmWithUser(u)}
+                onSelectChannel={(c) => openChannel(c)}
                 isAdmin={user?.systemRole === "ADMIN"}
                 onClickCreateChannel={() => setAddChannelOpen(true)}
               />
@@ -589,7 +705,6 @@ export default function ChatPanel() {
           </div>
         </div>
 
-        {/* Desktop Chat Window - Fixed to take remaining space */}
         <div className="hidden min-[1300px]:flex flex-1 min-w-0 flex-col h-full prof-surface border-none relative overflow-hidden">
           <div className="absolute top-0 left-0 w-64 h-64 bg-gradient-to-br from-blue-100/20 to-purple-100/20 rounded-full -translate-x-32 -translate-y-32 blur-2xl" />
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tr from-blue-50/10 to-indigo-50/10 rounded-full translate-x-48 translate-y-48 blur-2xl" />
@@ -606,15 +721,20 @@ export default function ChatPanel() {
               setNewMessage={setNewMessage}
               handleKeyDown={handleKeyDown}
               handleSendMessage={handleSendMessage}
+              channelDetails={channelDetails}
+              currentUserId={safeUserId}
+              onEditChannelTitle={editChannelTitle}
+              onAddMembers={handleAddMembers}
+              onRemoveMember={removeMemberFromChannel}
+              onDeleteChannel={deleteChannel}
+              allUsers={dmList}
             />
           </div>
         </div>
 
-        {/* Drawer Chat Window - Fixed to take full height */}
         <AnimatePresence>
           {isDrawerOpen && (
             <>
-              {/* Enhanced Backdrop */}
               <motion.button
                 type="button"
                 aria-label="Close chat"
@@ -625,7 +745,6 @@ export default function ChatPanel() {
                 exit={{ opacity: 0 }}
               />
 
-              {/* Enhanced Drawer Panel - Fixed height */}
               <motion.div
                 className="absolute inset-0 z-50 w-full bg-gradient-to-br from-white via-white to-gray-50/90 backdrop-blur-xl shadow-2xl shadow-black/20 min-[1300px]:hidden"
                 initial={{ x: "100%" }}
@@ -638,7 +757,6 @@ export default function ChatPanel() {
                   mass: 0.8,
                 }}
               >
-                {/* Drawer decorative elements */}
                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
                 <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-br from-blue-100/30 to-purple-100/30 rounded-full blur-xl" />
 
@@ -655,6 +773,13 @@ export default function ChatPanel() {
                     handleKeyDown={handleKeyDown}
                     handleSendMessage={handleSendMessage}
                     showBackButton
+                    channelDetails={channelDetails}
+                    currentUserId={safeUserId}
+                    onEditChannelTitle={editChannelTitle}
+                    onAddMembers={handleAddMembers}
+                    onRemoveMember={removeMemberFromChannel}
+                    onDeleteChannel={deleteChannel}
+                    allUsers={dmList}
                   />
                 </div>
               </motion.div>
@@ -662,12 +787,12 @@ export default function ChatPanel() {
           )}
         </AnimatePresence>
 
-        {user?.id && (
+        {safeUserId && (
           <AddChannel
             open={addChannelOpen}
             onClose={() => setAddChannelOpen(false)}
-            users={filteredUsers.filter((u) => u.id !== user?.id)}
-            currentUserId={user.id}
+            users={filteredUsers.filter((u) => u.id !== safeUserId)}
+            currentUserId={safeUserId}
             onCreated={({ threadId, title }) => {
               setChannelList((prev: any) => [
                 {
