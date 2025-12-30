@@ -62,7 +62,13 @@ export const DEFAULT_ACCESS_OPTIONS: SelectOption[] = [
 
 export const DEFAULT_APPS_OPTIONS: SelectOption[] = [
   { label: "ACA", value: "ACA" },
-  { label: "Medicare", value: "Medicare" },
-  { label: "Taxation", value: "Taxation" },
-  { label: "Launchpad", value: "Launchpad" },
+  { label: "Medicare", value: "MEDICARE" },
+  { label: "Taxation", value: "TAXATION" },
+  { label: "Launchpad", value: "LAUNCHPAD" },
 ];
+export enum DealType {
+  ACA = 'ACA',
+  MEDICARE = 'MEDICARE',
+  TAXATION = 'TAXATION',
+  LAUNCHPAD = 'LAUNCHPAD'
+}

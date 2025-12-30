@@ -170,7 +170,7 @@ const FileInput = ({
               "border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800"
             )}
           >
-            <Image src={imagePreview} alt="File preview" fill className="object-cover" />
+           <Image src={imagePreview} alt="File preview" fill className="object-cover" />
 
             <button
               onClick={handleDeleteFile}

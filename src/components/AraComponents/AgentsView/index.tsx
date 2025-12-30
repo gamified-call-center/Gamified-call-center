@@ -201,6 +201,8 @@ export default function AcaAgentsView() {
   const [form, setForm] = useState<AgentForm>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+   const [passworderrors, setpasswordErrors] = useState<Record<string, string>>({});
+
 
   const isEditMode = Boolean(editing?.id);
 
@@ -475,19 +477,28 @@ export default function AcaAgentsView() {
   ) => {
     setPasswordForm((prev) => ({ ...prev, [field]: value }));
   };
+  const validatePasswordForm = () => {
+  const e: Record<string, string> = {};
+  const pass = passwordForm.password;
+  const confirm = passwordForm.confirmPassword;
+
+  if (!pass) e.password = "Password is required";
+  else if (pass.length < 8) e.password = "Must be at least 8 characters";
+
+  if (!confirm) e.confirmPassword = "Confirm password is required";
+  else if (pass !== confirm) e.confirmPassword = "Passwords and confirm password must match";
+
+ setpasswordErrors(e);
+  return Object.keys(e).length === 0;
+};
 
   const submitPassword = async () => {
     if (!selectedAgent?.id) return;
 
-    // if (!passwordForm.password || !passwordForm.confirmPassword) {
-    //   toast.error("Both fields are required ❌");
-    //   return;
-    // }
-
-    // if (passwordForm.password !== passwordForm.confirmPassword) {
-    //   toast.error("Passwords do not match ❌");
-    //   return;
-    // }
+    if (!validatePasswordForm()) {
+    toast.error("Please fix password errors ");
+    return;
+  }
 
     const dto = {
       newPassword: passwordForm.password,
@@ -1145,7 +1156,7 @@ const PasswordToggle = () => (
               className="app-text"
             >
               <div className="space-y-4 p-2 mt-2 app-card">
-                <Field label="Password" required>
+                <Field label="Password" required error={passworderrors.password}>
                   <TextInput
                     type={showPassword ? "text" : "password"}
                     value={passwordForm.password}
@@ -1157,7 +1168,7 @@ const PasswordToggle = () => (
                   />
                 </Field>
 
-                <Field label="Confirm Password" required>
+                <Field label="Confirm Password" required error={passworderrors.confirmPassword}>
                   <TextInput
                     type={showPassword ? "text" : "password"}
                     value={passwordForm.confirmPassword}

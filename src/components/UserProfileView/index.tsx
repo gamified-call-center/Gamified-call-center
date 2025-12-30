@@ -58,10 +58,7 @@ import { uploadFile } from "@/Utils/uploadFile";
 import Button from "@/commonComponents/Button";
 import { DEFAULT_APPS_OPTIONS } from "@/Utils/constants/ara/constants";
 import { twMerge } from "tailwind-merge";
-
-
-
-
+import { useSession } from "next-auth/react";
 
 type AgentProfile = {
   id?: string;
@@ -120,27 +117,19 @@ type UserFull = {
   createdAt?: string;
   updatedAt?: string;
   password?: string;
- 
+
   agentProfile?: AgentProfile | null;
   addresses?: Address[];
   bankAccounts?: BankAccount[];
 };
 
-type ModalType =
-  | "profile"
- 
-  | "professional"
-  | "address"
-  | "security"
-  | "bank";
+type ModalType = "profile" | "professional" | "address" | "security" | "bank";
 type ModalMode = "add" | "edit";
 
 function hasProfileData(u: UserFull | null) {
   if (!u) return false;
   return !!(u.firstName || u.lastName || u.email || u.phone || u.dob);
 }
-
-
 
 function hasAgentData(a: AgentProfile | null) {
   if (!a) return false;
@@ -164,21 +153,16 @@ function normalizeSSN(v: string) {
   return `${digits.slice(0, 3)}-${digits.slice(3, 5)}-${digits.slice(5)}`;
 }
 
-
-
-
 export default function UserProfileView() {
-  const params = useParams<{ id?: string }>();
-  const userId =
-    (params?.id as string | undefined) 
- 
+  
+const { data: session } = useSession();
+const userId = session?.user?.id;
 
   const [data, setData] = useState<UserFull | null>(null);
   const [loading, setLoading] = useState(false);
 
   const [activeTab, setActiveTab] = useState("profile");
   const [showPassword, setShowPassword] = useState(false);
-
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<ModalType>("profile");
@@ -191,9 +175,6 @@ export default function UserProfileView() {
     setModalInitial(initial ?? {});
     setModalOpen(true);
   };
- 
-
-  
 
   const closeModal = () => {
     setModalOpen(false);
@@ -239,7 +220,7 @@ export default function UserProfileView() {
 
   const tabs = [
     { id: "profile", label: "Profile", icon: <UserIcon /> },
-    
+
     {
       id: "professional",
       label: "Professional",
@@ -255,9 +236,7 @@ export default function UserProfileView() {
   ];
   const visibleTabs = useMemo(() => {
     if (data?.systemRole === "ADMIN") {
-      return tabs.filter(
-        (tab) =>  tab.id !== "professional"
-      );
+      return tabs.filter((tab) => tab.id !== "professional");
     }
     return tabs;
   }, [data]);
@@ -333,18 +312,21 @@ export default function UserProfileView() {
     // common select shapes
     return x.id ?? x.value ?? null;
   };
-  const PasswordToggle = ({ show, toggle }: { show: boolean; toggle: () => void }) => (
-  <Button
-    type="button"
-    onClick={toggle}
-    className="cursor-pointer p-1 bg-transparent hover:bg-transparent"
-  >
-    {show ? <EyeOff size={16} /> : <Eye size={16} />}
-  </Button>
-);
-
-
- 
+  const PasswordToggle = ({
+    show,
+    toggle,
+  }: {
+    show: boolean;
+    toggle: () => void;
+  }) => (
+    <Button
+      type="button"
+      onClick={toggle}
+      className="cursor-pointer p-1 bg-transparent hover:bg-transparent"
+    >
+      {show ? <EyeOff size={16} /> : <Eye size={16} />}
+    </Button>
+  );
 
   const saveProfessional = async (v: any) => {
     const dto = {
@@ -376,7 +358,6 @@ export default function UserProfileView() {
     toast.success("Professional details saved");
   };
 
-  
   const savePassword = async (v: any) => {
     if (v.newPassword !== v.confirmPassword) {
       toast.error("Passwords do not match ");
@@ -483,8 +464,6 @@ export default function UserProfileView() {
                       User ID: {data?.id}
                     </span>
                   </div>
-
-                  
                 </div>
 
                 <div className="flex items-center gap-2">
@@ -550,8 +529,6 @@ export default function UserProfileView() {
       </div>
     );
   };
-
-  
 
   const renderProfessionalTab = () => {
     const a = data?.agentProfile || null;
@@ -1180,7 +1157,6 @@ export default function UserProfileView() {
 
   const renderTabContent = () => {
     switch (activeTab) {
-     
       case "professional":
         return renderProfessionalTab();
       case "security":
@@ -1317,10 +1293,9 @@ export default function UserProfileView() {
         showPassword={showPassword}
         setShowPassword={setShowPassword}
         PasswordToggle={PasswordToggle}
-       
         onSave={async (values) => {
           if (modalType === "profile") return saveProfile(values);
-          
+
           if (modalType === "professional") return saveProfessional(values);
           if (modalType === "address") return saveAddress(values);
           if (modalType === "security") return savePassword(values);
@@ -1342,8 +1317,8 @@ function ProfileModal({
   onSave,
   showPassword,
   setShowPassword,
- 
-  PasswordToggle
+
+  PasswordToggle,
 }: {
   open: boolean;
   onClose: () => void;
@@ -1355,17 +1330,11 @@ function ProfileModal({
   onSave: (values: any) => Promise<void>;
   showPassword: boolean;
   setShowPassword: (v: boolean) => void;
-
- 
 }) {
   const [values, setValues] = useState<any>(initialValues || {});
   const [saving, setSaving] = useState(false);
 
-  
-
   useEffect(() => setValues(initialValues || {}), [initialValues]);
-
-
 
   if (!open) return null;
 
@@ -1380,7 +1349,7 @@ function ProfileModal({
       ? mode === "edit"
         ? "Edit Bank Account"
         : "Add Bank Account"
-      :type === "professional"
+      : type === "professional"
       ? mode === "edit"
         ? "Edit Professional"
         : "Add Professional"
@@ -1395,8 +1364,6 @@ function ProfileModal({
       if (!values.firstName?.trim()) return "First name is required";
       if (!values.email?.trim()) return "Email is required";
     }
-
-    
 
     if (type === "security") {
       if (!values.password || !values.newPassword || !values.confirmPassword)
@@ -1666,8 +1633,6 @@ function ProfileModal({
         </div>
       )}
 
-    
-
       {type === "professional" && (
         <div className="md:space-y-4 space-y-2">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1756,7 +1721,7 @@ function ProfileModal({
 
               <Field label="Chase Data Password">
                 <TextInput
-                   type={showPassword ? "text" : "password"}
+                  type={showPassword ? "text" : "password"}
                   value={values.chaseDataPassword || ""}
                   onChange={(e: any) =>
                     set("chaseDataPassword", e.target.value)
@@ -1778,7 +1743,7 @@ function ProfileModal({
 
               <Field label="HealthSherpa Password">
                 <TextInput
-                 type={showPassword ? "text" : "password"}
+                  type={showPassword ? "text" : "password"}
                   value={values.healthSherpaPassword || ""}
                   onChange={(e: any) =>
                     set("healthSherpaPassword", e.target.value)
@@ -1798,7 +1763,7 @@ function ProfileModal({
 
               <Field label="myMFG Password">
                 <TextInput
-                type={showPassword ? "text" : "password"}
+                  type={showPassword ? "text" : "password"}
                   value={values.myMfgPassword || ""}
                   onChange={(e: any) => set("myMfgPassword", e.target.value)}
                   placeholder="Password"
@@ -1816,8 +1781,6 @@ function ProfileModal({
             </div>
           </div>
 
-         
-        
           <Field label="Apps">
             <MultiSelect
               values={values.apps || []}
