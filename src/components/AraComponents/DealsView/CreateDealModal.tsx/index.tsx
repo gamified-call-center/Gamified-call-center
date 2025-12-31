@@ -42,11 +42,11 @@ export type DealForm = {
   customerLanguage: string;
   closedDate: string; // datetime-local
   agentId: string;
-  userId:string;
+  userId: string;
   status: DealStatus;
   notes: string;
- 
-documents: string[];
+
+  documents: string[];
 };
 
 export type CreateDealModalMode = "CREATE" | "EDIT";
@@ -92,10 +92,10 @@ const defaultForm = (): DealForm => ({
   customerLanguage: "",
   closedDate: nowAsDateTimeLocal(),
   agentId: "",
-  userId:"",
+  userId: "",
   notes: "",
   status: "OPEN",
- 
+
   documents: [],
 });
 
@@ -146,9 +146,8 @@ export default function CreateDealModal({
       form.customerLanguage !== base.customerLanguage ||
       form.agentId !== base.agentId ||
       form.notes !== base.notes ||
-      form.userId!==base.userId||
-     
-      form.documents!==base.documents
+      form.userId !== base.userId ||
+      form.documents !== base.documents
     );
   }, [form]);
 
@@ -172,10 +171,7 @@ export default function CreateDealModal({
     // if (!form.ffm) e.ffm = "FFM must be enabled";
     if (!form.career) e.career = "Required";
     if (!form.typeOfWork) e.typeOfWork = "Required";
-    if (!form.monthlyIncome) e.monthlyIncome = "Required";
 
-    if (!form.documentsNeeded) e.documentsNeeded = "Required";
-    if (!form.socialProvided) e.socialProvided = "Required";
     if (!form.customerLanguage) e.customerLanguage = "Required";
     if (!form.closedDate) e.closedDate = "Required";
     if (!form.userId) e.userId = "Select an agent";
@@ -383,7 +379,6 @@ export default function CreateDealModal({
               onChange={(e) => update("notes", e.target.value)}
             />
           </Field>
-         
 
           <Field label="Documents">
             <FileInput
@@ -392,10 +387,13 @@ export default function CreateDealModal({
               initialFileUrl={form.documents?.[0]}
               requiredClass="app-border"
               onFileChange={(url: string) => {
-    if (!url) return;
-    setForm(prev => ({ ...prev, documents: [...prev.documents, url] })); 
-    toast.success("Document uploaded successfully!");
-  }}
+                if (!url) return;
+                setForm((prev) => ({
+                  ...prev,
+                  documents: [...prev.documents, url],
+                }));
+                toast.success("Document uploaded successfully!");
+              }}
             />
           </Field>
         </Section>

@@ -150,6 +150,12 @@ export default function JobApplicationWizard() {
       { label: "MEDICA", value: "CARESOURCE" },
       { label: "PRIORITY HEALTH", value: "PRIORITY HEALTH" },
       { label: "FIRST CHOICE", value: "FIRST CHOICE" },
+      { label: "ANTHEM", value: "ANTHEM" },
+      { label: "INSTIL", value: "INSTIL" },
+      { label: "WELLPOINT", value: "WELLPOINT" },
+      { label: "AMERITAS", value: "AMERITAS" },
+      { label: "AMERIHEALTH", value: "AMERIHEALTH" },
+      { label: "ALLINTHEALTH", value: "ALLINTHEALTH" },
     ],
     []
   );
@@ -244,14 +250,14 @@ export default function JobApplicationWizard() {
   };
 
   const next = () => {
-    // if (!validateStep(step)) return;
+    if (!validateStep(step)) return;
     setStep((p) => Math.min(p + 1, STEPS.length - 1));
   };
 
   const back = () => setStep((p) => Math.max(p - 1, 0));
 
   const onSubmit = async () => {
-    // if (!validateStep(3)) return;
+    if (!validateStep(3)) return;
     setLoading(true);
 
     const payload = {
@@ -287,37 +293,37 @@ export default function JobApplicationWizard() {
         payload,
         true
       );
-      if (res.status === 200 ||res.status==201) {
+      if (res.status === 200 || res.status == 201) {
         toast.success("Application submitted successfully!");
         setSuccessModalOpen(true);
         setForm({
-    firstName: "",
-    lastName: "",
-    email: "",
-    dob: "",
-    phone: "",
-    npn: "",
-    address1: "",
-    address2: "",
-    city: "",
-    state: "",
-    zip: "",
-    aboutYou: "",
-    yearsOfExperience: "",
-    carrier: [],
-    ahipCertified: false,
-    ahipProofUrl: "",
-    stateLicenseNo: "",
-    stateLicense: [],
-    stateLicenses: [],
-    bankName: "",
-    accountHolderName: "",
-    accountNumber: "",
-    driversLicenseOrPassportUrl: "",
-    assignmentOfCommissionUrl: "",
-    enoCertificateUrl: "",
-  });
-  setStep(0)
+          firstName: "",
+          lastName: "",
+          email: "",
+          dob: "",
+          phone: "",
+          npn: "",
+          address1: "",
+          address2: "",
+          city: "",
+          state: "",
+          zip: "",
+          aboutYou: "",
+          yearsOfExperience: "",
+          carrier: [],
+          ahipCertified: false,
+          ahipProofUrl: "",
+          stateLicenseNo: "",
+          stateLicense: [],
+          stateLicenses: [],
+          bankName: "",
+          accountHolderName: "",
+          accountNumber: "",
+          driversLicenseOrPassportUrl: "",
+          assignmentOfCommissionUrl: "",
+          enoCertificateUrl: "",
+        });
+        setStep(0);
       }
     } catch {
       toast.error("Failed to submit. Try again.");
@@ -337,7 +343,6 @@ export default function JobApplicationWizard() {
     <div className="h-screen overflow-y-scroll ">
       <div className="mx-auto max-w-7xl px-4 py-8">
         <div className="rounded-2xl  bg-white shadow-sm overflow-hidden">
-
           <div className="px-6 py-5 border-b bg-gradient-to-r from-slate-900 to-slate-700">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -353,13 +358,7 @@ export default function JobApplicationWizard() {
             </div>
           </div>
 
-
-          <WizardStepper
-            steps={STEPS as any}
-            activeStep={step}
-
-          />
-
+          <WizardStepper steps={STEPS as any} activeStep={step} />
 
           <div className="px-6 pb-6">
             <AnimatePresence mode="wait">
@@ -497,14 +496,9 @@ export default function JobApplicationWizard() {
 
                       <Field label="State" required error={errors.state}>
                         <SingleSelect
-                          value={
-                            form.state
-                              
-                          }
-                          onChange={(v: any) =>
-                            update("state", v as any)
-                          }
-                          options={stateOptions }
+                          value={form.state}
+                          onChange={(v: any) => update("state", v as any)}
+                          options={stateOptions}
                           placeholder="Select State"
                           placement="auto"
                           searchable
