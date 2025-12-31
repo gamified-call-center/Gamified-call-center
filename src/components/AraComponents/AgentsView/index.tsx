@@ -24,6 +24,7 @@ import {
   XCircle,
   Rows,
   LayoutGrid,
+  CreditCard,
 } from "lucide-react";
 import apiClient from "@/Utils/apiClient";
 import Modal from "@/commonComponents/Modal";
@@ -63,6 +64,7 @@ type AgentsRow = {
   lastName: string;
   email: string;
   phone: string;
+  ssn?:string;
   employee: {
     designation: { name: string; id: string };
     id:string;
@@ -107,7 +109,7 @@ export type AgentForm = {
   lastName: string;
   email: string;
   dob: string;
-  ssn: string;
+  ssn?: string;
   phone: string;
   password: string;
 
@@ -542,6 +544,7 @@ export default function AcaAgentsView() {
         phone: normalizePhone(form.phone),
         dob: form.dob,
         password: form.password,
+        ssn:form.ssn
       },
 
       employee: {
@@ -1327,6 +1330,18 @@ const PasswordToggle = () => (
                     placeholder="Contact Number"
                     leftIcon={<Phone size={16} />}
                     error={!!errors.phone}
+                    containerClassName="md:py-[6px] py-1"
+                  />
+                </Field>
+                 <Field label="SSN" >
+                  <TextInput
+                    value={form.ssn}
+                    onChange={(e: any) =>
+                      update("ssn", e.target.value)
+                    }
+                    placeholder="ssn"
+                    leftIcon={<CreditCard size={16} />}
+                  
                     containerClassName="md:py-[6px] py-1"
                   />
                 </Field>

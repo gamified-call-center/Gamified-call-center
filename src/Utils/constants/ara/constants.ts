@@ -10,21 +10,26 @@ export const COVERAGE_OPTIONS: SelectOption[] = [
 
 export const CAREER_OPTIONS: SelectOption[] = [
   { label: "AMBETTER", value: "AMBETTER" },
-      { label: "AETNA", value: "AETNA" },
-      { label: "BCBS", value: "BCBS" },
-      { label: "CARESOURCE", value: "CARESOURCE" },
-      { label: "CIGNA", value: "CIGNA" },
-      { label: "MOLINA", value: "MOLINA" },
-      { label: "OSCAR", value: "OSCAR" },
-      { label: "UNITED HEALTHCARE", value: "UNITED HEALTHCARE" },
-      { label: "FLORIDA BLUE", value: "FLORIDA BLUE" },
-      { label: "HEALTH FIRST", value: "HEALTH FIRST" },
-      { label: "UNIV OF UTHA", value: "UNIV OF UTHA" },
-      { label: "MEDICA", value: "CARESOURCE" },
-      { label: "PRIORITY HEALTH", value: "PRIORITY HEALTH" },
-      { label: "FIRST CHOICE", value: "FIRST CHOICE" },
-    ]
-
+  { label: "AETNA", value: "AETNA" },
+  { label: "BCBS", value: "BCBS" },
+  { label: "CARESOURCE", value: "CARESOURCE" },
+  { label: "CIGNA", value: "CIGNA" },
+  { label: "MOLINA", value: "MOLINA" },
+  { label: "OSCAR", value: "OSCAR" },
+  { label: "UNITED HEALTHCARE", value: "UNITED HEALTHCARE" },
+  { label: "FLORIDA BLUE", value: "FLORIDA BLUE" },
+  { label: "HEALTH FIRST", value: "HEALTH FIRST" },
+  { label: "UNIV OF UTHA", value: "UNIV OF UTHA" },
+  { label: "MEDICA", value: "CARESOURCE" },
+  { label: "PRIORITY HEALTH", value: "PRIORITY HEALTH" },
+  { label: "FIRST CHOICE", value: "FIRST CHOICE" },
+  { label: "ANTHEM", value: "ANTHEM" },
+  { label: "INSTIL", value: "INSTIL" },
+  { label: "WELLPOINT", value: "WELLPOINT" },
+  { label: "AMERITAS", value: "AMERITAS" },
+  { label: "AMERIHEALTH", value: "AMERIHEALTH" },
+  { label: "ALLINTHEALTH", value: "ALLINTHEALTH" },
+];
 
 export const WORK_TYPE_OPTIONS: SelectOption[] = [
   { label: "Select", value: "" },
@@ -40,6 +45,10 @@ export const DOCUMENTS_NEEDED_OPTIONS: SelectOption[] = [
   { label: "Income Proof", value: "INCOME_PROOF" },
   { label: "Address Proof", value: "ADDRESS_PROOF" },
   { label: "Bank Statement", value: "BANK_STATEMENT" },
+  { label: "IMMIGRATION", value: "IMMIGRATION" },
+  { label: "CITIZENSHIP", value: "CITIZENSHIP" },
+  { label: "SS", value: "SS" },
+  { label: "NONE", value: "NONE" },
 ];
 
 export const SOCIAL_PROVIDED_OPTIONS: SelectOption[] = [
@@ -56,7 +65,6 @@ export const LANGUAGE_OPTIONS: SelectOption[] = [
   { label: "Other", value: "OTHER" },
 ];
 
-
 export const DEFAULT_ROLE_OPTIONS: SelectOption[] = [
   { label: "Agent", value: "Agent" },
   { label: "Agent Lead", value: "AgentLead" },
@@ -66,7 +74,6 @@ export const DEFAULT_ROLE_OPTIONS: SelectOption[] = [
 export const DEFAULT_ACCESS_OPTIONS: SelectOption[] = [
   { label: "Training", value: "TRAINING" },
   { label: "Full Access", value: "ALL_ACCESS" },
-  
 ];
 
 export const DEFAULT_APPS_OPTIONS: SelectOption[] = [
@@ -76,8 +83,8 @@ export const DEFAULT_APPS_OPTIONS: SelectOption[] = [
   { label: "Launchpad", value: "LAUNCHPAD" },
 ];
 export enum DealType {
-  ACA = 'ACA',
-  MEDICARE = 'MEDICARE',
-  TAXATION = 'TAXATION',
-  LAUNCHPAD = 'LAUNCHPAD'
+  ACA = "ACA",
+  MEDICARE = "MEDICARE",
+  TAXATION = "TAXATION",
+  LAUNCHPAD = "LAUNCHPAD",
 }

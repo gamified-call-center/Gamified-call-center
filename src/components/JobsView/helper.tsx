@@ -4,6 +4,7 @@ type Option = { label: string; value: string };
 export const stateOptions: Option[] = 
   ([
     { label: "Alabama", value: "Alabama" },
+    {label:"American Samoa",value:"AMERICAN SAMOA"},
     { label: "Alaska", value: "Alaska" },
     { label: "Arizona", value: "Arizona" },
     { label: "Arkansas", value: "Arkansas" },
@@ -11,8 +12,11 @@ export const stateOptions: Option[] =
     { label: "Colorado", value: "Colorado" },
     { label: "Connecticut", value: "Connecticut" },
     { label: "Delaware", value: "Delaware" },
+    { label: "Distric Of Columbia", value: "Distric_Of_Columbia" },
+
     { label: "Florida", value: "Florida" },
     { label: "Georgia", value: "Georgia" },
+    { label: "Guam", value: "GUAM" },
     { label: "Hawaii", value: "Hawaii" },
     { label: "Idaho", value: "Idaho" },
     { label: "Illinois", value: "Illinois" },
@@ -35,6 +39,7 @@ export const stateOptions: Option[] =
     { label: "New Jersey", value: "New Jersey" },
     { label: "New Mexico", value: "New Mexico" },
     { label: "New York", value: "New York" },
+    { label: "Non-Us", value: "Non_Us" },
     { label: "North Carolina", value: "North Carolina" },
     { label: "North Dakota", value: "North Dakota" },
     { label: "Ohio", value: "Ohio" },

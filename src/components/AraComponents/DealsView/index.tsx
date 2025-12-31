@@ -392,7 +392,7 @@ const handleDealsCsvUpload = async () => {
         carrier: payload.career || "",
         typeOfWork: payload.typeOfWork || "",
         monthlyIncome: Number(payload.monthlyIncome || 0),
-        documentsNeeded: payload.documentsNeeded || "",
+        documentsNeeded: payload.documentsNeeded || "NONE",
         socialProvider: payload.socialProvided || "",
         customerLanguage: payload.customerLanguage || "",
         closedDate: payload.closedDate
