@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Modal from "@/commonComponents/Modal";
+import Image from "next/image";
 import {
   X,
   User,
@@ -26,6 +27,7 @@ import {
   Eye,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
+import Button from "@/commonComponents/Button";
 
 type DealViewModalProps = {
   open: boolean;
@@ -143,14 +145,14 @@ const DocumentPreviewModal = ({
       open={!!preview?.open}
       onClose={onClose}
       size="2xl"
-      showCloseIcon={false}
+      showCloseIcon={true}
       overlayClassName="bg-black/60 backdrop-blur-sm"
       bodyClassName="p-0 md:h-[650px] h-[600px] rounded-[10px] app-card"
       className="animate-fade-in"
     >
       <div className="flex flex-col h-full">
         {/* Top bar */}
-        <div className="flex items-center justify-between p-4 border-b app-border app-card">
+        <div className="flex items-center justify-between md:p-4 p-1 border-b app-border app-card">
           <div className="min-w-0">
             <div className="text-sm app-muted truncate">
               {preview ? `Document ${preview.index + 1} of ${total}` : ""}
@@ -159,21 +161,15 @@ const DocumentPreviewModal = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <button
+            <Button
               onClick={() => onDownload(url)}
-              className="p-2 rounded-lg transition-colors app-btn-action"
+              className="p-2 rounded-lg transition-colors btn-text app-btn-action"
               title="Download"
             >
               <Download className="w-5 h-5 app-text" />
-            </button>
+            </Button>
 
-            <button
-              onClick={onClose}
-              className="p-2 rounded-lg transition-colors app-border app-text"
-              title="Close"
-            >
-              <X className="w-5 h-5 app-text" />
-            </button>
+         
           </div>
         </div>
 
@@ -182,11 +178,15 @@ const DocumentPreviewModal = ({
           <div className="h-full w-full flex items-center justify-center p-4">
             {isImg ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <div className="relative rounded-md w-full h-full">
+                <Image
+
                 src={url}
                 alt="Document preview"
+                fill
                 className="max-h-full max-w-full rounded-xl shadow-lg object-contain"
               />
+                </div>
             ) : isPdf ? (
               <iframe
                 src={url}
@@ -200,13 +200,13 @@ const DocumentPreviewModal = ({
                 <div className="app-muted text-sm mt-1">
                   This file type can’t be previewed here. You can download it.
                 </div>
-                <button
+                <Button
                   onClick={() => onDownload(url)}
-                  className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-linear-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
+                  className="mt-4 inline-flex items-center gap-2 btn-text px-4 py-2 rounded-xl bg-linear-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
                 >
                   <Download className="w-4 h-4" />
-                  Download
-                </button>
+                
+                </Button>
               </div>
             )}
           </div>
@@ -214,25 +214,25 @@ const DocumentPreviewModal = ({
 
         {/* Bottom controls */}
         <div className="flex items-center justify-between p-4 border-t app-border app-card">
-          <button
+          <Button
             onClick={onPrev}
             disabled={!preview || preview.index <= 0}
-            className={`px-4 py-2 rounded-xl border app-border app-text transition-colors ${
+            className={`px-4 py-2 rounded-xl border btn-text app-border app-text transition-colors ${
               !preview || preview.index <= 0 ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-50 dark:hover:bg-slate-700/50"
             }`}
           >
             Prev
-          </button>
+          </Button>
 
-          <button
+          <Button
             onClick={onNext}
             disabled={!preview || preview.index >= total - 1}
-            className={`px-4 py-2 rounded-xl border app-border app-text transition-colors ${
+            className={`px-4 py-2 rounded-xl border  btn-text app-border app-text transition-colors ${
               !preview || preview.index >= total - 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-slate-50 dark:hover:bg-slate-700/50"
             }`}
           >
             Next
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -403,8 +403,8 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
 
   const renderDocuments = () => (
     <div className="animate-fadeIn app-surface">
-      <div className="app-card rounded-2xl p-6 shadow-lg border app-border">
-        <div className="flex items-center justify-between mb-6">
+      <div className="app-card rounded-2xl p-2 md:p-4 shadow-lg border app-border">
+        <div className="flex items-center justify-between md:mb-6 mb-2">
           <div className="flex items-center gap-2">
             <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
               <FileText className="w-5 h-5 text-blue-600 dark:text-blue-200" />
@@ -424,7 +424,7 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
             <div className="app-muted text-sm mt-1">Upload documents from the form to see them here.</div>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 md:gap-4 gap-2">
             {documents.map((url, idx) => {
               const img = isImageUrl(url);
 
@@ -433,7 +433,7 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                   key={`${url}-${idx}`}
                   className="group relative rounded-2xl overflow-hidden border app-border app-card shadow-sm hover:shadow-lg transition-all"
                 >
-                  <button
+                  <Button
                     type="button"
                     onClick={() => openPreview(url, idx)}
                     className="w-full text-left"
@@ -442,11 +442,13 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                     <div className="aspect-square bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
                       {img ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img
+                       <div className="relative w-full h-full rounded-md">
+                         <Image
                           src={url}
                           alt={`Document ${idx + 1}`}
                           className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform"
                         />
+                        </div>
                       ) : (
                         <div className="flex flex-col items-center justify-center p-4">
                           <FileText className="w-10 h-10 text-slate-400 mb-2" />
@@ -456,31 +458,31 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                         </div>
                       )}
                     </div>
-                  </button>
+                  </Button>
 
                   {/* Overlay actions */}
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-black/35 flex items-center justify-center gap-3">
-                    <button
+                    <Button
                       type="button"
                       onClick={() => openPreview(url, idx)}
-                      className="p-2 rounded-xl bg-white/90 hover:bg-white shadow"
+                      className="p-2 rounded-xl bg-white/90 btn-text hover:bg-white shadow"
                       title="Preview"
                     >
                       <Eye className="w-5 h-5 text-slate-700" />
-                    </button>
+                    </Button>
 
-                    <button
+                    <Button
                       type="button"
                       onClick={() => downloadFile(url)}
-                      className="p-2 rounded-xl bg-white/90 hover:bg-white shadow"
+                      className="p-2 rounded-xl bg-white/90 btn-text hover:bg-white shadow"
                       title="Download"
                     >
                       <Download className="w-5 h-5 text-slate-700" />
-                    </button>
+                    </Button>
                   </div>
 
                   {/* Footer name */}
-                  <div className="p-3 border-t app-border">
+                  <div className="md:p-3 p-1 border-t app-border">
                     <div className="text-xs app-text truncate">{getFileNameFromUrl(url)}</div>
                   </div>
                 </div>
@@ -506,11 +508,11 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
   );
 
   const renderOverview = () => (
-    <div className="space-y-6 animate-fadeIn app-surface">
+    <div className="md:space-y-6 space-y-3 animate-fadeIn app-surface">
       {/* Header Section */}
-      <div className="rounded-2xl p-6 shadow-sm app-card">
+      <div className="rounded-2xl md:p-3 p-1  shadow-sm app-card">
         <div className="flex items-start justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center md:gap-4 gap-2">
             <div className="relative">
               <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-lg">
                 <User className="w-8 h-8 text-white" />
@@ -524,22 +526,22 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
             </div>
 
             <div>
-              <h2 className="text-2xl font-bold app-text">
+              <h2 className="md:text-2xl text-[14px] font-bold app-text">
                 {`${deal?.applicantFirstName || ""} ${deal?.applicantLastName || ""}`.trim() ||
                   "Unnamed Deal"}
               </h2>
 
-              <div className="flex items-center gap-3 mt-2 flex-wrap">
+              <div className="flex items-center md:gap-3 gap-2 md:mt-2 mt-1 flex-wrap">
                 <span
-                  className={`px-3 py-1 rounded-full text-sm font-bold ${statusConfig.bg} ${statusConfig.color}`}
+                  className={`md:px-3 px-1 py-1 rounded-full md:text-sm text-[10px] font-bold ${statusConfig.bg} ${statusConfig.color}`}
                 >
                   {statusConfig.label}
                 </span>
 
-                <span className="text-sm app-muted">Deal ID: {deal?.id?.slice(0, 8)}...</span>
+                <span className="md:text-sm text-[10px] font-regular app-muted">Deal ID: {deal?.id?.slice(0, 8)}...</span>
 
                 {deal?.ffm && (
-                  <span className="px-2 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-200 text-xs font-bold rounded-full">
+                  <span className="md:px-2 px-1 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-200 md:text-xs text-[12px] font-bold rounded-full">
                     FFM
                   </span>
                 )}
@@ -548,7 +550,7 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
           </div>
 
           <div className="flex items-center gap-2">
-            <button
+            <Button
               onClick={() => copyToClipboard(deal?.id, "Deal ID")}
               className="p-2 rounded-lg transition-colors relative group app-btn-action"
               title="Copy Deal ID"
@@ -559,55 +561,50 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                   Copied!
                 </div>
               )}
-            </button>
+            </Button>
 
-            <button
-              onClick={onClose}
-              className="p-2 rounded-lg transition-colors app-border app-text"
-              title="Close"
-            >
-              <X className="w-5 h-5 app-text" />
-            </button>
+           
           </div>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 md:gap-4 gap-2 w-full">
         {stats.map((stat, index) => (
-          <div
-            key={stat.label}
-            className="rounded-2xl p-5 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group app-card"
-            style={{ animationDelay: `${index * 100}ms` }}
-            title={stat.tooltip}
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className={`p-2 rounded-xl bg-linear-to-br ${stat.color} bg-opacity-10`}>
-                <div className={`text-white bg-linear-to-br ${stat.color} p-2 rounded-lg`}>
-                  {stat.icon}
-                </div>
-              </div>
-            </div>
+  <div
+    key={stat.label}
+    className="rounded-2xl md:p-3 p-2 max-w-[150px] shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group app-card inline-block"
+    style={{ animationDelay: `${index * 100}ms` }}
+    title={stat.tooltip}
+  >
+    <div className="flex items-center justify-between mb-3">
+      <div className={`p-2 rounded-xl bg-linear-to-br ${stat.color} bg-opacity-10`}>
+        <div className={`text-white bg-linear-to-br ${stat.color} p-2 rounded-lg`}>
+          {stat.icon}
+        </div>
+      </div>
+    </div>
 
-            <div className="text-2xl font-bold app-text">{stat.value}</div>
-            <div className="text-sm app-muted mt-1">{stat.label}</div>
-          </div>
-        ))}
+    <div className="text-2xl font-bold app-text">{stat.value}</div>
+    <div className="text-sm app-muted mt-1">{stat.label}</div>
+  </div>
+))}
+
       </div>
 
       {/* Details Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 md:gap-6 gap-2">
         {/* Deal Information Card */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="rounded-2xl p-6 shadow-lg app-card">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+        <div className="lg:col-span-2 md:space-y-6 space-y-2">
+          <div className="rounded-2xl md:p-3 p-1 shadow-lg app-card">
+            <div className="flex items-center md:gap-2 gap-1 md:mb-6 mb-3">
+              <div className="md:p-2 p-1 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                 <Tag className="w-5 h-5 text-blue-600 dark:text-blue-200" />
               </div>
               <h3 className="font-bold app-text">Deal Information</h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 md:gap-2 gap-1">
               {[
                 {
                   label: "Carrier",
@@ -665,13 +662,13 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                   value: (
                     <div className="flex items-center justify-between gap-2">
                       <span>{documents.length} file{documents.length !== 1 ? "s" : ""}</span>
-                      <button
+                      <Button
                         type="button"
                         onClick={() => setActiveTab("documents")}
-                        className="text-xs px-2 py-1 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-200"
+                        className="text-xs px-2 py-1 rounded-lg bg-blue-100 btn-text dark:bg-blue-900/30 text-blue-700 dark:text-blue-200"
                       >
                         View
-                      </button>
+                      </Button>
                     </div>
                   ),
                   icon: <FileText className="w-4 h-4 text-slate-600 dark:text-slate-200" />,
@@ -682,11 +679,11 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                   key={item.label}
                   className={`${
                     item.fullWidth ? "col-span-1 md:col-span-2" : ""
-                  } p-3 rounded-xl transition-colors group border border-transparent hover:border-slate-200 dark:hover:border-slate-600`}
+                  } md:p-2 p-1 rounded-xl transition-colors group border border-transparent hover:border-slate-200 dark:hover:border-slate-600`}
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-700/60 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/25 transition-colors">
+                    <div className="md:p-2 p-1 rounded-lg bg-slate-100 dark:bg-slate-700/60 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/25 transition-colors">
                       {item.icon}
                     </div>
                     <span className="text-sm font-medium app-muted">{item.label}</span>
@@ -700,22 +697,22 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
 
           {/* Notes Section */}
           {deal?.notes ? (
-            <div className="rounded-2xl p-6 shadow-lg border app-border app-card">
+            <div className="rounded-2xl p-2 md:p-3 shadow-lg border app-border app-card">
               <div className="flex items-center gap-2 mb-4">
-                <div className="p-2 app-surface rounded-lg">
+                <div className="md:p-2 p-1 app-surface rounded-lg">
                   <MessageSquare className="w-5 h-5 text-blue-600 dark:text-blue-200" />
                 </div>
                 <h3 className="font-bold app-text">Notes</h3>
               </div>
 
-              <div className="p-4 rounded-xl border app-border app-card">
+              <div className="md:p-2 p-1 rounded-xl border app-border app-card">
                 <p className="app-text leading-relaxed opacity-90">{deal.notes}</p>
               </div>
             </div>
           ) : (
-            <div className="rounded-2xl p-6 shadow-sm app-card">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="p-2 app-card rounded-lg">
+            <div className="rounded-2xl md:p-3 p-1 shadow-sm app-card">
+              <div className="flex items-center gap-2 md:mb-4 mb-2">
+                <div className="md:p-2 p-1 app-card rounded-lg">
                   <MessageSquare className="w-5 h-5 text-slate-400 dark:text-slate-300" />
                 </div>
                 <h3 className="font-bold app-muted">Notes</h3>
@@ -726,17 +723,17 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
         </div>
 
         {/* Right Column - Timeline & Agent */}
-        <div className="space-y-6">
+        <div className="md:space-y-4 space-y-2">
           {/* Timeline Card */}
-          <div className="rounded-2xl p-6 shadow-lg app-card">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+          <div className="rounded-2xl md:p-3 p-1 shadow-lg app-card">
+            <div className="flex items-center gap-2 md:mb-6 mb-2">
+              <div className="md:p-2 p-1 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
                 <Calendar className="w-5 h-5 text-purple-600 dark:text-purple-200" />
               </div>
               <h3 className="font-bold app-text">Timeline</h3>
             </div>
 
-            <div className="space-y-4 relative before:absolute before:left-7 before:top-8 before:bottom-8 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-700">
+            <div className="md:space-y-4  space-y-2 relative before:absolute before:left-7 before:top-8 before:bottom-8 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-700">
               {[
                 {
                   event: "Deal Created",
@@ -776,10 +773,10 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
 
           {/* Agent Information Card */}
           {deal?.agent && (
-            <div className="rounded-2xl p-6 shadow-lg app-card">
-              <div className="flex items-center justify-between mb-6">
+            <div className="rounded-2xl md:p-3 p-1 shadow-lg app-card">
+              <div className="flex items-center justify-between md:mb-6 mb-2">
                 <div className="flex items-center gap-2">
-                  <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                  <div className="md:p-2 p-1 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
                     <User className="w-5 h-5 text-emerald-600 dark:text-emerald-200" />
                   </div>
                   <h3 className="font-bold app-text">Assigned Agent</h3>
@@ -792,9 +789,9 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                 </span>
               </div>
 
-              <div className="flex items-center gap-4 p-4 rounded-xl border border-emerald-100 dark:border-emerald-800/30 mb-4 bg-linear-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20">
+              <div className="flex items-center gap-4 md:p-2 p-1 rounded-xl border border-emerald-100 dark:border-emerald-800/30 mb-4 bg-linear-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20">
                 <div className="w-14 h-14 rounded-full bg-linear-to-br from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg">
-                  <span className="app-text font-bold text-lg">
+                  <span className="text-white font-bold text-lg">
                     {deal.agent.user?.firstName?.charAt(0)}
                     {deal.agent.user?.lastName?.charAt(0)}
                   </span>
@@ -820,23 +817,23 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center gap-3 p-2 rounded-lg transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/50">
+              <div className="md:space-y-3 space-y-1">
+                <div className="flex items-center gap-3 md:p-2 p-1 rounded-lg transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/50">
                   <Mail className="w-4 h-4 text-slate-500 dark:text-slate-300" />
                   <span className="text-sm app-text truncate opacity-90">{deal.agent.user?.email}</span>
                 </div>
 
-                <div className="flex items-center gap-3 p-2 rounded-lg transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/50">
+                <div className="flex items-center gap-1 md:gap-2 p-2 rounded-lg transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/50">
                   <Phone className="w-4 h-4 text-slate-500 dark:text-slate-300" />
                   <span className="text-sm app-text opacity-90">{deal.agent.user?.phone}</span>
                 </div>
 
-                <div className="flex items-center justify-between p-2">
+                <div className="flex items-center justify-between p-1">
                   <span className="text-sm app-muted">Experience</span>
                   <span className="font-medium app-text">{deal.agent.yearsOfExperience} years</span>
                 </div>
 
-                <div className="flex items-center justify-between p-2">
+                <div className="flex items-center justify-between p-1">
                   <span className="text-sm app-muted">Access Level</span>
                   <span className="font-medium app-text">{deal.agent.accessLevel}</span>
                 </div>
@@ -856,17 +853,17 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
       case "applicants":
         return (
           <div className="animate-fadeIn">
-            <div className="app-card rounded-2xl p-8 shadow-lg app-border">
+            <div className="app-card rounded-2xl p-2 md:p-4 shadow-lg app-border">
               <div className="text-center">
                 <div className="w-20 h-20 rounded-full bg-linear-to-br from-blue-100 to-cyan-100 dark:from-blue-900/30 dark:to-cyan-900/30 flex items-center justify-center mx-auto mb-6">
                   <Users className="w-10 h-10 text-blue-500" />
                 </div>
-                <h3 className="text-2xl font-bold app-text">{deal?.numberOfApplicants || 0} Applicants</h3>
-                <p className="text-slate-500 dark:text-slate-400 mb-8">
+                <h3 className="md:text-2xl text-[16px] font-bold app-text">{deal?.numberOfApplicants || 0} Applicants</h3>
+                <p className="text-slate-500 dark:text-slate-400 mb-2 md:mb-4">
                   Total number of applicants in this deal
                 </p>
 
-                <div className="max-w-md mx-auto app-card rounded-xl p-6 border app-border">
+                <div className="max-w-md mx-auto app-card rounded-xl md:p-3 p-2 border app-border">
                   {deal?.agent?.stateLicenseNumber && (
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-sm font-medium app-text">stateLicenseNumber</span>
@@ -876,7 +873,7 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                     </div>
                   )}
 
-                  <div className="space-y-3">
+                  <div className="space-y-1 md:space-y-1">
                     <div className="flex items-center justify-between">
                       <span className="app-text">Name</span>
                       <span className="font-medium app-text">
@@ -900,8 +897,8 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
         return (
           <div className="animate-fadeIn app-surface">
             {deal?.agent ? (
-              <div className="app-card rounded-2xl p-6 shadow-lg border app-border">
-                <div className="flex items-start justify-between mb-8">
+              <div className="app-card rounded-2xl p-2 md:p-4 shadow-lg border app-border">
+                <div className="flex items-start justify-between md:mb-4 mb-2">
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-full bg-linear-to-br from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg">
                       <span className="app-inverse font-bold text-xl">
@@ -911,11 +908,11 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                     </div>
 
                     <div>
-                      <h2 className="text-2xl font-bold app-text">
+                      <h2 className="md:text-2xl text-[16px] font-bold app-text">
                         {deal.agent.user?.firstName} {deal.agent.user?.lastName}
                       </h2>
 
-                      <div className="flex items-center gap-3 mt-2 flex-wrap">
+                      <div className="flex items-center md:gap-3 gap-1 mt-2 flex-wrap">
                         <span
                           className={`px-3 py-1 rounded-full text-sm font-bold ${agentStatusConfig.bg} ${agentStatusConfig.color}`}
                         >
@@ -934,13 +931,13 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-6">
-                    <div className="app-card rounded-xl p-6 border app-border">
-                      <h3 className="font-bold app-text mb-4">Contact Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4">
+                  <div className="md:space-y-4 space-y-2">
+                    <div className="app-card rounded-xl p-1 md:p-2 border app-border">
+                      <h3 className="font-bold app-text md:mb-4 mb-2">Contact Information</h3>
 
-                      <div className="space-y-4">
-                        <div className="flex items-center gap-3">
+                      <div className="space-y-1 md:space-y-2">
+                        <div className="flex items-center md:gap-3 gap-1">
                           <Mail className="w-5 h-5 app-text" />
                           <div>
                             <p className="text-sm app-muted">Email</p>
@@ -948,7 +945,7 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center md:gap-3 gap-1">
                           <Phone className="w-5 h-5 app-text" />
                           <div>
                             <p className="text-sm app-muted">Phone</p>
@@ -958,10 +955,10 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                       </div>
                     </div>
 
-                    <div className="rounded-xl p-6 border app-border app-card">
-                      <h3 className="font-bold app-text mb-4">Professional Details</h3>
+                    <div className="rounded-xl md:p-4 p-2 border app-border app-card">
+                      <h3 className="font-bold app-text md:mb-4 mb-2">Professional Details</h3>
 
-                      <div className="space-y-3">
+                      <div className="md:space-y-3 space-y-1">
                         {[
                           { label: "Years of Experience", value: `${deal.agent.yearsOfExperience} years` },
                           { label: "Access Level", value: deal.agent.accessLevel },
@@ -977,11 +974,11 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                     </div>
                   </div>
 
-                  <div className="space-y-6">
-                    <div className="rounded-xl p-6 border app-border app-card">
-                      <h3 className="font-bold app-text mb-4">System Information</h3>
+                  <div className="space-y-1 md:space-y-3">
+                    <div className="rounded-xl md:p-4 p-2 border app-border app-card">
+                      <h3 className="font-bold app-text md:mb-4 mb-2">System Information</h3>
 
-                      <div className="space-y-3">
+                      <div className="md:space-y-3 space-y-1">
                         {[
                           { label: "User ID", raw: deal.agent.user?.id, value: deal.agent.user?.id?.slice(0, 8) + "..." },
                           { label: "System Role", raw: deal.agent.user?.systemRole, value: deal.agent.user?.systemRole },
@@ -991,31 +988,31 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                           <div key={item.label} className="flex items-center justify-between group">
                             <span className="text-sm app-muted">{item.label}</span>
 
-                            <button
+                            <Button
                               onClick={() => copyToClipboard(item.raw ?? item.value, item.label)}
-                              className="font-medium app-text hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1"
+                              className="font-medium btn-text app-text hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex items-center gap-1"
                               title="Copy"
                             >
                               {item.value}
                               <Copy className="w-3 h-3 opacity-0 group-hover:opacity-100 app-text" />
-                            </button>
+                            </Button>
                           </div>
                         ))}
                       </div>
                     </div>
 
                     {/* Quick documents access here too */}
-                    <div className="rounded-xl p-6 border app-border app-card">
+                    <div className="rounded-xl p-2 md:p-4 border app-border app-card">
                       <h3 className="font-bold app-text mb-3">Agent Documents</h3>
                       <div className="flex items-center justify-between">
                         <span className="text-sm app-muted">Deal Documents</span>
-                        <button
+                        <Button
                           type="button"
                           onClick={() => setActiveTab("documents")}
-                          className="text-sm px-3 py-1.5 rounded-xl bg-linear-to-r from-blue-500 to-cyan-500 text-white shadow"
+                          className="text-sm px-3 py-1.5 rounded-xl btn-text bg-linear-to-r from-blue-500 to-cyan-500 text-white shadow"
                         >
                           View ({documents.length})
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -1041,20 +1038,20 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
       open={open}
       onClose={onClose}
       size="2xl"
-      showCloseIcon={false}
+      showCloseIcon={true}
       overlayClassName="bg-black/50 backdrop-blur-sm"
       bodyClassName="p-0 md:h-[650px] h-[600px] rounded-[6px] md:rounded-[10px] app-card"
       className="animate-fade-in "
     >
       <div className="flex flex-col h-full">
-        {/* Tab Navigation */}
+       
         <div className="flex items-center justify-between p-6 border-b app-border app-card sticky top-0 z-100">
           <div className="flex items-center gap-2 overflow-x-auto">
             {tabs.map((tab) => (
-              <button
+              <Button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2 font-medium btn-text rounded-xl transition-all duration-300 whitespace-nowrap ${
+                className={`flex items-center gap-2 md:px-4 px-2 md:py-2 py-1 font-medium btn-text rounded-xl transition-all duration-300 whitespace-nowrap ${
                   activeTab === tab.id
                     ? "bg-linear-to-r from-blue-500 to-cyan-500 text-white shadow-lg"
                     : "app-text"
@@ -1074,21 +1071,16 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                     {documents.length}
                   </span>
                 )}
-              </button>
+              </Button>
             ))}
           </div>
 
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors"
-          >
-            <X className="w-5 h-5 text-slate-500" />
-          </button>
+         
         </div>
 
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto">
-          <div className="p-6">{renderTabContent()}</div>
+          <div className="md:p-6 p-3">{renderTabContent()}</div>
         </div>
       </div>
 

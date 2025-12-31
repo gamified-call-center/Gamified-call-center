@@ -18,8 +18,10 @@ import {
   Briefcase,
   Check,
   CheckCircle,
+  ClipboardList,
   Download,
   Eye,
+  FileText,
   Layers,
   LayoutGrid,
   Pencil,
@@ -43,6 +45,7 @@ import TableToolbar from "@/commonComponents/TableSearchBar";
 import Loader from "@/commonComponents/Loader";
 import Pagination from "@/commonComponents/Pagination";
 import { cn } from "@/Utils/common/cn";
+import ApplicationsView from "./ApplicationsView";
 
 type Designation = { id: number; name: string; levelOrder: number };
 type Option = { label: string; value: string };
@@ -109,7 +112,7 @@ type ViewMode = "compact" | "cards";
 
 export default function DesignationsPermissionsPage() {
   const [designations, setDesignations] = useState<any[]>([]);
-  const [tab, setTab] = useState<"users" | "designations">("users");
+  const [tab, setTab] = useState<"users" | "designations" |"applications">("users");
   const [view, setView] = useState<ViewMode>("compact");
 
   const [loading, setLoading] = useState(false);
@@ -407,7 +410,7 @@ export default function DesignationsPermissionsPage() {
     <Button
       onClick={onClick}
       className={[
-        "flex items-center gap-2 md:px-4 px-2 md:py-2 py-1 rounded-xl border transition-all text-[12px] md:text-[14px] font-medium",
+        "flex items-center gap-2 md:px-4 px-2 md:py-2 py-1 rounded-xl border transition-all text-[12px] md:text-[14px] font-semibold",
         active ? "app-btn-active" : "app-btn hover:shadow-sm",
       ].join(" ")}
       type="button"
@@ -693,7 +696,7 @@ export default function DesignationsPermissionsPage() {
     <div className="md:p-6 p-2 md:space-y-6 space-y-3 app-card min-h-screen">
       <div className="app-card rounded-2xl shadow-lg border app-border p-5">
         <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b app-border">
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 md:flex-nowrap flex-wrap">
             <TabButton
               active={tab === "users"}
               icon={<Users size={16} />}
@@ -706,9 +709,20 @@ export default function DesignationsPermissionsPage() {
               label="Designations"
               onClick={() => setTab("designations")}
             />
+             <TabButton
+              active={tab === "applications"}
+             icon={<ClipboardList size={16} />}
+              label="Applications"
+              onClick={() => setTab("applications")}
+            />
           </div>
         </div>
-
+     {tab === "applications" ? (
+  <ApplicationsView />
+) : (
+  
+  null
+)}
         {tab === "users" ? (
           <div className="md:pt-5 pt-2 md:space-y-4 space-y-2 app-card">
             <div className="rounded-md shadow-2xl md:p-4  p-2 ">

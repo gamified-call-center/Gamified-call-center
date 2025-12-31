@@ -1,6 +1,6 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
-import { Download, Eye, LayoutGrid, Pencil, Rows, Trash2 } from "lucide-react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Download, Eye, FileSpreadsheet, LayoutGrid, Pencil, Rows, Trash2 } from "lucide-react";
 import apiClient from "@/Utils/apiClient";
 import TableToolbar from "@/commonComponents/TableSearchBar";
 import CreateDealModal from "./CreateDealModal.tsx";
@@ -11,6 +11,7 @@ import DealViewModal from "./DealViewModal";
 import Button from "@/commonComponents/Button";
 import Modal from "@/commonComponents/Modal";
 import {DealType} from "../../../../src/Utils/constants/ara/constants"
+import CSVUploadModal from "../AgentsView/CsvUploadModal";
 
 type DealRow = {
   id: string | number;
@@ -169,6 +170,11 @@ const AraDealsView = () => {
       return matchSearch && matchDate;
     });
   }, [items, q, from, to]);
+  const [uploadProgress, setUploadProgress] = useState(0);
+    const [openFileModal, setOpenFileModal] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const dealFileInputRef = useRef<HTMLInputElement | null>(null);
+    const [ isDealsUploading, setIsDealsUploading]=useState(false)
 
  const fetchAgents = async () => {
   setLoading(true);
@@ -238,6 +244,65 @@ const AraDealsView = () => {
     setEditing(deal);
     setModalOpen(true);
   };
+  const handleDealFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  if (!file.name.toLowerCase().endsWith(".csv")) {
+    toast.error("Please upload a valid CSV file");
+    return;
+  }
+
+ setSelectedFile(file);
+};
+
+const uploadDealsCsv = async (file: File) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return apiClient.post(
+    `${apiClient.URLS.deals}/bulk/csv`,
+    formData,
+    true,
+    "file"
+  );
+};
+
+const handleDealsCsvUpload = async () => {
+  if (!selectedFile) {
+    toast.error("Select CSV file to upload");
+    return;
+  }
+
+  setIsDealsUploading(true);
+  setUploadProgress(25);
+
+  try {
+    const res = await uploadDealsCsv(selectedFile);
+    setUploadProgress(100);
+
+    const { created = 0, failed = 0, failures = [], parseErrors = [] } = res.body || {};
+
+    if (failed > 0 || failures.length > 0) {
+      toast.error(`Upload completed with ${failures.length || failed} deal errors`);
+      console.table(failures);
+    }
+
+    if (created > 0 && failures.length === 0) {
+      toast.success(`${created} deals uploaded successfully`);
+    }
+
+    await fetchDeals?.();
+    setOpenFileModal(false);
+  } catch (err) {
+    console.error(err);
+    toast.error("Bulk deals upload failed");
+  } finally {
+    setIsDealsUploading(false);
+    setSelectedFile(null);
+  }
+};
+
   const exportToCSV = () => {
     const headers = [
       "Deal #",
@@ -431,11 +496,19 @@ const AraDealsView = () => {
                 >
                   <Rows className="md:w-4 w-4 md:h-4 h-4" />
                 </Button>
+
               </div>
             </div>
           }
           actionsSlot={
             <>
+             <Button
+                              onClick={() => setOpenFileModal(true)}
+                              className="flex items-center gap-2 rounded-xl md:px-4 px-2 md:py-2 py-1.5 cursor-pointer text-[12px] md:text-sm text-nowrap bg-indigo-600  font-bold text-white hover:bg-indigo-700"
+                            >
+                              <FileSpreadsheet className="md:w-4 w-3 md:h-4 h-3" />
+                              Import CSV
+                            </Button>
               <Button
                 onClick={exportToCSV}
                 className="
@@ -514,26 +587,26 @@ const AraDealsView = () => {
                       <td className="px-4 py-1  font-medium border app-border ">
                         {d.dealNo || i + 1}
                       </td>
-                      <td className="px-4 py-1 border app-border ">
+                      <td className="px-4 py-1 font-medium border app-border ">
                         {d.fullName?.trim() ||
                           `${d.applicantFirstName} ${d.applicantLastName}`}
                       </td>
-                      <td className="px-4 py-1 text-center border app-border ">
+                      <td className="px-4 py-1 text-center  font-medium border app-border ">
                         {d.numberOfApplicants}
                       </td>
-                      <td className="px-4 py-1 border app-border ">
+                      <td className="px-4 py-1 border font-medium app-border ">
                         {d.carrier || "-"}
                       </td>
-                      <td className="px-4 py-1 whitespace-nowrap  border app-border ">
+                      <td className="px-4 py-1 whitespace-nowrap font-medium border app-border ">
                         {formatDateTime(d.closedDate)}
                       </td>
-                      <td className="px-4 py-1 border app-border ">
+                      <td className="px-4 py-1 border app-border font-medium ">
                         {d.agent?.user?.firstName || "-"}
                       </td>
-                      <td className="px-4 py-1 border app-border ">
+                      <td className="px-4 py-1 border app-border font-medium ">
                         {formatDateTime(d.createdAt)}
                       </td>
-                      <td className="px-4 py-1 text-center border app-border ">
+                      <td className="px-4 py-1 text-center border font-medium app-border ">
                         <div className="inline-flex items-center gap-2">
                           <Button
                             className="p-2 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:bg-indigo-500/10 dark:hover:bg-indigo-500/20 transition"
@@ -710,6 +783,19 @@ const AraDealsView = () => {
         initialValues={initialValues}
         onSubmit={handleSubmit}
       />
+      <CSVUploadModal
+  open={openFileModal}
+  onClose={() => {
+    setOpenFileModal(false);
+    setSelectedFile(null);
+  }}
+  selectedFile={selectedFile}
+  onFileSelect={handleDealFileSelect}
+  onUpload={handleDealsCsvUpload}
+  fileInputRef={dealFileInputRef}
+  isLoading={isDealsUploading}
+/>
+
     </div>
   );
 };

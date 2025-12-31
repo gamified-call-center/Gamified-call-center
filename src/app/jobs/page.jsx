@@ -12,4 +12,4 @@ const Jobs= () => {
   );
 };
 
-export default withJobLayout(Jobs);
+export default Jobs;

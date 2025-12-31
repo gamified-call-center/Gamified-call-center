@@ -1,6 +1,7 @@
 import React from "react";
 import Modal from "@/commonComponents/Modal";
 import { FaFileCsv, FaUpload } from "react-icons/fa";
+import Button from "@/commonComponents/Button"
 
 interface CSVUploadModalProps {
   open: boolean;
@@ -34,7 +35,7 @@ export default function CSVUploadModal({
     >
       {isLoading ? (
         <div className="p-8 text-center">
-          <p className="mt-4 label-text text-gray-600 font-medium">
+          <p className="mt-4 label-text app-text font-medium">
             Uploading CSV...
           </p>
         </div>
@@ -46,10 +47,10 @@ export default function CSVUploadModal({
               <FaFileCsv className="text-blue-600 text-lg" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-gray-800">
+              <h3 className="text-base font-bold app-text">
                 Upload CSV
               </h3>
-              <p className="text-xs text-gray-500 font-medium">
+              <p className="text-xs app-muted font-medium">
                 Import data in bulk
               </p>
             </div>
@@ -87,14 +88,14 @@ export default function CSVUploadModal({
 
           {/* Actions */}
           <div className="flex gap-3">
-            <button
+            <Button
               onClick={onClose}
               className="flex-1 py-2 border  font-medium rounded-lg cursor-pointer label-text"
             >
               Cancel
-            </button>
+            </Button>
 
-            <button
+            <Button
               onClick={onUpload}
               disabled={!selectedFile}
               className={`flex-1 py-2 rounded-lg label-text cursor-pointer  flex items-center justify-center gap-2 ${
@@ -105,7 +106,7 @@ export default function CSVUploadModal({
             >
               <FaUpload />
               Upload
-            </button>
+            </Button>
           </div>
         </div>
       )}

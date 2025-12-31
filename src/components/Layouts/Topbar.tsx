@@ -5,6 +5,7 @@ import AppsMenu from "@/commonComponents/AppMenu";
 import AvatarMenu from "@/commonComponents/Avatar";
 import ThemeToggle from "@/commonComponents/ThemeToggle";
 import { useAuthStore } from "@/store/user";
+import { useSession } from "next-auth/react";
 import {
   Bell,
   ShieldCheck,
@@ -14,19 +15,21 @@ import {
   Trash2,
   Dot,
   BellIcon,
+  Check,
 } from "lucide-react";
-import apiclient from "@/Utils/apiClient"
+import apiclient from "@/Utils/apiClient";
 import { useRouter } from "next/navigation";
 import { useAppContextStore } from "@/store/appContext";
 import Button from "@/commonComponents/Button";
+import apiClient from "@/Utils/apiClient";
 
 type NotificationItem = {
   id: string;
   title: string;
   message?: string;
-  time: string;
-  read: boolean;
-  type?: "info" | "success" | "warning" | "danger";
+  isRead: boolean;
+  createdAt: Date;
+  type?: any;
 };
 
 function useOnEscape(handler: () => void, enabled: boolean) {
@@ -50,41 +53,102 @@ export default function Topbar({
   title?: string;
 }) {
   const router = useRouter();
-  const user = useAuthStore((st) => st.user) as any;
+  const session = useSession() as any;
+  const { data } = session;
+  const [user, setUser] = useState<any>(null);
   const name = user?.firstName ?? "Super Admin";
   const role = user?.employee?.designation?.name ?? "Administrator";
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([
-    {
-      id: "n1",
-      title: "New lead assigned",
-      message: "A new lead has been assigned to you in ACA Deals.",
-      time: "2 mins ago",
-      read: false,
-      type: "info",
-    },
-    {
-      id: "n2",
-      title: "Document uploaded",
-      message: "A deal document was uploaded successfully.",
-      time: "1 hour ago",
-      read: false,
-      type: "success",
-    },
-    {
-      id: "n3",
-      title: "Training reminder",
-      message: "Complete ‘Objection Handling’ module today.",
-      time: "Yesterday",
-      read: true,
-      type: "warning",
-    },
+    // {
+    //   id: "n1",
+    //   title: "New lead assigned",
+    //   message: "A new lead has been assigned to you in ACA Deals.",
+    //   time: "2 mins ago",
+    //   read: false,
+    //   type: "info",
+    // },
+    // {
+    //   id: "n2",
+    //   title: "Document uploaded",
+    //   message: "A deal document was uploaded successfully.",
+    //   time: "1 hour ago",
+    //   read: false,
+    //   type: "success",
+    // },
+    // {
+    //   id: "n3",
+    //   title: "Training reminder",
+    //   message: "Complete ‘Objection Handling’ module today.",
+    //   time: "Yesterday",
+    //   read: true,
+    //   type: "warning",
+    // },
   ]);
 
   const unreadCount = useMemo(
-    () => notifications.filter((n) => !n.read).length,
+    () => notifications.filter((n) => !n.isRead).length,
     [notifications]
   );
+  const getNotifications = async () => {
+    if (!user?.id) return;
+    try {
+      const res = await apiClient.get(
+        `${apiClient.URLS.notifications}/${user?.id}`,
+        {}
+      );
+      if (res.status === 200 && res.body) {
+        setNotifications(res.body);
+      }
+    } catch (error) {
+      console.log("error is ", error);
+    }
+  };
+  useEffect(() => {
+    if (session.status === "authenticated") {
+      const currentUser: any = session.data?.user;
+      setUser(currentUser);
+    }
+  }, [session.status, session.data]);
+  useEffect(() => {
+    if (user?.id) {
+      getNotifications();
+    }
+  }, [user]);
+  const markOneRead = async (id: string) => {
+    try {
+      const res = await apiClient.patch(
+        `${apiClient.URLS.notifications}/read`,
+        { ids: [id] },
+        true
+      );
+      if (res.status === 200) {
+        setNotifications((prev) =>
+          prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+        );
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const markAllRead = async () => {
+    const ids = notifications.filter((n) => !n.isRead).map((n) => n.id);
+    if (ids.length === 0) return;
+
+    try {
+      const res = await apiClient.patch(
+        `${apiClient.URLS.notifications}/read`,
+        { ids },
+        true
+      );
+      if (res.status === 200) {
+        setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const panelRef = useRef<HTMLDivElement | null>(null);
 
@@ -113,17 +177,7 @@ export default function Topbar({
     };
   }, [notifOpen]);
 
-  const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
-
   const clearAll = () => setNotifications([]);
-
-  const markOneRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
-  };
 
   const removeOne = (id: string) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id));
@@ -156,9 +210,7 @@ export default function Topbar({
 
           <div className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5 text-black/70" />
-            <div className="text-[15px]  font-bold text-[#111827]">
-              {title}
-            </div>
+            <div className="text-[15px]  font-bold text-[#111827]">{title}</div>
           </div>
         </div>
 
@@ -180,11 +232,9 @@ export default function Topbar({
           >
             <BellIcon className="h-6 w-6 z-100 dark:text-black" />
             {unreadCount > 0 && (
-              <>
-                <span className="absolute top-0 right-1 min-w-[18px] font-medium h-[18px] px-1 rounded-full bg-[#1d2027] text-white text-[10px] grid place-items-center">
-                  {unreadCount > 99 ? "99+" : unreadCount}
-                </span>
-              </>
+              <span className="absolute top-0 right-1 min-w-[18px] font-medium h-[18px] px-1 rounded-full bg-[#1d2027] text-white text-[10px] grid place-items-center">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
             )}
           </button>
           <div className="hidden sm:block">
@@ -217,21 +267,23 @@ export default function Topbar({
               </div>
 
               <div className="flex items-center gap-2">
-                <Button
-                  onClick={markAllRead}
-                  className="h-9 px-3 rounded-lg text-[12px]  font-medium bg-black/5 hover:bg-black/10 text-[#111827] flex items-center gap-2"
-                  type="button"
-                >
-                  <CheckCheck className="h-4 w-4" />
-                  Mark all read
-                </Button>
-                <Button
+                {notifications?.length > 0 && (
+                  <Button
+                    onClick={markAllRead}
+                    className="h-9 px-3 rounded-lg text-[12px]  font-medium bg-black/5 hover:bg-black/10 text-[#111827] flex items-center gap-2"
+                    type="button"
+                  >
+                    <CheckCheck className="h-4 w-4" />
+                    Mark all read
+                  </Button>
+                )}
+                {/* <Button
                   onClick={() => setNotifOpen(false)}
                   className="h-9 w-9 rounded-lg hover:bg-black/5 grid place-items-center"
                   aria-label="Close notifications"
                 >
                   <X className="h-5 w-5 text-black/70" />
-                </Button>
+                </Button> */}
               </div>
             </div>
 
@@ -239,14 +291,14 @@ export default function Topbar({
               <div className="text-[12px] text-black/60">
                 Latest updates & alerts
               </div>
-              <Button
+              {/* <Button
                 onClick={clearAll}
                 className="h-9 px-3 rounded-lg text-[12px]  font-medium bg-red-50 hover:bg-red-100 text-red-700 flex items-center gap-2"
                 type="button"
               >
                 <Trash2 className="h-4 w-4" />
                 Clear all
-              </Button>
+              </Button> */}
             </div>
 
             <div className="flex-1 overflow-auto">
@@ -261,11 +313,12 @@ export default function Topbar({
                 </div>
               ) : (
                 <ul className="divide-y divide-black/10">
-                  {notifications.map((n) => (
+                  {notifications?.map((n) => (
                     <li
-                      key={n.id}
-                      className={`p-4 hover:bg-black/[0.02] transition ${n.read ? "opacity-80" : "bg-orange-50/30"
-                        }`}
+                      key={n?.id}
+                      className={`p-4 hover:bg-black/[0.02] transition ${
+                        n?.isRead ? "opacity-80" : "bg-orange-50/30"
+                      }`}
                     >
                       <div className="flex items-start gap-3">
                         <Dot
@@ -276,35 +329,37 @@ export default function Topbar({
                         <div className="flex-1">
                           <div className="flex items-start justify-between gap-3">
                             <div className="text-[13px]  font-bold text-[#111827]">
-                              {n.title}
+                              {n?.title}
                             </div>
                             <div className="text-[11px] text-black/50 whitespace-nowrap">
-                              {n.time}
+                              {new Date(n?.createdAt).toLocaleString("en-IN", {
+                                timeZone: "+05:30",
+                              })}
                             </div>
                           </div>
-                          {n.message && (
+                          {n?.message && (
                             <div className="text-[12px] text-black/60 mt-1">
-                              {n.message}
+                              {n?.message}
                             </div>
                           )}
 
                           <div className="mt-3 flex items-center gap-2">
-                            {!n.read && (
+                            {!n?.isRead && (
                               <Button
                                 onClick={() => markOneRead(n.id)}
-                                className="h-8 px-3 rounded-lg text-[12px]  font-medium bg-black/5 hover:bg-black/10 text-[#111827]"
-                                type="button"
+                                className="mt-3 h-8 px-3 rounded-lg text-[12px] font-bold bg-black/5 hover:bg-black/10 flex items-center gap-2"
                               >
+                                <Check size={14} />
                                 Mark read
                               </Button>
                             )}
-                            <Button
+                            {/* <Button
                               onClick={() => removeOne(n.id)}
                               className="h-8 px-3 rounded-lg text-[12px]  font-medium bg-black/5 hover:bg-black/10 text-[#111827]"
                               type="button"
                             >
                               Remove
-                            </Button>
+                            </Button> */}
                           </div>
                         </div>
                       </div>

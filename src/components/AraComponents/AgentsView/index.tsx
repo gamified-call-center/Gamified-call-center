@@ -226,6 +226,7 @@ export default function AcaAgentsView() {
   });
   const [updating, setUpdating] = useState(false);
 
+
   const fetchAgents = async () => {
     setLoading(true);
     try {
@@ -253,10 +254,13 @@ export default function AcaAgentsView() {
       setLoading(false);
     }
   };
+ 
+ useEffect(() => {
+  
+  fetchAgents();
+  
+}, [page]);
 
-  useEffect(() => {
-    fetchAgents();
-  }, [page, q]);
 
   const openCreate = () => {
     setEditing(null);
@@ -863,7 +867,7 @@ const PasswordToggle = () => (
                     </td>
                   </tr>
                 ) : (
-                  sortedItems.map((a) => (
+                  sortedItems?.map((a) => (
                     <tr key={a.id} className="border-t app-text">
                       <td className="px-3 md:py-1 py-1  font-medium  text-nowrap border app-border">
                         {a.firstName}

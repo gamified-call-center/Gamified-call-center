@@ -86,42 +86,47 @@ export default function TableToolbar({
         
       </div>
       {dateRange ? (
-          <div className="flex items-center gap-2 rounded-xl px-3 py-2 border dark:app-border app-input">
-            {dateRange.label ? (
-              <span className="text-xs app-muted">{dateRange.label}</span>
-            ) : null}
+  <div className="flex items-center gap-2 rounded-xl px-3 py-2 border dark:app-border app-input">
+    {dateRange.label && <span className="text-xs app-muted">{dateRange.label}</span>}
 
-            <input
-              type="date"
-              value={dateRange.value.from}
-              min={dateRange.min}
-              max={dateRange.max}
-              onChange={(e) =>
-                dateRange.onChange({
-                  ...dateRange.value,
-                  from: e.target.value,
-                })
-              }
-              className="bg-transparent text-sm outline-none app-text"
-            />
+    <input
+      type="date"
+      value={dateRange.value.from}
+      min={dateRange.min}
+      max={dateRange.max}
+      onChange={(e) =>
+        dateRange.onChange({ ...dateRange.value, from: e.target.value })
+      }
+      className="bg-transparent text-sm outline-none app-text"
+    />
 
-            <span className="app-muted text-sm">to</span>
+    <span className="app-muted text-sm">to</span>
 
-            <input
-              type="date"
-              value={dateRange.value.to}
-              min={dateRange.min}
-              max={dateRange.max}
-              onChange={(e) =>
-                dateRange.onChange({
-                  ...dateRange.value,
-                  to: e.target.value,
-                })
-              }
-              className="bg-transparent text-sm outline-none app-text app-muted"
-            />
-          </div>
-        ) : null}
+    <input
+      type="date"
+      value={dateRange.value.to}
+      min={dateRange.min}
+      max={dateRange.max}
+      onChange={(e) =>
+        dateRange.onChange({ ...dateRange.value, to: e.target.value })
+      }
+      className="bg-transparent text-sm outline-none app-text app-muted"
+    />
+
+    {/* Clear button */}
+    {(dateRange.value.from || dateRange.value.to) && (
+      <button
+        type="button"
+        onClick={() => dateRange.onChange({ from: "", to: "" })}
+        className="text-sm px-2 py-1 app-surface app-text rounded transition"
+        title="Clear Dates"
+      >
+        Clear
+      </button>
+    )}
+  </div>
+) : null}
+
 
         {/* Filters */}
         {filtersSlot ? (
