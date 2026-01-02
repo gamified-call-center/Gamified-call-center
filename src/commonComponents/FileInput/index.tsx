@@ -106,6 +106,8 @@ const FileInput = ({
     if (inputRef.current) inputRef.current.value = "";
     onFileChange?.("");
   };
+  const isImage = imagePreview?.match(/\.(jpeg|jpg|png|webp)$/i);
+
 
   return (
     <div
@@ -161,30 +163,28 @@ const FileInput = ({
         )}
       </div>
 
-      {/* Preview Box */}
-      {imagePreview && (
-        <div className="mt-4 flex items-center gap-4">
-          <div
-            className={twMerge(
-              "relative w-24 h-24 rounded-xl overflow-hidden border",
-              "border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800"
-            )}
-          >
-           <Image src={imagePreview} alt="File preview" fill className="object-cover" />
-
-            <button
-              onClick={handleDeleteFile}
-              disabled={uploading}
-              className={twMerge(
-                "absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center transition",
-                "bg-red-500 hover:bg-red-600 text-white text-xs shadow-md"
-              )}
-            >
-              ✕
-            </button>
-          </div>
+      
+     {imagePreview && (
+  <div className="mt-4 flex items-center gap-4">
+    <div className="relative w-24 h-24 rounded-xl overflow-hidden border border-gray-300">
+      {isImage ? (
+        <Image src={imagePreview} alt="File preview" fill className="object-cover" />
+      ) : (
+        <div className="w-24 h-24 flex items-center justify-center bg-gray-200 text-gray-700 font-semibold">
+          PDF
         </div>
       )}
+      <button
+        onClick={handleDeleteFile}
+        disabled={uploading}
+        className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-500 text-white text-xs shadow-md"
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+)}
+
 
       {errorMessage && (
         <p className={twMerge("text-xs text-red-500 mt-2", errorTextClass)}>

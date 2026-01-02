@@ -9,6 +9,7 @@ import {
   Calendar,
   CheckCircle,
   ChevronRight,
+  DollarSign,
   Download,
   Eye,
   EyeOff,
@@ -27,6 +28,7 @@ import {
   Pencil,
   Phone,
   Plus,
+  Share2,
   Shield,
   Star,
   Trash2,
@@ -68,6 +70,9 @@ type AgentProfile = {
   ffmUsername?: string | null;
   apps?: string[];
   isActive?: any;
+  ssn?: string | null;
+  forwarding: string | null;
+  payStructure: number;
 };
 
 type Address = {
@@ -142,7 +147,6 @@ function normalizeSSN(v: string) {
 }
 
 export default function UserProfileView() {
-
   const { data: session } = useSession();
   const userId = session?.user?.id;
 
@@ -321,6 +325,7 @@ export default function UserProfileView() {
       agentProfile: {
         ...(data?.agentProfile?.id ? { id: data.agentProfile.id } : {}),
         npn: v.npn?.trim() || null,
+        ssn: v.ssn?.trim() || null,
         yearsOfExperience: Number(v.yearsOfExperience ?? 0),
         ahipCertified: !!v.ahipCertified,
         ahipProofUrl: v.ahipProofUrl?.trim() || null,
@@ -339,6 +344,8 @@ export default function UserProfileView() {
         myMfgPassword: v.myMfgPassword?.trim() || null,
         ffmUsername: v.ffmUsername?.trim() || null,
         apps: v.apps?.length ? v.apps : [],
+        forwarding: v.forwarding || null,
+        payStructure: Number(v.payStructure ?? 0),
       },
     };
 
@@ -525,6 +532,7 @@ export default function UserProfileView() {
     const init: AgentProfile = {
       id: a?.id,
       npn: a?.npn ?? null,
+      ssn: a?.ssn ?? null,
       yearsOfExperience: a?.yearsOfExperience ?? 0,
       ahipCertified: a?.ahipCertified ?? false,
       ahipProofUrl: a?.ahipProofUrl ?? null,
@@ -541,6 +549,8 @@ export default function UserProfileView() {
       myMfgPassword: a?.myMfgPassword ?? null,
       ffmUsername: a?.ffmUsername ?? null,
       apps: a?.apps ?? [],
+      forwarding: a?.forwarding ?? null,
+      payStructure: a?.payStructure ?? 0,
     };
 
     return (
@@ -564,6 +574,22 @@ export default function UserProfileView() {
               label="NPN"
               value={a?.npn ?? "-"}
             />
+            <KV
+              icon={<Lock className="w-4 h-4" />}
+              label="SSN"
+              value={a?.ssn ?? "-"}
+            />
+            <KV
+              icon={<Share2 className="w-4 h-4" />}
+              label="Forwarding"
+              value={a?.forwarding ?? "-"}
+            />
+            <KV
+              icon={<DollarSign className="w-4 h-4" />}
+              label="Pay Structure"
+              value={a?.payStructure ?? 0}
+            />
+
             <KV
               icon={<TrendingUp className="w-4 h-4" />}
               label="Experience"
@@ -717,15 +743,15 @@ export default function UserProfileView() {
 
       const res = v?.id
         ? await apiClient.patch(
-          `${apiClient.URLS.user}/${userId}/bank-accounts/${v.id}`,
-          payload,
-          true
-        )
+            `${apiClient.URLS.user}/${userId}/bank-accounts/${v.id}`,
+            payload,
+            true
+          )
         : await apiClient.post(
-          `${apiClient.URLS.user}/${userId}/bank-accounts`,
-          payload,
-          true
-        );
+            `${apiClient.URLS.user}/${userId}/bank-accounts`,
+            payload,
+            true
+          );
 
       if (res?.status === 200 || res?.status === 201) {
         toast.success(v?.id ? "Bank updated" : "Bank added");
@@ -1188,16 +1214,18 @@ export default function UserProfileView() {
                     <Button
                       key={t.id}
                       onClick={() => setActiveTab(t.id)}
-                      className={`w-full flex items-center gap-3 font-medium px-4 py-3 rounded-xl transition-all duration-300 ${activeTab === t.id
-                        ? "bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-lg"
-                        : " app-text"
-                        }`}
+                      className={`w-full flex items-center gap-3 font-medium px-4 py-3 rounded-xl transition-all duration-300 ${
+                        activeTab === t.id
+                          ? "bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-lg"
+                          : " app-text"
+                      }`}
                     >
                       {t.icon}
                       <span className=" font-medium">{t.label}</span>
                       <ChevronRight
-                        className={`w-4 h-4 ml-auto transition-transform ${activeTab === t.id ? "rotate-90" : ""
-                          }`}
+                        className={`w-4 h-4 ml-auto transition-transform ${
+                          activeTab === t.id ? "rotate-90" : ""
+                        }`}
                       />
                     </Button>
                   ))}
@@ -1331,18 +1359,18 @@ function ProfileModal({
         ? "Edit Profile"
         : "Add Profile"
       : type === "bank"
-        ? mode === "edit"
-          ? "Edit Bank Account"
-          : "Add Bank Account"
-        : type === "professional"
-          ? mode === "edit"
-            ? "Edit Professional"
-            : "Add Professional"
-          : type === "address"
-            ? mode === "edit"
-              ? "Edit Address"
-              : "Add Address"
-            : "Change Password";
+      ? mode === "edit"
+        ? "Edit Bank Account"
+        : "Add Bank Account"
+      : type === "professional"
+      ? mode === "edit"
+        ? "Edit Professional"
+        : "Add Professional"
+      : type === "address"
+      ? mode === "edit"
+        ? "Edit Address"
+        : "Add Address"
+      : "Change Password";
 
   const validate = () => {
     if (type === "profile") {
@@ -1626,6 +1654,30 @@ function ProfileModal({
                 value={values.npn || ""}
                 onChange={(e: any) => set("npn", e.target.value)}
                 placeholder="NPN"
+              />
+            </Field>
+            <Field label="SSN">
+              <TextInput
+                value={values.ssn || ""}
+                onChange={(e: any) => set("ssn", e.target.value)}
+                placeholder="SSN"
+              />
+            </Field>
+            <Field label="forwarding">
+              <TextInput
+                value={values.forwarding || ""}
+                onChange={(e: any) => set("forwarding", e.target.value)}
+                placeholder="forwarding"
+              />
+            </Field>
+            <Field label="pay Structure">
+              <TextInput
+                type="number"
+                value={values.payStructure ?? 0}
+                onChange={(e: any) =>
+                  set("payStructure", Number(e.target.value))
+                }
+                placeholder="payStructure"
               />
             </Field>
 
@@ -1934,7 +1986,7 @@ function ToggleInline({
             "w-11 h-6 rounded-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all",
             "bg-gray-300 dark:bg-gray-700", // ✅ Unchecked gray based on theme
             checked &&
-            "peer-checked:bg-emerald-500 peer-checked:after:translate-x-full"
+              "peer-checked:bg-emerald-500 peer-checked:after:translate-x-full"
           )}
         />
       </label>

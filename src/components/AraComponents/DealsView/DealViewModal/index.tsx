@@ -106,17 +106,23 @@ function normalizeDocs(docs: any): string[] {
   return [];
 }
 
-function downloadFile(url: string) {
-  // Most S3/signed URLs will download/open fine with an <a>. If download attr is blocked by CORS,
-  // it will still open in a new tab and user can save.
-  const a = document.createElement("a");
-  a.href = url;
-  a.target = "_blank";
-  a.rel = "noreferrer";
-  a.download = getFileNameFromUrl(url);
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
+async function downloadFile(url: string) {
+  try {
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = getFileNameFromUrl(url); // keeps original filename
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(blobUrl);
+  } catch (e) {
+    console.error("Download failed", e);
+  }
 }
 
 type PreviewState = { open: boolean; url: string; index: number } | null;
@@ -448,20 +454,7 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                           alt={`Document ${idx + 1}`}
                           className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform"
                         />
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center justify-center p-4">
-                          <FileText className="w-10 h-10 text-slate-400 mb-2" />
-                          <div className="text-xs app-muted text-center line-clamp-2">
-                            {getFileNameFromUrl(url)}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </Button>
-
-                  {/* Overlay actions */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-black/35 flex items-center justify-center gap-3">
+                        <div className="absolute top-0 left-0   flex items-center justify-center gap-3">
                     <Button
                       type="button"
                       onClick={() => openPreview(url, idx)}
@@ -480,6 +473,20 @@ const DealViewModal = ({ open, onClose, deal }: DealViewModalProps) => {
                       <Download className="w-5 h-5 text-slate-700" />
                     </Button>
                   </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center p-4">
+                          <FileText className="w-10 h-10 text-slate-400 mb-2" />
+                          <div className="text-xs app-muted text-center line-clamp-2">
+                            {getFileNameFromUrl(url)}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </Button>
+
+                  {/* Overlay actions */}
+                  
 
                   {/* Footer name */}
                   <div className="md:p-3 p-1 border-t app-border">

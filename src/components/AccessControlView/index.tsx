@@ -200,7 +200,7 @@ export default function DesignationsPermissionsPage() {
     try {
       const res: any = await apiClient.get(
         apiClient.URLS.user,
-        { page, limit: LIMIT },
+        { page, limit: LIMIT ,search: tableSearch || undefined,},
         true
       );
       const body = res?.body ?? res;
@@ -235,11 +235,14 @@ export default function DesignationsPermissionsPage() {
       setLoading(false);
     }
   };
+  useEffect(()=>{
+      fetchDesignations();
+  },[])
 
   useEffect(() => {
-    fetchDesignations();
+  
     fetchUsers();
-  }, []);
+  }, [page,tableSearch]);
   const filteredDesignations = useMemo(() => {
     const q = tableSearch.toLowerCase().trim();
     if (!q) return designations;
@@ -419,21 +422,31 @@ export default function DesignationsPermissionsPage() {
       {label}
     </Button>
   );
-  const filteredUsers = useMemo(() => {
-    const q = tableSearch.toLowerCase().trim();
-    if (!q) return users;
+  const displayedUsers = users;
 
-    return users.filter((u) => {
-      const name = `${u.firstName || ""} ${u.lastName || ""}`.toLowerCase();
-      return (
-        name.includes(q) ||
-        (u.email || "").toLowerCase().includes(q) ||
-        (u.phone || "").toLowerCase().includes(q) ||
-        (u.employee?.designation?.name || "").toLowerCase().includes(q) ||
-        (u.systemRole || "").toLowerCase().includes(q)
-      );
-    });
-  }, [users, tableSearch]);
+  // const filteredUsers = useMemo(() => {
+  //   const q = tableSearch.toLowerCase().trim();
+  //   if (!q) return users;
+
+  //   return users.filter((u) => {
+  //     const name = `${u.firstName || ""} ${u.lastName || ""}`.toLowerCase();
+  //     return (
+  //       name.includes(q) ||
+  //       (u.email || "").toLowerCase().includes(q) ||
+  //       (u.phone || "").toLowerCase().includes(q) ||
+  //       (u.employee?.designation?.name || "").toLowerCase().includes(q) ||
+  //       (u.systemRole || "").toLowerCase().includes(q)
+  //     );
+  //   });
+  // }, [users, tableSearch]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+const toggleSelect = (id: string, checked: boolean) => {
+  setSelectedIds(prev =>
+    checked ? [...prev, id] : prev.filter(x => x !== id)
+  );
+};
+
   const resetUserWizard = () => {
     setStep(1);
     setIsAgent(false);
@@ -669,6 +682,26 @@ export default function DesignationsPermissionsPage() {
       setSavingUser(false);
     }
   };
+  const hardDeleteSelected = async () => {
+  if (selectedIds.length === 0) return;
+
+  try {
+    const res = await apiClient.delete(
+      `${apiClient.URLS.user}/bulk/hard`,
+      { userIds: selectedIds },
+      true
+    );
+
+    // Remove from UI
+    setUsers(prev => prev.filter(u => !selectedIds.includes(u.id)));
+    setSelectedIds([]);
+    await fetchUsers()
+
+  } catch (err: any) {
+    console.error("Bulk delete failed", err);
+  }
+};
+
 
   const deactivateUser = async (u: UserEntity) => {
     if (!u) return;
@@ -729,7 +762,10 @@ export default function DesignationsPermissionsPage() {
               <TableToolbar
                 search={{
                   value: tableSearch,
-                  onChange: setTableSearch,
+                   onChange: (val) => {
+       setTableSearch(val); 
+      setPage(1);          
+    },
                   placeholder:
                     "Search users by name, email, phone, role, designation...",
                   widthClassName: "min-w-full  rounded-xl",
@@ -785,8 +821,10 @@ export default function DesignationsPermissionsPage() {
                 }
               />
             </div>
+           
 
-            {filteredUsers.length === 0 ? (
+
+            {displayedUsers.length === 0 ? (
               <div className="py-12 text-center label-text font-medium app-text">
                 No users found
               </div>
@@ -794,7 +832,7 @@ export default function DesignationsPermissionsPage() {
               <>
                 {view === "cards" && (
                   <div className="grid lg:grid-cols-3 md:grid-cols-2 px-3 grid-cols-1 gap-3">
-                    {filteredUsers.map((u) => (
+                    {displayedUsers.map((u) => (
                       <div
                         key={u.id}
                         className="app-card rounded-2xl border app-border p-4 md:p-5 hover:shadow-xl transition-all duration-300 hover:-translate-y-[2px]"
@@ -899,6 +937,7 @@ export default function DesignationsPermissionsPage() {
                     <table className="min-w-full w-full text-sm app-text border-collapse">
                       <thead className="app-table-head">
                         <tr>
+                          
                           <th className="px-4 py-1 text-left font-bold border app-border">
                             Name
                           </th>
@@ -924,7 +963,7 @@ export default function DesignationsPermissionsPage() {
                       </thead>
 
                       <tbody>
-                        {filteredUsers.length === 0 ? (
+                        {displayedUsers.length === 0 ? (
                           <tr>
                             <td
                               colSpan={7}
@@ -934,8 +973,9 @@ export default function DesignationsPermissionsPage() {
                             </td>
                           </tr>
                         ) : (
-                          filteredUsers.map((u) => (
+                          displayedUsers.map((u) => (
                             <tr key={u.id} className="border-t app-row-hover">
+                               
                               <td className="px-4 py-0.5 border app-border font-medium text-nowrap">
                                 {u.firstName} {u.lastName}
                               </td>
@@ -1026,15 +1066,16 @@ export default function DesignationsPermissionsPage() {
                 )}
               </>
             )}
-            <div className="">
+            {totalPages>1 &&  <div className="">
               <Pagination
                 page={page}
                 totalPages={totalPages}
-                totalItems={filteredUsers.length}
+                totalItems={displayedUsers.length}
                 limit={LIMIT}
                 onPageChange={setPage}
               />
-            </div>
+            </div> }
+           
           </div>
         ) : null}
 
@@ -1366,15 +1407,7 @@ export default function DesignationsPermissionsPage() {
                 )}
               </div>
             </div>
-            <div className="">
-              <Pagination
-                page={page}
-                totalPages={totalPages}
-                totalItems={filteredDesignations.length}
-                limit={LIMIT}
-                onPageChange={setPage}
-              />
-            </div>
+            
           </div>
         ) : null}
       </div>

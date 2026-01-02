@@ -42,7 +42,9 @@ export default function ApplicationsView() {
     try {
       const res = await apiClient.get(
         `${apiClient.URLS.adminapplications}`,
-        { page, limit: LIMIT },
+        { page, limit: LIMIT,search: tableSearch?.trim() || undefined,
+        from: from ? new Date(from).toISOString() : undefined,
+        to: to ? new Date(to).toISOString() : undefined, },
         true
       );
       const data = Array.isArray(res?.body.data)
@@ -63,7 +65,7 @@ export default function ApplicationsView() {
 
   useEffect(() => {
     fetchApplications();
-  }, []);
+  }, [page,tableSearch,from,to]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [allSelected, setAllSelected] = useState(false);
 
@@ -121,22 +123,8 @@ export default function ApplicationsView() {
     );
   }, [apps]);
 
-  const filtered = useMemo(() => {
-    return sorted.filter((a) => {
-      const searchMatch =
-        tableSearch === "" ||
-        [a.firstName, a.lastName, a.email, a.phoneNumber]
-          .join(" ")
-          .toLowerCase()
-          .includes(tableSearch.toLowerCase());
+ const filtered = apps;
 
-      const dateMatch =
-        (!from || new Date(a.createdAt) >= new Date(from)) &&
-        (!to || new Date(a.createdAt) <= new Date(to));
-
-      return searchMatch && dateMatch;
-    });
-  }, [sorted, tableSearch, from, to]);
   const totalPages = Math.ceil(total / LIMIT);
 
   if (loading) {
@@ -407,7 +395,7 @@ export default function ApplicationsView() {
           )}
         </div>
       )}
-      <div className="">
+      {totalPages>1&& <div className="">
         <Pagination
           page={page}
           totalPages={totalPages}
@@ -415,7 +403,7 @@ export default function ApplicationsView() {
           limit={LIMIT}
           onPageChange={setPage}
         />
-      </div>
+      </div>}
       {confirmdeleteOpen && (
         <Modal
           open={confirmdeleteOpen}

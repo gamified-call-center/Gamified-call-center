@@ -37,7 +37,7 @@ type DealRow = {
   closedDate: any;
   createdAt: string;
   coverageTypes?: string[];
-  ffm?: boolean;
+  ffm?: string;
   typeOfWork?: string;
   monthlyIncome?: number;
   documentsNeeded?: string;
@@ -128,7 +128,9 @@ const AraDealsView = () => {
     try {
       const res: any = await apiClient.get(
         apiClient.URLS.deals,
-        { page, limit: LIMIT },
+        { page, limit: LIMIT, search: q || undefined, 
+        from: from || undefined,
+        to: to || undefined, },
         true
       );
 
@@ -222,7 +224,7 @@ const AraDealsView = () => {
   // refetch whenever page changes
   useEffect(() => {
     fetchDeals();
-  }, [page]);
+  }, [page, q, from, to]);
 
   useEffect(() => {
     setPage(1);
@@ -350,7 +352,7 @@ const handleDealsCsvUpload = async () => {
 
       numberOfApplicants: String(editing.numberOfApplicants ?? ""),
 
-      ffm: editing?.ffm ?? false,
+      ffm: String(editing.ffm)??"",
 
       career: editing.carrier ?? "",
       typeOfWork: editing.typeOfWork ?? "",
@@ -572,7 +574,7 @@ const handleDealsCsvUpload = async () => {
               </thead>
 
               <tbody>
-                {filteredItems.length === 0 ? (
+                {items.length === 0 ? (
                   <tr>
                     <td
                       colSpan={8}
@@ -582,7 +584,7 @@ const handleDealsCsvUpload = async () => {
                     </td>
                   </tr>
                 ) : (
-                  filteredItems.map((d, i) => (
+                  items.map((d, i) => (
                     <tr key={d.id} className="app-row-hover  transition-colors">
                       <td className="px-4 py-1  font-medium border app-border ">
                         {d.dealNo || i + 1}
@@ -644,7 +646,7 @@ const handleDealsCsvUpload = async () => {
         )}
         {view === "cards" && (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 md:gap-4 gap-2 px-1">
-            {filteredItems.map((d) => (
+            {items.map((d) => (
               <div
                 key={d.id}
                 className="app-card border app-border rounded-2xl shadow-md md:p-4 p-2 flex flex-col md:gap-2 gap-1 hover:shadow-lg transition"
@@ -715,7 +717,24 @@ const handleDealsCsvUpload = async () => {
             ))}
           </div>
         )}
-        {confirmOpen && (
+       
+
+        {totalPages>1 && <div className="">
+          <Pagination
+            page={page}
+            totalPages={totalPages}
+            totalItems={items.length}
+            limit={LIMIT}
+            onPageChange={setPage}
+          />
+        </div>}
+      </div>
+      <DealViewModal
+        open={viewOpen}
+        onClose={() => setViewOpen(false)}
+        deal={selectedDeal}
+      />
+       {confirmOpen && (
           <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)}>
             <div className="app-card w-full py-2 rounded-md">
               <div className="absolute top-0 left-0 w-full h-1 bg-rose-500"></div>
@@ -758,22 +777,6 @@ const handleDealsCsvUpload = async () => {
             </div>
           </Modal>
         )}
-
-        <div className="">
-          <Pagination
-            page={page}
-            totalPages={totalPages}
-            totalItems={items.length}
-            limit={LIMIT}
-            onPageChange={setPage}
-          />
-        </div>
-      </div>
-      <DealViewModal
-        open={viewOpen}
-        onClose={() => setViewOpen(false)}
-        deal={selectedDeal}
-      />
 
       <CreateDealModal
         open={modalOpen}

@@ -33,7 +33,7 @@ export type DealForm = {
   firstName: string;
   lastName: string;
   numberOfApplicants: string; // keep string for input
-  ffm: boolean;
+  ffm: string;
   career: string;
   typeOfWork: string;
   monthlyIncome: string;
@@ -83,7 +83,7 @@ const defaultForm = (): DealForm => ({
   firstName: "",
   lastName: "",
   numberOfApplicants: "",
-  ffm: false,
+  ffm: "",
   career: "",
   typeOfWork: "",
   monthlyIncome: "",
@@ -272,11 +272,14 @@ export default function CreateDealModal({
             </Field>
 
             <Field label="FFM">
-              <Checkbox
-                label="FFM Applicable"
-                checked={form.ffm}
-                onChange={(e) => update("ffm", e.target.checked)}
+             
+                 <TextInput
+                value={form.ffm}
+                placeholder="Enter ffm"
+                onChange={(e) => update("ffm", e.target.value)}
+                leftIcon={<User size={16} />}
               />
+            
             </Field>
           </TwoCol>
         </Section>

@@ -60,8 +60,8 @@ export const SOCIAL_PROVIDED_OPTIONS: SelectOption[] = [
 
 export const LANGUAGE_OPTIONS: SelectOption[] = [
   { label: "Select", value: "" },
-  { label: "English", value: "EN" },
-  { label: "Spanish", value: "ES" },
+  { label: "English", value: "ENGLISH" },
+  { label: "Spanish", value: "SPANISH" },
   { label: "Other", value: "OTHER" },
 ];
 
@@ -73,7 +73,7 @@ export const DEFAULT_ROLE_OPTIONS: SelectOption[] = [
 
 export const DEFAULT_ACCESS_OPTIONS: SelectOption[] = [
   { label: "Training", value: "TRAINING" },
-  { label: "Full Access", value: "ALL_ACCESS" },
+  { label: "ALL Access", value: "ALL_ACCESS" },
 ];
 
 export const DEFAULT_APPS_OPTIONS: SelectOption[] = [

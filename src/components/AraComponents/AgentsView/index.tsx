@@ -57,45 +57,45 @@ const accessLevelMap: Record<AgentAccess, "TRAINING" | "ALL_ACCESS"> = {
 };
 type ViewMode = "compact" | "cards";
 
-
 type AgentsRow = {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
   phone: string;
-  ssn?:string;
+  ssn?: string;
   employee: {
     designation: { name: string; id: string };
-    id:string;
+    id: string;
 
-    user:any;
-
+    user: any;
   };
   agentProfile: {
-    id:string;
+    id: string;
     npn: string;
-  yearsOfExperience: number;
-  ahipCertified: boolean;
-  chaseExt: string;
+    ssn: string;
+    forwarding: string;
+    payStructure: number;
+    yearsOfExperience: number;
+    ahipCertified: boolean;
+    chaseExt: string;
 
-  chaseDataUsername: string;
-  chaseDataPassword: string;
+    chaseDataUsername: string;
+    chaseDataPassword: string;
 
-  healthSherpaUsername: string;
-  healthSherpaPassword: string;
+    healthSherpaUsername: string;
+    healthSherpaPassword: string;
 
-  myMfgUsername: string;
-  myMfgPassword: string;
+    myMfgUsername: string;
+    myMfgPassword: string;
 
-  ffmUsername: string;
+    ffmUsername: string;
 
-  apps: string[];
-  accessLevel: string;
-  isActive: boolean;
-  stateLicensed: boolean;
-  stateLicenseNumber?: string;
-  
+    apps: string[];
+    accessLevel: string;
+    isActive: boolean;
+    stateLicensed: boolean;
+    stateLicenseNumber?: string;
   };
   userStatus: string;
   password: string;
@@ -133,7 +133,7 @@ export type AgentForm = {
   ffmUsername: string;
   forwarding: string;
 
-  payStructure: string;
+  payStructure: number | "";
 
   role: AgentRole | "";
   access: AgentAccess | "";
@@ -180,8 +180,7 @@ export default function AcaAgentsView() {
   const [q, setQ] = useState("");
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-     const [view, setView] = useState<ViewMode>("compact");
-
+  const [view, setView] = useState<ViewMode>("compact");
 
   const [page, setPage] = useState(1);
   const LIMIT = 10;
@@ -203,8 +202,9 @@ export default function AcaAgentsView() {
   const [form, setForm] = useState<AgentForm>(emptyForm);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-   const [passworderrors, setpasswordErrors] = useState<Record<string, string>>({});
-
+  const [passworderrors, setpasswordErrors] = useState<Record<string, string>>(
+    {}
+  );
 
   const isEditMode = Boolean(editing?.id);
 
@@ -227,42 +227,12 @@ export default function AcaAgentsView() {
     confirmPassword: "",
   });
   const [updating, setUpdating] = useState(false);
-
-
-  const fetchAgents = async () => {
-    setLoading(true);
-    try {
-      const res: any = await apiClient.get(
-        apiClient.URLS.user,
-        { page, limit: LIMIT },
-        true
-      );
-      if (res?.status) {
-        const body = res?.body ?? res;
-
-        const list = body?.data?.items || body?.items || body?.data || [];
-        const totalCount =
-          body?.data?.total || body?.meta?.total || list.length;
-        setItems(Array.isArray(list) ? list : []);
-        setTotal(totalCount);
-        toast.success("Agents fetched successfully");
-      }
-    } catch (e) {
-      console.error(e);
-      setItems([]);
-      setTotal(0);
-      toast.error("Failed to fetch agents");
-    } finally {
-      setLoading(false);
-    }
-  };
  
- useEffect(() => {
-  
-  fetchAgents();
-  
-}, [page]);
+  const [designationId, setDesignationId] = useState<string>(""); 
 
+  useEffect(() => {
+    fetchAgents();
+  }, [page,designationId]);
 
   const openCreate = () => {
     setEditing(null);
@@ -274,39 +244,35 @@ export default function AcaAgentsView() {
     setSortKey(key);
     setSortOrder(order);
   };
-  const filteredItems = useMemo(() => {
-    if (!q.trim()) return items;
-    const query = q.toLowerCase();
+  // const filteredItems = useMemo(() => {
+  //   if (!q.trim()) return items;
+  //   const query = q.toLowerCase();
 
-    return items.filter((a) => {
-      const f = a.firstName?.toLowerCase() || "";
-      const l = a.lastName?.toLowerCase() || "";
-      return f.includes(query) || l.includes(query);
-    });
-  }, [items, q]);
+  //   return items.filter((a) => {
+  //     const f = a.firstName?.toLowerCase() || "";
+  //     const l = a.lastName?.toLowerCase() || "";
+  //     return f.includes(query) || l.includes(query);
+  //   });
+  // }, [items, q]);
 
   const sortedItems = useMemo(() => {
-    if (!sortKey) return filteredItems;
+  if (!sortKey) return items;
 
-    return [...filteredItems].sort((a, b) => {
-      const aVal = (a[sortKey as keyof AgentsRow] ?? "")
-        .toString()
-        .toLowerCase();
-      const bVal = (b[sortKey as keyof AgentsRow] ?? "")
-        .toString()
-        .toLowerCase();
+  return [...items].sort((a, b) => {
+    const aVal = (a[sortKey] ?? "").toString().toLowerCase();
+    const bVal = (b[sortKey] ?? "").toString().toLowerCase();
 
-      if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
-      if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
-      return 0;
-    });
-  }, [filteredItems, sortKey, sortOrder]);
-  
+    if (aVal < bVal) return sortOrder === "asc" ? -1 : 1;
+    if (aVal > bVal) return sortOrder === "asc" ? 1 : -1;
+    return 0;
+  });
+}, [items, sortKey, sortOrder]);
+
 
   const openEdit = (agent: any) => {
     setEditing(agent);
     setErrors({});
-   
+
     setForm({
       firstName: agent.firstName || "",
       lastName: agent.lastName || "",
@@ -317,7 +283,9 @@ export default function AcaAgentsView() {
       password: agent.password || "",
 
       designation: agent.employee?.designation?.id ?? "",
-      reportsTo: agent.employee?.reportsTo?.id ? String(agent.employee.reportsTo.id) : "",
+      reportsTo: agent.employee?.reportsTo?.id
+        ? String(agent.employee.reportsTo.id)
+        : "",
 
       npn: agent.agentProfile?.npn || "",
       yearsOfExperience: agent.agentProfile?.yearsOfExperience ?? "",
@@ -334,7 +302,7 @@ export default function AcaAgentsView() {
       myMfgPassword: agent?.agentProfile?.myMfgPassword || "",
       ffmUsername: agent?.agentProfile?.ffmUsername || "",
       forwarding: agent?.agentProfile?.forwarding || "",
-      payStructure: agent.payStructure || "",
+      payStructure: agent?.agentProfile?.payStructure || "",
       role: agent.systemRole || "",
       apps: agent?.agentProfile?.apps || [],
     });
@@ -376,13 +344,15 @@ export default function AcaAgentsView() {
       e.email = "Enter valid email";
     if (!form.password) e.password = "password is required";
 
-    // if (!form.dob) e.dob = "DOB is required";
+    if (!form.dob) e.dob = "DOB is required";
 
-    if (form.phone && normalizePhone(form.phone).length < 8) {
+    if (!form.phone) e.phone = "Contact number is required";
+    else if (normalizePhone(form.phone).length < 8)
       e.phone = "Enter valid contact number";
-    }
 
-    if (!form.designation) e.role = "designation is required";
+    if (!form.npn) e.npn = "npn is required";
+
+    if (!form.designation) e.designation = "designation is required";
     // if (!form.reportsTo) e.reportsTo = "Reportsto is required";
     if (!form.access) e.access = "Access is required";
     if (!form.apps || form.apps.length === 0)
@@ -446,6 +416,33 @@ export default function AcaAgentsView() {
 
     fetchDesignations();
   }, []);
+  const fetchAgents = async () => {
+    setLoading(true);
+    try {
+      const url = designationId
+        ? `${apiClient.URLS.user}/by-designation/${designationId}`
+        : apiClient.URLS.user;
+
+      const res: any = await apiClient.get(url, { page, limit: LIMIT ,  search: q.trim() || undefined }, true);
+      const body = res?.body ?? res;
+
+      const list = Array.isArray(body?.data) ? body.data : [];
+      const totalCount = body?.meta?.total ?? list.length;
+
+      setItems(list);
+      setTotal(totalCount);
+    } catch (e) {
+      console.error(e);
+      setItems([]);
+      setTotal(0);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAgents();
+  }, [page, designationId,q]);
 
   useEffect(() => {
     if (!form.designation) {
@@ -463,8 +460,8 @@ export default function AcaAgentsView() {
 
         if (Array.isArray(res.body)) {
           const options = res.body.map((emp: any) => ({
-            label: emp.fullName, 
-            value: String(emp.id), 
+            label: emp.fullName,
+            value: String(emp.id),
           }));
 
           setReportsToOptions(options);
@@ -484,27 +481,27 @@ export default function AcaAgentsView() {
     setPasswordForm((prev) => ({ ...prev, [field]: value }));
   };
   const validatePasswordForm = () => {
-  const e: Record<string, string> = {};
-  const pass = passwordForm.password;
-  const confirm = passwordForm.confirmPassword;
+    const e: Record<string, string> = {};
+    const pass = passwordForm.password;
+    const confirm = passwordForm.confirmPassword;
 
-  if (!pass) e.password = "Password is required";
-  else if (pass.length < 8) e.password = "Must be at least 8 characters";
+    if (!pass) e.password = "Password is required";
 
-  if (!confirm) e.confirmPassword = "Confirm password is required";
-  else if (pass !== confirm) e.confirmPassword = "Passwords and confirm password must match";
+    if (!confirm) e.confirmPassword = "Confirm password is required";
+    else if (pass !== confirm)
+      e.confirmPassword = "Passwords and confirm password must match";
 
- setpasswordErrors(e);
-  return Object.keys(e).length === 0;
-};
+    setpasswordErrors(e);
+    return Object.keys(e).length === 0;
+  };
 
   const submitPassword = async () => {
     if (!selectedAgent?.id) return;
 
     if (!validatePasswordForm()) {
-    toast.error("Please fix password errors ");
-    return;
-  }
+      toast.error("Please fix password errors ");
+      return;
+    }
 
     const dto = {
       newPassword: passwordForm.password,
@@ -544,7 +541,6 @@ export default function AcaAgentsView() {
         phone: normalizePhone(form.phone),
         dob: form.dob,
         password: form.password,
-        ssn:form.ssn
       },
 
       employee: {
@@ -558,15 +554,18 @@ export default function AcaAgentsView() {
         ahipCertified: Boolean(form.ahipCertified),
         stateLicensed: Boolean(form.stateLicensed),
         accessLevel: form.access === "FullAccess" ? "ALL_ACCESS" : "TRAINING",
-        chaseExt:form.chaseExt,
-        chaseDataUsername:form.chaseDataUsername,
-        chaseDataPassword:form.chaseDataPassword,
-        healthSherpaUsername:form.healthSherpaUsername,
-        healthSherpaPassword:form.healthSherpaPassword,
-        myMfgUsername:form.myMfgUsername,
-        myMfgPassword:form.myMfgPassword,
-        ffmUsername:form.ffmUsername,
-       apps: form.apps?.length ? form.apps : [],
+        chaseExt: form.chaseExt,
+        chaseDataUsername: form.chaseDataUsername,
+        chaseDataPassword: form.chaseDataPassword,
+        healthSherpaUsername: form.healthSherpaUsername,
+        healthSherpaPassword: form.healthSherpaPassword,
+        myMfgUsername: form.myMfgUsername,
+        myMfgPassword: form.myMfgPassword,
+        ffmUsername: form.ffmUsername,
+        forwarding: form.forwarding,
+        payStructure: Number(form.payStructure),
+        ssn: form.ssn,
+        apps: form.apps?.length ? form.apps : [],
       },
     };
 
@@ -655,72 +654,72 @@ export default function AcaAgentsView() {
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-  const file = event.target.files?.[0];
-  if (!file) return;
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-  if (!file.name.toLowerCase().endsWith(".csv")) {
-    toast.error("Please upload a CSV file");
-    return;
-  }
-
-  setSelectedFile(file);
-};
-
-const uploadCsvFile = async (file: File) => {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  return apiClient.post(
-    `${apiClient.URLS.user}/bulk-onboard`,
-    formData,
-    true,
-    "file" 
-  );
-};
-
-const handleUpload = async () => {
-  if (!selectedFile) {
-    toast.error("Select CSV file");
-    return;
-  }
-
-  setIsAgentsLoading(true);
-  setUploadProgress(20);
-
-  try {
-    const res = await uploadCsvFile(selectedFile);
-
-    setUploadProgress(100);
-
-    const { success = [], failed = [] } = res.body || {};
-
-    if (failed.length) {
-      toast.error(`Uploaded with ${failed.length} errors`);
-      console.table(failed); // show failed rows
-    } else {
-      toast.success(`${success.length} users onboarded successfully`);
+    if (!file.name.toLowerCase().endsWith(".csv")) {
+      toast.error("Please upload a CSV file");
+      return;
     }
 
-    await fetchAgents?.();
-    setOpenFileModal(false);
-  } catch (e) {
-    console.error(e);
-    toast.error("Bulk upload failed");
-  } finally {
-    setIsAgentsLoading(false);
-    setSelectedFile(null);
-  }
-};
+    setSelectedFile(file);
+  };
 
-const PasswordToggle = () => (
-  <Button
-    type="button"
-    onClick={() => setShowPass((p) => !p)}
-    className="cursor-pointer p-1"
-  >
-    {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
-  </Button>
-);
+  const uploadCsvFile = async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    return apiClient.post(
+      `${apiClient.URLS.user}/bulk-onboard`,
+      formData,
+      true,
+      "file"
+    );
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      toast.error("Select CSV file");
+      return;
+    }
+
+    setIsAgentsLoading(true);
+    setUploadProgress(20);
+
+    try {
+      const res = await uploadCsvFile(selectedFile);
+
+      setUploadProgress(100);
+
+      const { success = [], failed = [] } = res.body || {};
+
+      if (failed.length) {
+        toast.error(`Uploaded with ${failed.length} errors`);
+        console.table(failed); // show failed rows
+      } else {
+        toast.success(`${success.length} users onboarded successfully`);
+      }
+
+      await fetchAgents?.();
+      setOpenFileModal(false);
+    } catch (e) {
+      console.error(e);
+      toast.error("Bulk upload failed");
+    } finally {
+      setIsAgentsLoading(false);
+      setSelectedFile(null);
+    }
+  };
+
+  const PasswordToggle = () => (
+    <Button
+      type="button"
+      onClick={() => setShowPass((p) => !p)}
+      className="cursor-pointer p-1"
+    >
+      {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+    </Button>
+  );
   const totalPages = Math.ceil(total / LIMIT);
   if (loading || isAgentsLoading) {
     return (
@@ -778,39 +777,57 @@ const PasswordToggle = () => (
           <TableToolbar
             search={{
               value: q,
-              onChange: (v: any) => setQ(v),
+              onChange: (v: string) => {
+                setQ(v);
+                setPage(1);
+              },
               placeholder: "Search...",
               debounceMs: 350,
             }}
-           middleSlot={
-          <div className="flex items-center md:gap-2 gap-1">
-            <div className="flex items-center gap-1">
-              <Button
-                className={`md:px-2 px-1 md:py-[7px] py-[5px] rounded-md border ${
-                  view === "cards"
-                    ? "bg-purple-600 text-white"
-                    : "bg-white text-gray-800"
-                }`}
-                onClick={() => setView("cards")}
-                title="Cards view"
-              >
-                <LayoutGrid className="md:w-4 w-3 md:h-4 h-3" />
-              </Button>
+            filtersSlot={
+              <div className="md:min-w-[220px]  w-full">
+                <SingleSelect
+                  value={designationId}
+                  onChange={(v) => {
+                    setDesignationId(v);
+                    setPage(1);
+                    setQ("");
+                  }}
+                  options={designationOptions}
+                  placeholder="Filter by designation"
+                  searchable
+                />
+              </div>
+            }
+            middleSlot={
+              <div className="flex items-center  md:gap-2 gap-1">
+                <div className="flex items-center gap-1">
+                  <Button
+                    className={`md:px-2 px-1 md:py-[7px] py-[5px] rounded-md border ${
+                      view === "cards"
+                        ? "bg-purple-600 text-white"
+                        : "bg-white text-gray-800"
+                    }`}
+                    onClick={() => setView("cards")}
+                    title="Cards view"
+                  >
+                    <LayoutGrid className="md:w-4 w-3 md:h-4 h-3" />
+                  </Button>
 
-              <Button
-                className={`md:px-2 px-1 md:py-[7px] py-[5px] rounded-md border ${
-                  view === "compact"
-                    ? "bg-purple-600 text-white"
-                    : "bg-white text-gray-800"
-                }`}
-                onClick={() => setView("compact")}
-                title="Compact view"
-              >
-                <Rows className="md:w-4 w-3 md:h-4 h-3" />
-              </Button>
-            </div>
-          </div>
-        }
+                  <Button
+                    className={`md:px-2 px-1 md:py-[7px] py-[5px] rounded-md border ${
+                      view === "compact"
+                        ? "bg-purple-600 text-white"
+                        : "bg-white text-gray-800"
+                    }`}
+                    onClick={() => setView("compact")}
+                    title="Compact view"
+                  >
+                    <Rows className="md:w-4 w-3 md:h-4 h-3" />
+                  </Button>
+                </div>
+              </div>
+            }
             actionsSlot={
               <>
                 <Button
@@ -839,55 +856,154 @@ const PasswordToggle = () => (
           />
           {view === "compact" ? (
             <>
+              <div className="overflow-auto   rounded-md shadow-2xl border app-border app-card">
+                <table className="w-full text-sm border app-border ">
+                  <thead className="app-table-head">
+                    <tr>
+                      <SortableTh label="First Name" column="firstName" />
+                      <SortableTh label="Last Name" column="lastName" />
+                      <SortableTh
+                        label="Email"
+                        column="email"
+                        className="px-6 py-2 min-w-62.5"
+                      />
+                      <SortableTh label="Role" column="role" />
+                      <SortableTh label="Status" column="userStatus" />
+                      <th className="px-4 py-1 border app-border text-nowrap  font-medium ">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
 
-          <div className="overflow-auto   rounded-md shadow-2xl border app-border app-card">
-            <table className="w-full text-sm border app-border ">
-              <thead className="app-table-head">
-                <tr>
-                  <SortableTh label="First Name" column="firstName" />
-                  <SortableTh label="Last Name" column="lastName" />
-                  <SortableTh
-                    label="Email"
-                    column="email"
-                    className="px-6 py-2 min-w-62.5"
-                  />
-                  <SortableTh label="Role" column="role" />
-                  <SortableTh label="Status" column="userStatus" />
-                  <th className="px-4 py-1 border app-border text-nowrap  font-medium ">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
+                  <tbody>
+                    {sortedItems.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={6}
+                          className="px-4 py-10 text-center app-text  font-bold"
+                        >
+                          No Agents found
+                        </td>
+                      </tr>
+                    ) : (
+                      sortedItems?.map((a) => (
+                        <tr key={a.id} className="border-t app-text">
+                          <td className="px-3 md:py-1 py-1  font-medium  text-nowrap border app-border">
+                            {a.firstName}
+                          </td>
+                          <td className="px-3 md:py-1 py-1  font-medium text-nowrap border app-border ">
+                            {a.lastName}
+                          </td>
+                          <td className="px-6 md:py-1 py-1  font-medium text-nowrap border app-border ">
+                            {a.email}
+                          </td>
+                          <td className="px-3 md:py-1 py-1 border text-nowrap app-border  font-medium ">
+                            {a?.employee?.designation?.name ?? "-"}
+                          </td>
 
-              <tbody>
+                          <td className="px-4 py-1 border text-nowrap app-border  whitespace-nowrap">
+                            <span
+                              className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs  font-bold transition ${
+                                a.agentProfile?.isActive
+                                  ? "bg-green-500/15 text-green-700"
+                                  : "bg-orange-500/15 text-orange-700"
+                              }`}
+                            >
+                              {a?.agentProfile?.isActive ? (
+                                <CheckCircle size={14} />
+                              ) : (
+                                <XCircle size={14} />
+                              )}
+                              {a?.agentProfile?.isActive
+                                ? "Active"
+                                : "Inactive"}
+                            </span>
+                          </td>
+
+                          <td className="px-4 py-1 border app-border text-nowrap  font-medium ">
+                            <div className="flex justify-center items-center gap-3">
+                              <Button
+                                className="p-2.5 rounded-lg bg-indigo-600/10 text-indigo-700 hover:bg-indigo-600  hover:text-white transition"
+                                title="Edit"
+                                onClick={() => openEdit(a)}
+                              >
+                                <Pencil size={15} />
+                              </Button>
+
+                              <Button
+                                className="p-2.5 rounded-lg bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500 hover:text-white transition"
+                                title="Reset / View Password"
+                                onClick={() => {
+                                  setSelectedAgent(a);
+                                  setPasswordModalOpen(true);
+                                }}
+                              >
+                                <Key size={15} />
+                              </Button>
+
+                              {a?.agentProfile?.isActive ? (
+                                <Button
+                                  className="p-2.5 rounded-lg bg-red-500/10 text-red-700 hover:bg-red-500 hover:text-white transition"
+                                  title="Deactivate"
+                                  onClick={() => openDeactivate(a)}
+                                >
+                                  <Trash2 size={15} />
+                                </Button>
+                              ) : (
+                                <Button
+                                  className="p-2.5 rounded-lg bg-green-600/10 text-green-700 hover:bg-green-600 hover:text-white transition"
+                                  title="Activate"
+                                  onClick={() => openActivate(a)}
+                                >
+                                  <Check size={15} />
+                                </Button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+             { totalPages>1 &&<div className="">
+                <Pagination
+                  page={page}
+                  totalPages={totalPages}
+                  totalItems={sortedItems?.length}
+                  limit={LIMIT}
+                  onPageChange={setPage}
+                />
+              </div>}
+            </>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 md:gap-4 gap-2">
                 {sortedItems.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="px-4 py-10 text-center app-text  font-bold"
-                    >
-                      No Agents found
-                    </td>
-                  </tr>
+                  <div className="col-span-full py-10 text-center app-text font-bold">
+                    No Agents found
+                  </div>
                 ) : (
-                  sortedItems?.map((a) => (
-                    <tr key={a.id} className="border-t app-text">
-                      <td className="px-3 md:py-1 py-1  font-medium  text-nowrap border app-border">
-                        {a.firstName}
-                      </td>
-                      <td className="px-3 md:py-1 py-1  font-medium text-nowrap border app-border ">
-                        {a.lastName}
-                      </td>
-                      <td className="px-6 md:py-1 py-1  font-medium text-nowrap border app-border ">
-                        {a.email}
-                      </td>
-                      <td className="px-3 md:py-1 py-1 border text-nowrap app-border  font-medium ">
-                        {a?.employee?.designation?.name ?? "-"}
-                      </td>
+                 sortedItems.map((a) => (
+                    <div
+                      key={a.id}
+                      className="rounded-2xl border app-border app-card shadow-sm md:p-4 p-2 flex flex-col gap-3"
+                    >
+                      <div className="flex items-start justify-between md:gap-3 gap-2">
+                        <div>
+                          <p className="font-semibold app-text text-base">
+                            {a.firstName} {a.lastName}
+                          </p>
+                          <p className="text-sm app-muted break-all">
+                            {a.email}
+                          </p>
+                          <p className="text-sm app-muted">
+                            {a?.employee?.designation?.name ?? "-"}
+                          </p>
+                        </div>
 
-                      <td className="px-4 py-1 border text-nowrap app-border  whitespace-nowrap">
                         <span
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs  font-bold transition ${
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition ${
                             a.agentProfile?.isActive
                               ? "bg-green-500/15 text-green-700"
                               : "bg-orange-500/15 text-orange-700"
@@ -900,157 +1016,62 @@ const PasswordToggle = () => (
                           )}
                           {a?.agentProfile?.isActive ? "Active" : "Inactive"}
                         </span>
-                      </td>
+                      </div>
 
-                      <td className="px-4 py-1 border app-border text-nowrap  font-medium ">
-                        <div className="flex justify-center items-center gap-3">
+                      <div className="flex justify-center items-center gap-3">
+                        <Button
+                          className="p-2.5 rounded-lg bg-indigo-600/10 text-indigo-700 hover:bg-indigo-600  hover:text-white transition"
+                          title="Edit"
+                          onClick={() => openEdit(a)}
+                        >
+                          <Pencil size={15} />
+                        </Button>
+
+                        <Button
+                          className="p-2.5 rounded-lg bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500 hover:text-white transition"
+                          title="Reset / View Password"
+                          onClick={() => {
+                            setSelectedAgent(a);
+                            setPasswordModalOpen(true);
+                          }}
+                        >
+                          <Key size={15} />
+                        </Button>
+
+                        {a?.agentProfile?.isActive ? (
                           <Button
-                            className="p-2.5 rounded-lg bg-indigo-600/10 text-indigo-700 hover:bg-indigo-600  hover:text-white transition"
-                            title="Edit"
-                            onClick={() => openEdit(a)}
+                            className="p-2.5 rounded-lg bg-red-500/10 text-red-700 hover:bg-red-500 hover:text-white transition"
+                            title="Deactivate"
+                            onClick={() => openDeactivate(a)}
                           >
-                            <Pencil size={15} />
+                            <Trash2 size={15} />
                           </Button>
-
+                        ) : (
                           <Button
-                            className="p-2.5 rounded-lg bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500 hover:text-white transition"
-                            title="Reset / View Password"
-                            onClick={() => {
-                              setSelectedAgent(a);
-                              setPasswordModalOpen(true);
-                            }}
+                            className="p-2.5 rounded-lg bg-green-600/10 text-green-700 hover:bg-green-600 hover:text-white transition"
+                            title="Activate"
+                            onClick={() => openActivate(a)}
                           >
-                            <Key size={15} />
+                            <Check size={15} />
                           </Button>
-
-                          {a?.agentProfile?.isActive ? (
-                            <Button
-                              className="p-2.5 rounded-lg bg-red-500/10 text-red-700 hover:bg-red-500 hover:text-white transition"
-                              title="Deactivate"
-                              onClick={() => openDeactivate(a)}
-                            >
-                              <Trash2 size={15} />
-                            </Button>
-                          ) : (
-                            <Button
-                              className="p-2.5 rounded-lg bg-green-600/10 text-green-700 hover:bg-green-600 hover:text-white transition"
-                              title="Activate"
-                              onClick={() => openActivate(a)}
-                            >
-                              <Check size={15} />
-                            </Button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
+                        )}
+                      </div>
+                    </div>
                   ))
                 )}
-              </tbody>
-            </table>
-          </div>
-          <div className="">
-            <Pagination
-              page={page}
-              totalPages={totalPages}
-              totalItems={sortedItems?.length}
-              limit={LIMIT}
-              onPageChange={setPage}
-            />
-          </div>
-          </>):(
-            <>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 md:gap-4 gap-2">
-            {filteredItems.length === 0 ? (
-              <div className="col-span-full py-10 text-center app-text font-bold">
-                No Agents found
               </div>
-            ) : (
-              filteredItems.map((a) => (
-                <div
-                  key={a.id}
-                  className="rounded-2xl border app-border app-card shadow-sm md:p-4 p-2 flex flex-col gap-3"
-                >
-                  <div className="flex items-start justify-between md:gap-3 gap-2">
-                    <div>
-                      <p className="font-semibold app-text text-base">
-                        {a.firstName} {a.lastName}
-                      </p>
-                      <p className="text-sm app-muted break-all">{a.email}</p>
-                      <p className="text-sm app-muted">
-                        {a?.employee?.designation?.name ?? "-"}
-                      </p>
-                    </div>
 
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition ${
-                        a.agentProfile?.isActive
-                          ? "bg-green-500/15 text-green-700"
-                          : "bg-orange-500/15 text-orange-700"
-                      }`}
-                    >
-                      {a?.agentProfile?.isActive ? (
-                        <CheckCircle size={14} />
-                      ) : (
-                        <XCircle size={14} />
-                      )}
-                      {a?.agentProfile?.isActive ? "Active" : "Inactive"}
-                    </span>
-                  </div>
-
-                   <div className="flex justify-center items-center gap-3">
-                          <Button
-                            className="p-2.5 rounded-lg bg-indigo-600/10 text-indigo-700 hover:bg-indigo-600  hover:text-white transition"
-                            title="Edit"
-                            onClick={() => openEdit(a)}
-                          >
-                            <Pencil size={15} />
-                          </Button>
-
-                          <Button
-                            className="p-2.5 rounded-lg bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500 hover:text-white transition"
-                            title="Reset / View Password"
-                            onClick={() => {
-                              setSelectedAgent(a);
-                              setPasswordModalOpen(true);
-                            }}
-                          >
-                            <Key size={15} />
-                          </Button>
-
-                          {a?.agentProfile?.isActive ? (
-                            <Button
-                              className="p-2.5 rounded-lg bg-red-500/10 text-red-700 hover:bg-red-500 hover:text-white transition"
-                              title="Deactivate"
-                              onClick={() => openDeactivate(a)}
-                            >
-                              <Trash2 size={15} />
-                            </Button>
-                          ) : (
-                            <Button
-                              className="p-2.5 rounded-lg bg-green-600/10 text-green-700 hover:bg-green-600 hover:text-white transition"
-                              title="Activate"
-                              onClick={() => openActivate(a)}
-                            >
-                              <Check size={15} />
-                            </Button>
-                          )}
-                        </div>
-                </div>
-              ))
-            )}
-          </div>
-
-          <div className="mt-4">
-            <Pagination
-              page={page}
-              totalPages={totalPages}
-              totalItems={items.length}
-              limit={LIMIT}
-              onPageChange={setPage}
-            />
-          </div>
-        </>
-      )}
+             {totalPages>1 &&  <div className="mt-4">
+                <Pagination
+                  page={page}
+                  totalPages={totalPages}
+                  totalItems={items.length}
+                  limit={LIMIT}
+                  onPageChange={setPage}
+                />
+              </div>}
+            </>
+          )}
           {confirmOpen && (
             <Modal open={confirmOpen} onClose={() => setConfirmOpen(false)}>
               <div className="w-full py-2 rounded-md">
@@ -1163,7 +1184,11 @@ const PasswordToggle = () => (
               className="app-text"
             >
               <div className="space-y-4 p-2 mt-2 app-card">
-                <Field label="Password" required error={passworderrors.password}>
+                <Field
+                  label="Password"
+                  required
+                  error={passworderrors.password}
+                >
                   <TextInput
                     type={showPassword ? "text" : "password"}
                     value={passwordForm.password}
@@ -1175,7 +1200,11 @@ const PasswordToggle = () => (
                   />
                 </Field>
 
-                <Field label="Confirm Password" required error={passworderrors.confirmPassword}>
+                <Field
+                  label="Confirm Password"
+                  required
+                  error={passworderrors.confirmPassword}
+                >
                   <TextInput
                     type={showPassword ? "text" : "password"}
                     value={passwordForm.confirmPassword}
@@ -1295,9 +1324,9 @@ const PasswordToggle = () => (
                   />
                 </Field>
 
-                <Field label="Password" required>
+                <Field label="Password" required error={errors.password}>
                   <TextInput
-                      type={showPass ? "text" : "password"}
+                    type={showPass ? "text" : "password"}
                     value={form.password}
                     onChange={(e: any) => update("password", e.target.value)}
                     placeholder="Password"
@@ -1319,9 +1348,7 @@ const PasswordToggle = () => (
                   />
                 </Field>
 
-              
-
-                <Field label="Contact Number" error={errors.phone}>
+                <Field label="Contact Number" required error={errors.phone}>
                   <TextInput
                     value={form.phone}
                     onChange={(e: any) =>
@@ -1330,18 +1357,6 @@ const PasswordToggle = () => (
                     placeholder="Contact Number"
                     leftIcon={<Phone size={16} />}
                     error={!!errors.phone}
-                    containerClassName="md:py-[6px] py-1"
-                  />
-                </Field>
-                 <Field label="SSN" >
-                  <TextInput
-                    value={form.ssn}
-                    onChange={(e: any) =>
-                      update("ssn", e.target.value)
-                    }
-                    placeholder="ssn"
-                    leftIcon={<CreditCard size={16} />}
-                  
                     containerClassName="md:py-[6px] py-1"
                   />
                 </Field>
@@ -1376,7 +1391,7 @@ const PasswordToggle = () => (
                   />
                 </Field>
 
-                <Field label="NPN">
+                <Field label="NPN" required error={errors.npn}>
                   <TextInput
                     value={form.npn}
                     onChange={(e: any) => update("npn", e.target.value)}
@@ -1390,6 +1405,15 @@ const PasswordToggle = () => (
                     value={form.chaseExt}
                     onChange={(e: any) => update("chaseExt", e.target.value)}
                     placeholder="Chase Ext."
+                    containerClassName="md:py-[6px] py-1"
+                  />
+                </Field>
+                <Field label="SSN">
+                  <TextInput
+                    value={form.ssn}
+                    onChange={(e: any) => update("ssn", e.target.value)}
+                    placeholder="ssn"
+                    leftIcon={<CreditCard size={16} />}
                     containerClassName="md:py-[6px] py-1"
                   />
                 </Field>
@@ -1418,7 +1442,7 @@ const PasswordToggle = () => (
 
                 <Field label="Chase Data Password">
                   <TextInput
-                     type={showPass ? "text" : "password"}
+                    type={showPass ? "text" : "password"}
                     value={form.chaseDataPassword}
                     onChange={(e: any) =>
                       update("chaseDataPassword", e.target.value)
@@ -1443,7 +1467,7 @@ const PasswordToggle = () => (
 
                 <Field label="HealthSherpa Password">
                   <TextInput
-                     type={showPass ? "text" : "password"}
+                    type={showPass ? "text" : "password"}
                     value={form.healthSherpaPassword}
                     onChange={(e: any) =>
                       update("healthSherpaPassword", e.target.value)
@@ -1457,7 +1481,7 @@ const PasswordToggle = () => (
 
                 <Field label="MyMFG Username">
                   <TextInput
-                  type="text"
+                    type="text"
                     value={form.myMfgUsername}
                     onChange={(e: any) =>
                       update("myMfgUsername", e.target.value)
@@ -1469,7 +1493,7 @@ const PasswordToggle = () => (
 
                 <Field label="MyMFG Password">
                   <TextInput
-                   type={showPass ? "text" : "password"}
+                    type={showPass ? "text" : "password"}
                     value={form.myMfgPassword}
                     onChange={(e: any) =>
                       update("myMfgPassword", e.target.value)
@@ -1512,6 +1536,7 @@ const PasswordToggle = () => (
 
                 <Field label="Pay Structure">
                   <TextInput
+                    type="number"
                     value={form.payStructure}
                     onChange={(e: any) =>
                       update("payStructure", e.target.value)
