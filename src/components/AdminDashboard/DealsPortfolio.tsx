@@ -15,6 +15,8 @@ import {
 
 import apiClient from "../../Utils/apiClient";
 import { SpinnerLoader } from "./spinner";
+import SimpleFromToPicker from "@/commonComponents/TwoPointerCalender";
+import toast from "react-hot-toast";
 
 /* ----------------------------- Types ----------------------------- */
 
@@ -307,7 +309,8 @@ function RangeCalendar({
           const start = isStart(d);
           const end = isEnd(d);
 
-          const baseCls = "h-9 w-full rounded-xl text-xs font-semibold transition";
+          const baseCls =
+            "h-9 w-full rounded-xl text-xs font-semibold transition";
           const cls = range
             ? start || end
               ? "bg-slate-900 text-white"
@@ -357,7 +360,7 @@ function RangeCalendar({
 export default function DealsPortfolioCard() {
   const initial = todayRangeDefault();
 
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   const [draftRange, setDraftRange] = useState<DraftRange>({
     from: initial.from,
@@ -389,7 +392,7 @@ export default function DealsPortfolioCard() {
 
   const fetchPortfolio = async (nextFrom: string, nextTo: string) => {
     try {
-      setLoading(true)
+      setLoading(true);
       const res = await apiClient.get(
         `${apiClient.URLS.dashboard}/deals-portfolio?from=${nextFrom}&to=${nextTo}`
       );
@@ -398,17 +401,18 @@ export default function DealsPortfolioCard() {
 
       const rows: DealsPortfolioApiRow[] = Array.isArray(body)
         ? body.map((r: any) => ({
-          agentId: typeof r?.agentId === "string" ? r.agentId : "",
-          agentName: typeof r?.agentName === "string" ? r.agentName : "Unknown",
-          totalDeals:
-            typeof r?.totalDeals === "number" && Number.isFinite(r.totalDeals)
-              ? r.totalDeals
-              : 0,
-          totalForms:
-            typeof r?.totalForms === "number" && Number.isFinite(r.totalForms)
-              ? r.totalForms
-              : 0,
-        }))
+            agentId: typeof r?.agentId === "string" ? r.agentId : "",
+            agentName:
+              typeof r?.agentName === "string" ? r.agentName : "Unknown",
+            totalDeals:
+              typeof r?.totalDeals === "number" && Number.isFinite(r.totalDeals)
+                ? r.totalDeals
+                : 0,
+            totalForms:
+              typeof r?.totalForms === "number" && Number.isFinite(r.totalForms)
+                ? r.totalForms
+                : 0,
+          }))
         : [];
 
       const totalDeals = rows.reduce((s, r) => s + clampInt(r.totalDeals), 0);
@@ -425,12 +429,15 @@ export default function DealsPortfolioCard() {
           deals: clampInt(r.totalDeals),
         })),
       };
-      setLoading(false)
+
+      setLoading(false);
 
       setPortfolio(safe);
+      toast.success("Deals Portfolio updated");
     } catch {
       setPortfolio((p) => p);
-      setLoading(false)
+      setLoading(false);
+      toast.error("Failed to update Deals Portfolio");
     }
   };
 
@@ -514,10 +521,12 @@ export default function DealsPortfolioCard() {
   })();
 
   const rangeLabel = hasTwoPointers
-    ? `${fmtRange.format(draftRange.from!)} to ${fmtRange.format(draftRange.to!)}`
+    ? `${fmtRange.format(draftRange.from!)} to ${fmtRange.format(
+        draftRange.to!
+      )}`
     : draftRange.from
-      ? `${fmtRange.format(draftRange.from)} to —`
-      : "Select date range";
+    ? `${fmtRange.format(draftRange.from)} to —`
+    : "Select date range";
 
   const applyRange = () => {
     if (!draftRange.from || !draftRange.to) return;
@@ -537,7 +546,6 @@ export default function DealsPortfolioCard() {
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       className="w-full"
     >
-
       <motion.div
         whileHover={{ y: -2 }}
         transition={{ type: "spring", stiffness: 260, damping: 18 }}
@@ -553,44 +561,13 @@ export default function DealsPortfolioCard() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <div ref={calWrapRef} className="relative">
-                <button
-                  type="button"
-                  onClick={() => setOpenCal((v) => !v)}
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-800 shadow-sm hover:bg-slate-50"
-                >
-                  <CalendarIcon className="h-4 w-4 text-slate-600" />
-                  <span>{rangeLabel}</span>
-                </button>
-
-                {openCal ? (
-                  <div className="absolute right-0 top-[44px] z-30">
-                    <div className="space-y-2">
-                      <RangeCalendar value={draftRange} onChange={setDraftRange} />
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setOpenCal(false)}
-                          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                        >
-                          Close
-                        </button>
-                        <button
-                          type="button"
-                          disabled={!hasTwoPointers}
-                          onClick={applyRange}
-                          className={`rounded-xl border px-3 py-2 text-xs font-semibold transition ${hasTwoPointers
-                            ? "border-slate-200 bg-slate-900 text-white hover:bg-slate-800"
-                            : "border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed"
-                            }`}
-                        >
-                          Apply
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ) : null}
-              </div>
+              <SimpleFromToPicker
+                value={draftRange}
+                onChange={setDraftRange}
+                canApply={hasTwoPointers}
+                onApply={applyRange}
+                label="Select date range"
+              />
             </div>
           </div>
 

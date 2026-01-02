@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Users,
   ArrowLeft,
@@ -25,10 +25,15 @@ import {
   initials,
 } from "@/lib/chat/utilFunctions";
 
-import { Channel, ChatUser, MessagesByThread, ChannelDetails} from "../../lib/chat/types";
+import {
+  Channel,
+  ChatUser,
+  MessagesByThread,
+  ChannelDetails,
+} from "../../lib/chat/types";
 
-
-
+// ✅ Emoji picker that works with React 19
+import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
 
 export function ChatWindow({
   selectedChat,
@@ -57,16 +62,19 @@ export function ChatWindow({
   messagesByThread: MessagesByThread | null;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   newMessage: string;
-  setNewMessage: (v: string) => void;
+  setNewMessage: (v: any) => void; // allow functional set too
   handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   handleSendMessage: () => void;
   showBackButton?: boolean;
 
   channelDetails?: ChannelDetails | null;
   currentUserId?: string;
-  onEditChannelTitle?: (threadId: string, title: string) => Promise<void> | void;
+  onEditChannelTitle?: (
+    threadId: string,
+    title: string
+  ) => Promise<void> | void;
 
-  onAddMembers?: (threadId: string,ids: string[]) => void;
+  onAddMembers?: (threadId: string, ids: string[]) => void;
   onRemoveMember?: (threadId: string, removeUserId: string) => void;
   onDeleteChannel?: (threadId: string) => void;
   allUsers?: any;
@@ -74,24 +82,24 @@ export function ChatWindow({
   const hasActive = Boolean(selectedChat || selectedChannel);
 
   const [isChannelInfoOpen, setIsChannelInfoOpen] = useState(false);
-
   const [isEditingTitle, setIsEditingTitle] = useState(false);
-  
-     const [showAddMembers, setShowAddMembers] = useState(false);
-    const [memberSearch, setMemberSearch] = useState("");
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
-    const [savingMembers, setSavingMembers] = useState(false);
-    
+
+  const [showAddMembers, setShowAddMembers] = useState(false);
+  const [memberSearch, setMemberSearch] = useState("");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [savingMembers, setSavingMembers] = useState(false);
+
   const [titleDraft, setTitleDraft] = useState("");
 
   const isChannel = Boolean(selectedChannel);
-  // const isAdmin = Boolean(channelDetails?.isAdmin);
-  const isAdmin = true;
+  const isAdmin = Boolean(channelDetails?.isOwner);
 
   const memberCount =
-    channelDetails?.members?.length ??
-    selectedChannel?.memberCount ??
-    0;
+    channelDetails?.members?.length ?? selectedChannel?.memberCount ?? 0;
+
+  // ✅ Emoji picker state + refs
+  const [showEmoji, setShowEmoji] = useState(false);
+  const emojiWrapRef = useRef<HTMLDivElement | null>(null);
 
   const openChannelInfo = () => {
     setIsChannelInfoOpen(true);
@@ -103,7 +111,7 @@ export function ChatWindow({
     setIsChannelInfoOpen(false);
     setIsEditingTitle(false);
   };
-  
+
   const threadKey = useMemo(() => {
     if (!selectedChat && !selectedChannel) return null;
     if (selectedChat && (selectedChat as any).threadId)
@@ -111,8 +119,6 @@ export function ChatWindow({
     if (selectedChannel) return `channel:${selectedChannel.id}`;
     return null;
   }, [selectedChat, selectedChannel]);
-
- 
 
   const existingMemberIds = useMemo(() => {
     const ids = new Set<string>();
@@ -122,8 +128,8 @@ export function ChatWindow({
 
   const addableUsers = useMemo(() => {
     const q = memberSearch.trim().toLowerCase();
-    return allUsers
-      .filter((u:any) => {
+    return (allUsers ?? [])
+      .filter((u: any) => {
         if (existingMemberIds.has(u.id)) return false;
         if (currentUserId && u.id === currentUserId) return false;
 
@@ -142,12 +148,10 @@ export function ChatWindow({
     );
   };
 
-
-
   const submitAddMembers = async () => {
     if (!selectedChannel) return;
     if (!selectedIds.length) return;
-    if(!onAddMembers) return;
+    if (!onAddMembers) return;
 
     try {
       setSavingMembers(true);
@@ -159,11 +163,38 @@ export function ChatWindow({
     }
   };
 
-
   useEffect(() => {
     if (!isChannelInfoOpen) return;
     setTitleDraft(channelDetails?.title ?? selectedChannel?.name ?? "");
   }, [isChannelInfoOpen, channelDetails?.title, selectedChannel?.name]);
+
+  // ✅ Close emoji picker on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (
+        emojiWrapRef.current &&
+        !emojiWrapRef.current.contains(e.target as Node)
+      ) {
+        setShowEmoji(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // ✅ Close emoji picker on ESC
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowEmoji(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, []);
+
+  // ✅ Emoji click -> append to input
+  const onEmojiClick = (emojiData: EmojiClickData) => {
+    setNewMessage((prev: string) => (prev ?? "") + (emojiData.emoji ?? ""));
+  };
 
   return (
     <div className="flex-1 min-w-0 flex flex-col h-full bg-gradient-to-b from-white via-blue-50/5 to-transparent">
@@ -301,7 +332,9 @@ export function ChatWindow({
               .map((m: any) => (
                 <div
                   key={m.id}
-                  className={`flex ${m.isOwn ? "justify-end" : "justify-start"}`}
+                  className={`flex ${
+                    m.isOwn ? "justify-end" : "justify-start"
+                  }`}
                 >
                   <div
                     className={`max-w-[85%] md:max-w-[75%] relative group ${
@@ -329,6 +362,11 @@ export function ChatWindow({
                           : "bg-white/90 backdrop-blur-sm text-gray-900 rounded-bl-md border-gray-200/60 shadow-sm",
                       ].join(" ")}
                     >
+                      {isChannel && (
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap font-bold">
+                          {m.senderName}
+                        </p>
+                      )}
                       <p className="text-sm leading-relaxed whitespace-pre-wrap">
                         {m.content}
                       </p>
@@ -384,12 +422,28 @@ export function ChatWindow({
               >
                 <Paperclip className="w-5 h-5" />
               </IconBtn>
-              <IconBtn
-                label="Emoji"
-                className="bg-gradient-to-br from-gray-50 to-gray-100/80 border border-gray-200/60 hover:from-gray-100 hover:to-gray-200 text-gray-700 hover:shadow-md transition-all"
-              >
-                <Smile className="w-5 h-5" />
-              </IconBtn>
+
+              {/* ✅ Emoji button + picker */}
+              <div className="relative" ref={emojiWrapRef}>
+                <IconBtn
+                  label="Emoji"
+                  onClick={() => setShowEmoji((v: boolean) => !v)}
+                  className="bg-gradient-to-br from-gray-50 to-gray-100/80 border border-gray-200/60 hover:from-gray-100 hover:to-gray-200 text-gray-700 hover:shadow-md transition-all"
+                >
+                  <Smile className="w-5 h-5" />
+                </IconBtn>
+
+                {showEmoji && (
+                  <div className="absolute bottom-12 left-0 z-50 shadow-2xl rounded-xl overflow-hidden border border-gray-200 bg-white">
+                    <EmojiPicker
+                      onEmojiClick={onEmojiClick}
+                      height={380}
+                      width={320}
+                      previewConfig={{ showPreview: false }}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex-1 min-w-0 relative">
@@ -404,7 +458,10 @@ export function ChatWindow({
             </div>
 
             <button
-              onClick={handleSendMessage}
+              onClick={() => {
+                handleSendMessage();
+                setShowEmoji(false);
+              }}
               disabled={!newMessage.trim()}
               className={[
                 "px-3.5 py-2 rounded-2xl transition-all duration-300 shadow-lg relative overflow-hidden group",
@@ -437,7 +494,9 @@ export function ChatWindow({
                 {!isEditingTitle ? (
                   <>
                     <h3 className="text-lg font-bold text-gray-900 truncate">
-                      {channelDetails?.title ?? selectedChannel.name ?? "Channel"}
+                      {channelDetails?.title ??
+                        selectedChannel.name ??
+                        "Channel"}
                     </h3>
                     <p className="text-sm text-gray-600 mt-1">
                       {memberCount} members
@@ -506,17 +565,23 @@ export function ChatWindow({
                     <p className="text-sm font-semibold text-gray-900 truncate">
                       {m.name}
                       {m.userId === currentUserId ? (
-                        <span className="ml-2 text-xs text-gray-500">(You)</span>
+                        <span className="ml-2 text-xs text-gray-500">
+                          (You)
+                        </span>
                       ) : null}
                     </p>
-                    <p className="text-xs text-gray-500">{m.role ?? "member"}</p>
+                    <p className="text-xs text-gray-500">
+                      {m.role ?? "member"}
+                    </p>
                   </div>
 
                   {isAdmin && m.userId !== currentUserId && onRemoveMember && (
                     <button
                       type="button"
                       className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-red-200 text-red-700 hover:bg-red-50"
-                      onClick={() => onRemoveMember(selectedChannel.id, m.userId)}
+                      onClick={() =>
+                        onRemoveMember(selectedChannel.id, m.userId)
+                      }
                     >
                       Remove
                     </button>
@@ -578,11 +643,10 @@ export function ChatWindow({
           <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl border border-gray-200">
             <div className="flex items-center justify-between px-5 py-4 border-b">
               <div>
-                <h3 className="text-lg font-bold text-gray-900">
-                  Add members
-                </h3>
+                <h3 className="text-lg font-bold text-gray-900">Add members</h3>
                 <p className="text-xs text-gray-500">
-                  Select users to add to <span className="font-semibold">{selectedChannel.name}</span>
+                  Select users to add to{" "}
+                  <span className="font-semibold">{selectedChannel.name}</span>
                 </p>
               </div>
               <button
@@ -612,7 +676,7 @@ export function ChatWindow({
                     No users available to add.
                   </div>
                 ) : (
-                  addableUsers.map((u:any) => {
+                  addableUsers.map((u: any) => {
                     const checked = selectedIds.includes(u.id);
                     return (
                       <button
@@ -658,7 +722,8 @@ export function ChatWindow({
               </div>
 
               <div className="mt-3 text-xs text-gray-600">
-                Selected: <span className="font-semibold">{selectedIds.length}</span>
+                Selected:{" "}
+                <span className="font-semibold">{selectedIds.length}</span>
               </div>
             </div>
 
@@ -687,7 +752,6 @@ export function ChatWindow({
           </div>
         </div>
       )}
-
     </div>
   );
 }

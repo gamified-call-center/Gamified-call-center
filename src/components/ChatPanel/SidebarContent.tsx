@@ -25,6 +25,7 @@ export function SidebarContent({
   onSelectChat,
   onSelectChannel,
   onClickCreateChannel,
+  allUsers
 }: {
   activeTab: "chats" | "channels";
   setActiveTab: (v: "chats" | "channels") => void;
@@ -41,6 +42,7 @@ export function SidebarContent({
   showProfileFooter?: boolean;
   isAdmin?: boolean;
   onClickCreateChannel?: () => void;
+  allUsers: any[]
 }) {
 
   return (
@@ -169,9 +171,93 @@ export function SidebarContent({
         </div>
 
         <div className="p-3">
+          <h2 className="text-white px-6  py-1 bg-gradient-to-r text-[10px] from-blue-500 to-purple-500 w-20 rounded-sm mb-2">Recent</h2>
           {activeTab === "chats" ? (
             <div className="space-y-2">
               {filteredUsers.map((user) => {
+                const selected = selectedChat?.id === user.id;
+                return (
+                  <motion.div
+                    key={user.id}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                    onClick={() => onSelectChat(user)}
+                    className={`relative p-3 rounded-2xl cursor-pointer transition-all duration-300 group ${selected
+                      ? "bg-gradient-to-r from-blue-50/80 to-purple-50/80 shadow-md shadow-blue-100/50 border-2 border-blue-100/50"
+                      : "bg-white/80 backdrop-blur-sm hover:bg-gradient-to-r hover:from-gray-50/50 hover:to-gray-50/30 hover:shadow-sm border-2 border-transparent hover:border-gray-200/60"
+                      }`}
+                  >
+                    {selected && (
+                      <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full" />
+                    )}
+
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 to-purple-500/0 rounded-2xl opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
+
+                    <div className="flex items-center gap-3 relative">
+                      <div className="relative">
+                        <div
+                          className={`w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-lg ${user.avatarColor}`}
+                          style={{
+                            backgroundImage: user.avatarColor.includes(
+                              "gradient"
+                            )
+                              ? user.avatarColor
+                              : `linear-gradient(135deg, ${user.avatarColor}, ${user.avatarColor}99)`,
+                          }}
+                        >
+                          <span className="text-base font-bold">
+                            {initials(user.name)}
+                          </span>
+                        </div>
+
+                        <div
+                          className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-3 border-white shadow-sm ${getStatusColor(
+                            user.status
+                          )} flex items-center justify-center`}
+                        >
+                          {user.status === "online" && (
+                            <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex-1 min-w-0 ">
+                        <div className="flex items-start justify-between gap-2 ">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <h3 className="font-bold text-gray-900 truncate text-sm">
+                              {user.name}
+                            </h3>
+                          </div>
+                        </div>
+
+                        <p className="sublabel-text text-gray-600 truncate mb-[2px] leading-tight">
+                          {user.lastMessage || "Start a conversation..."}
+                        </p>
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`text-[10px] px-2 py-[2px] rounded-full font-medium ${user.status === "online"
+                                ? "bg-gradient-to-r from-green-100 to-emerald-100 text-emerald-700 border border-emerald-200/50"
+                                : user.status === "away"
+                                  ? "bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-700 border border-amber-200/50"
+                                  : "bg-gradient-to-r from-gray-100 to-gray-200 text-gray-600 border border-gray-200/50"
+                                }`}
+                            >
+                              {getStatusText(user.status)}
+                            </span>
+                          </div>
+
+                          
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+              <h2 className="text-white px-6  py-1 bg-gradient-to-r text-[10px] from-blue-500 to-purple-500 w-20 rounded-sm">+New</h2>
+              {allUsers.map((user) => {
                 const selected = selectedChat?.id === user.id;
                 return (
                   <motion.div
@@ -251,15 +337,7 @@ export function SidebarContent({
                             </span>
                           </div>
 
-                          {!!user.unreadCount && user.unreadCount > 0 && (
-                            <motion.span
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              className="px-2.5 py-1 text-xs font-bold bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full min-w-[24px] text-center shadow-sm"
-                            >
-                              {user.unreadCount}
-                            </motion.span>
-                          )}
+                   
                         </div>
                       </div>
                     </div>

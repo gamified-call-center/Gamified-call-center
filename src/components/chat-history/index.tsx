@@ -222,7 +222,7 @@ export default function ChatHistory() {
             </thead>
 
             <tbody className="divide-y divide-gray-200/60">
-              {!loading ? (
+              {loading ? (
                 <tr>
                   <td colSpan={5} className="p-10 text-center">
                     <div className="flex flex-col items-center justify-center gap-3">

@@ -714,16 +714,7 @@ const AgentPerformanceLeaderboard = () => {
             </div>
 
             <div className="flex items-center gap-4">
-              <button
-                onClick={() => setIsLive(!isLive)}
-                className={`px-6 py-2.5 rounded-xl  font-medium transition-all duration-200 flex items-center gap-2 ${isLive
-                  ? "bg-linear-to-r from-red-500 to-orange-500 text-white hover:shadow-lg hover:shadow-red-200"
-                  : "bg-linear-to-r from-emerald-500 to-teal-500 text-white hover:shadow-lg hover:shadow-emerald-200"
-                  }`}
-              >
-                <Zap className="w-4 h-4" />
-                {isLive ? "Pause Live Updates" : "Enable Live Updates"}
-              </button>
+              
 
               <div className="text-sm app-text">
                 Last updated: Just now

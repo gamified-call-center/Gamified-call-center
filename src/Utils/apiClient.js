@@ -27,11 +27,14 @@ const URLS = {
   chatHistory: `${base_url}/chat/admin/chat-history`,
   chatHistoryDelete: `${base_url}/chat/admin/chat-history/delete`,
   resourcesadmin: `${base_url}/chat/admin/resources`,
+  deleteChatMessage: `${base_url}/chat/messages`,
+  chatUserList: `${base_url}/chat/sidebar`,
   users: `${base_url}/users`,
   applications: `${base_url}/public/applications`,
   adminapplications: `${base_url}/admin/applications`,
   dashboard: `${base_url}/dashboard`,
-  notifications:`${base_url}/notifications`
+  notifications:`${base_url}/notifications`,
+  getDesignations: `${base_url}/api/designation`
 };
 
 export function encodeQueryData(data = {}) {

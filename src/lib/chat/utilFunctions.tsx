@@ -86,22 +86,35 @@ export function getTimeHour(isoString: string): string {
 
 
 
+import React from "react";
+
 export function IconBtn({
-  children,
   label,
-  className,
+  className = "",
+  onClick,
+  type = "button",
+  disabled,
+  children,
 }: {
-  children: React.ReactNode;
   label: string;
   className?: string;
+  onClick?: () => void;
+  type?: "button" | "submit" | "reset";
+  disabled?: boolean;
+  children: React.ReactNode;
 }) {
   return (
     <button
-      className={
-        className || "p-2 rounded-xl hover:bg-gray-100 transition-colors"
-      }
+      type={type}
       aria-label={label}
-      type="button"
+      title={label}
+      onClick={onClick}
+      disabled={disabled}
+      className={[
+        "p-2 rounded-xl inline-flex items-center justify-center",
+        disabled ? "opacity-60 cursor-not-allowed" : "",
+        className,
+      ].join(" ")}
     >
       {children}
     </button>

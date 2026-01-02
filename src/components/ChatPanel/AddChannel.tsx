@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Search, Users, Check } from "lucide-react";
 import apiClient from "@/Utils/apiClient";
+import toast from "react-hot-toast";
 
 type UserPick = {
   id: string;
@@ -12,7 +13,7 @@ type UserPick = {
 };
 
 type CreateChannelResponse = {
-  threadId: string;
+  id: string;
   title: string;
   kind: "channel";
 };
@@ -74,7 +75,6 @@ export function AddChannel({
 
     try {
       setLoading(true);
-        console.log("creating channal")
       const res = await apiClient.post(
         `${apiClient.URLS.chatChannels}?userId=${currentUserId}`,
         {
@@ -85,9 +85,9 @@ export function AddChannel({
       console.log("created channal",res)
       const data: CreateChannelResponse = (res.data ?? res.body) as any;
 
-      if (!data?.threadId) throw new Error("threadId missing");
+      if (!data?.id) throw new Error("threadId missing");
 
-      onCreated({ threadId: data.threadId, title: data.title, memberIds });
+      onCreated({ threadId: data.id, title: data.title, memberIds });
       onClose();
 
       // reset UI
@@ -95,8 +95,8 @@ export function AddChannel({
       setQuery("");
       setSelected(new Set());
     } catch (e: any) {
-      console.error(e);
-      alert(e?.message ?? "Failed to create channel");
+      toast.error(e);
+      toast.error(e?.message ?? "Failed to create channel");
     } finally {
       setLoading(false);
     }

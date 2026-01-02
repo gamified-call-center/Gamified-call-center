@@ -46,6 +46,8 @@ export default function ChatPanel() {
   const [channelList, setChannelList] = useState<Channel[]>([] as any);
   const [addChannelOpen, setAddChannelOpen] = useState(false);
 
+  const [allUsers, setAllUsers] = useState([]);
+
   const [channelDetails, setChannelDetails] = useState<ChannelDetails | null>(
     null
   );
@@ -60,7 +62,6 @@ export default function ChatPanel() {
     setSelectedChannel(null);
     setChannelDetails(null);
   };
-
 
   const filteredUsers = useMemo(
     () =>
@@ -106,7 +107,6 @@ export default function ChatPanel() {
   const fetchChannelDetails = async (threadId: string) => {
     if (!safeUserId) return null;
 
-
     const url =
       `${apiClient.URLS.chat}/threads/${threadId}` +
       `?userId=${encodeURIComponent(safeUserId)}`;
@@ -134,14 +134,16 @@ export default function ChatPanel() {
     return details;
   };
 
-  const handleAddMembers = async (threadId: string,selectedIds: string[]) => {
+  const handleAddMembers = async (threadId: string, selectedIds: string[]) => {
     if (!safeUserId) return;
 
-    console.log("member ids", selectedIds);
     await addMembersToChannel(threadId, selectedIds);
   };
 
-  const addMembersToChannel = async (threadId: string, selectedIds: string[]) => {
+  const addMembersToChannel = async (
+    threadId: string,
+    selectedIds: string[]
+  ) => {
     if (!safeUserId || !selectedIds.length) return;
 
     try {
@@ -151,8 +153,9 @@ export default function ChatPanel() {
         }/channels/${threadId}/members?userId=${encodeURIComponent(
           safeUserId
         )}`,
-        { selectedIds }
+        { memberIds:selectedIds }
       );
+      console.log("selectedIds", selectedIds);
 
       await refreshChannelDetails(threadId);
       toast.success("Members added");
@@ -252,10 +255,11 @@ export default function ChatPanel() {
       id: clientId,
       content: newMessage.trim(),
       senderId: safeUserId || "me",
-      senderName: "You",
+      senderName: session?.data?.user?.lastName || "You",
       timestamp: getTimeHour(new Date().toISOString()),
       isOwn: true,
     };
+    console.log(session?.data?.user)
 
     setMessagesByThread((prev) => {
       const list = prev[threadKey] ?? [];
@@ -279,7 +283,7 @@ export default function ChatPanel() {
     }
   };
 
-  const openDmWithUser = async (u: ChatUser) => {
+  const openDmWithUser = async (u: any) => {
     setSelectedChannel(null);
     setChannelDetails(null);
     setMessagesByThread({});
@@ -287,20 +291,29 @@ export default function ChatPanel() {
     try {
       if (!safeUserId) return;
 
-      const dmRes = await apiClient.post(
-        `${apiClient.URLS.chatDm}?userId=${encodeURIComponent(safeUserId)}`,
-        { otherUserId: u.id }
-      );
+      let threadId = u.threadId;
 
-      const threadId = dmRes.body?.threadId as string;
-      if (!threadId) throw new Error("threadId missing from /chat/dm response");
+      // if no thread yet, create
+      if (!threadId) {
+        const dmRes = await apiClient.post(
+          `${apiClient.URLS.chatDm}?userId=${encodeURIComponent(safeUserId)}`,
+          { otherUserId: u.id }
+        );
 
-      const updated = { ...(u as any), threadId };
-      setSelectedChat(updated);
+        threadId = dmRes.body?.threadId as string;
+        if (!threadId)
+          throw new Error("threadId missing from /chat/dm response");
 
-      setDmList((prev: any) =>
-        prev.map((x: any) => (x.id === u.id ? updated : x))
-      );
+        // store threadId in lists
+        const updated = { ...u, threadId };
+        setSelectedChat(updated);
+
+        setDmList((prev: any) =>
+          prev.map((x: any) => (x.id === u.id ? updated : x))
+        );
+      } else {
+        setSelectedChat(u);
+      }
 
       const msgRes = await apiClient.get(
         `${
@@ -310,16 +323,19 @@ export default function ChatPanel() {
         )}&limit=50`
       );
 
-      const history = (msgRes.body?.data ?? msgRes.body ?? []).map(
-        (m: any) => ({
+      const history = (msgRes.body?.data ?? msgRes.body ?? [])
+        .map((m: any) => ({
           id: m.id,
           content: m.content,
           senderId: m.senderId,
           senderName: m.senderName ?? "Unknown",
+          // keep raw timestamp for sorting
+          _ts: new Date(m.timestamp).getTime(),
           timestamp: getTimeHour(m.timestamp),
           isOwn: m.senderId === safeUserId,
-        })
-      ) as Message[];
+        }))
+        .sort((a: any, b: any) => a._ts - b._ts)
+        .map(({ _ts, ...rest }: any) => rest);
 
       const key = `dm:${threadId}`;
       setMessagesByThread((prev) => ({ ...prev, [key]: history }));
@@ -337,16 +353,12 @@ export default function ChatPanel() {
     try {
       if (!safeUserId) return;
 
-      console.log("Channel details 1");
       const threadId = c.id;
       if (!threadId) throw new Error("channel threadId missing");
-      console.log("Channel details 2");
 
       setSelectedChannel(c);
-      console.log("Channel details 3");
 
       const details = await fetchChannelDetails(threadId);
-      console.log("Channel details", details);
 
       if (details) {
         setChannelDetails(details);
@@ -364,16 +376,24 @@ export default function ChatPanel() {
         { params: { userId: safeUserId, limit: 50 } }
       );
 
-      const history = (msgRes.body?.data ?? msgRes.body ?? []).map(
-        (m: any) => ({
-          id: m.id,
-          content: m.content,
-          senderId: m.senderId,
-          senderName: m.senderName ?? "Unknown",
-          timestamp: getTimeHour(m.timestamp),
-          isOwn: m.senderId === safeUserId,
-        })
-      ) as Message[];
+      const history = ((msgRes.body?.data ?? msgRes.body ?? [])
+  .map((m: any) => ({
+    id: m.id,
+    content: m.content,
+    senderId: m.senderId,
+    senderName: m.senderName ?? "Unknown",
+    timestamp: m.timestamp,          // keep raw timestamp for sorting
+    isOwn: m.senderId === safeUserId,
+  }))
+  .sort(
+    (a: any, b: any) =>
+      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+  )
+  .map((m: any) => ({
+    ...m,
+    timestamp: getTimeHour(m.timestamp), // format AFTER sorting
+  })) as Message[])
+
 
       const key = `channel:${threadId}`;
 
@@ -387,11 +407,11 @@ export default function ChatPanel() {
     }
   };
 
-  const loadThreads = async () => {
+  const loadThreads = async (): Promise<{ receiverIds: string[] }> => {
     setLoading(true);
     try {
       const id = session.data?.user?.id;
-      if (!id) return;
+      if (!id) return { receiverIds: [] };
 
       const url = `${apiClient.URLS.chat}/threads/?userId=${encodeURIComponent(
         id
@@ -399,6 +419,27 @@ export default function ChatPanel() {
       const res = (await apiClient.get(url)) as any;
 
       const threads = res?.body ?? [];
+      if (res?.status !== 200) return { receiverIds: [] };
+
+      const dms: any[] = threads
+        .filter((t: any) => t.kind === "dm")
+        .map((t: any) => ({
+          id: t.receiverId, // user id (other person)
+          receiverId: t.receiverId, // user id (other person)
+          threadId: t.id, // thread id
+          name: t.title ?? "",
+          status: "offline",
+          unreadCount: t.unreadCount,
+          lastMessage: t.lastMessage,
+          timestamp: t.timestamp,
+          avatarColor: "bg-blue-500",
+        }))
+        .sort((a: any, b: any) => {
+          const tA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+          const tB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+          return tB - tA;
+        });
+
       const chans: Channel[] = threads
         .filter((t: any) => t.kind === "channel")
         .map((t: any) => ({
@@ -408,26 +449,44 @@ export default function ChatPanel() {
           unreadCount: t.unreadCount ?? 0,
           lastMessage: t.lastMessage ?? "",
           timestamp: t.timestamp ?? "",
-        }));
+        }))
+        .sort((a: any, b: any) => {
+          const tA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+          const tB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+          return tB - tA;
+        });
 
+      setDmList(dms as any);
       setChannelList(chans);
+
+      const receiverIds = dms
+        .map((d) => d.receiverId)
+        .filter(Boolean)
+        .map(String);
+
+      return { receiverIds };
     } catch (e) {
       console.error("Failed to load threads", e);
       toast.error("Failed to load channels");
+      return { receiverIds: [] };
     } finally {
       setLoading(false);
     }
   };
 
-  const loadAllUsers = async (id: string) => {
+  const loadAllUsers = async (id: string, receiverIds: string[]) => {
     if (!id) return;
     setLoading(true);
     try {
       const res = await apiClient.get(apiClient.URLS.user);
       const all = (res.body.data ?? []) as any[];
+
       if (res?.status === 200) {
+        const dmReceiverIds = new Set(receiverIds.map(String));
+
         const mapped: ChatUser[] = all
           .filter((u) => u.id !== id)
+          // .filter((u) => !dmReceiverIds.has(String(u.id)))
           .map((u) => ({
             id: u.id,
             name: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email,
@@ -437,7 +496,9 @@ export default function ChatPanel() {
             timestamp: "",
             avatarColor: "bg-blue-500",
           }));
-        setDmList(mapped as any);
+
+        console.log(mapped);
+        setAllUsers(mapped as any);
         toast.success("Users loaded");
       }
     } catch (e) {
@@ -449,14 +510,21 @@ export default function ChatPanel() {
   };
 
   useEffect(() => {
-    if (session?.status === "authenticated") {
-      setUser(session.data.user);
-      setToken(session.data.token);
-      loadAllUsers(session.data.user?.id as string);
-      loadThreads();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.status]);
+    if (session.status !== "authenticated") return;
+
+    const token = (session.data as any)?.token;
+    if (!token) return;
+
+    const init = async () => {
+      const user = session.data.user;
+      setUser(user);
+      setToken(token);
+      const { receiverIds } = await loadThreads();
+      await loadAllUsers(user?.id as string, receiverIds as string[]);
+    };
+
+    init();
+  }, [session.status, (session.data as any)?.token]);
 
   useEffect(() => {
     if (!safeUserId) return;
@@ -491,7 +559,6 @@ export default function ChatPanel() {
     }
   }, [isBelow1300]);
 
-  // receiving Messages
   useEffect(() => {
     const socket = socketRef.current;
     if (!socket) return;
@@ -604,14 +671,28 @@ export default function ChatPanel() {
     if (!socket) return;
 
     const onOnline = ({ userId }: { userId: string }) => {
-      setDmList((prev) =>
-        prev.map((u) => (u.id === userId ? { ...u, status: "online" } : u))
+      setDmList((prev: any) =>
+        prev.map((u: any) =>
+          u.receiverId === userId ? { ...u, status: "online" } : u
+        )
+      );
+
+      setAllUsers((prev: any) =>
+        prev.map((u: any) => (u.id === userId ? { ...u, status: "online" } : u))
       );
     };
 
     const onOffline = ({ userId }: { userId: string }) => {
-      setDmList((prev) =>
-        prev.map((u) => (u.id === userId ? { ...u, status: "offline" } : u))
+      setDmList((prev: any) =>
+        prev.map((u: any) =>
+          u.receiverId === userId ? { ...u, status: "offline" } : u
+        )
+      );
+
+      setAllUsers((prev: any) =>
+        prev.map((u: any) =>
+          u.id === userId ? { ...u, status: "offline" } : u
+        )
       );
     };
 
@@ -621,6 +702,38 @@ export default function ChatPanel() {
     return () => {
       socket.off("user:online", onOnline);
       socket.off("user:offline", onOffline);
+    };
+  }, []);
+
+  useEffect(() => {
+    const socket = socketRef.current;
+    if (!socket) return;
+
+    const onPresenceState = ({
+      onlineUserIds,
+    }: {
+      onlineUserIds: string[];
+    }) => {
+      const online = new Set(onlineUserIds);
+
+      setDmList((prev: any) =>
+        prev.map((u: any) => ({
+          ...u,
+          status: online.has(u.receiverId) ? "online" : "offline",
+        }))
+      );
+
+      setAllUsers((prev: any) =>
+        prev.map((u: any) => ({
+          ...u,
+          status: online.has(u.id) ? "online" : "offline",
+        }))
+      );
+    };
+
+    socket.on("presence:state", onPresenceState);
+    return () => {
+      socket.off("presence:state", onPresenceState);
     };
   }, []);
 
@@ -700,6 +813,7 @@ export default function ChatPanel() {
                 onSelectChannel={(c) => openChannel(c)}
                 isAdmin={user?.systemRole === "ADMIN"}
                 onClickCreateChannel={() => setAddChannelOpen(true)}
+                allUsers={allUsers}
               />
             </div>
           </div>
@@ -727,7 +841,7 @@ export default function ChatPanel() {
               onAddMembers={handleAddMembers}
               onRemoveMember={removeMemberFromChannel}
               onDeleteChannel={deleteChannel}
-              allUsers={dmList}
+              allUsers={allUsers}
             />
           </div>
         </div>
@@ -779,7 +893,7 @@ export default function ChatPanel() {
                     onAddMembers={handleAddMembers}
                     onRemoveMember={removeMemberFromChannel}
                     onDeleteChannel={deleteChannel}
-                    allUsers={dmList}
+                    allUsers={allUsers}
                   />
                 </div>
               </motion.div>
@@ -791,7 +905,7 @@ export default function ChatPanel() {
           <AddChannel
             open={addChannelOpen}
             onClose={() => setAddChannelOpen(false)}
-            users={filteredUsers.filter((u) => u.id !== safeUserId)}
+            users={allUsers.filter((u:any) => u.id !== safeUserId)}
             currentUserId={safeUserId}
             onCreated={({ threadId, title }) => {
               setChannelList((prev: any) => [

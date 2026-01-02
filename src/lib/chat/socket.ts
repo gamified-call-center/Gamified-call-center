@@ -56,7 +56,7 @@ export function getSocket(params: { userId?: string; token?: string }) {
     });
 
     socket.on("connect_error", (err) => {
-      console.error("socket connect_error:", err?.message || err);
+      console.log("socket connect_error:", err?.message || err);
     });
   }
 

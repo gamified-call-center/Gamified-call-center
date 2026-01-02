@@ -4,6 +4,7 @@ export type PresenceStatus = "online" | "away" | "offline";
 export interface ChatUser {
   id: string;
   name: string;
+  receiverId?: string;
   status: PresenceStatus;
   lastSeen?: string;
   unreadCount?: number;
@@ -91,6 +92,6 @@ export type ChannelDetails = {
   id: string;
   kind: "channel" | "dm";
   title: string | null;
-  isAdmin?: boolean;
+  isOwner?: boolean;
   members?: ChannelMember[];
 };

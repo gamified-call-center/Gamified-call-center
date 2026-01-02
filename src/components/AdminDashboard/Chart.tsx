@@ -12,16 +12,13 @@ import {
   Tooltip,
 } from "recharts";
 import { motion } from "framer-motion";
-import {
-  TrendingUp,
-  Users,
-  FileText,
-  ChevronDown,
-  Zap,
-  BarChart3,
-} from "lucide-react";
+import { TrendingUp, Users, FileText, Zap, BarChart3 } from "lucide-react";
 import apiClient from "../../Utils/apiClient";
 import Loader from "@/commonComponents/Loader";
+
+// ✅ use your common component (adjust path/name as per your project)
+import CommonSelect from "../../commonComponents/DropDown";
+import toast from "react-hot-toast";
 
 /* -------------------- Types -------------------- */
 
@@ -50,7 +47,6 @@ type AgentOption = {
   name: string;
 };
 
-
 /* -------------------- Helpers -------------------- */
 
 const fmt = new Intl.NumberFormat();
@@ -70,7 +66,7 @@ function formatToDayMonth(dateStr: string): string {
   return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
 }
 
-/* -------------------- UI Subcomponents (same styling) -------------------- */
+/* -------------------- UI Subcomponents -------------------- */
 
 type StatCardProps = {
   label: string;
@@ -97,12 +93,7 @@ function StatCard({
     <motion.div
       initial={{ opacity: 0, y: 30, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{
-        type: "spring",
-        stiffness: 100,
-        damping: 15,
-        delay,
-      }}
+      transition={{ type: "spring", stiffness: 100, damping: 15, delay }}
       whileHover={{
         y: -8,
         scale: 1.03,
@@ -111,15 +102,10 @@ function StatCard({
         transition: { type: "spring", stiffness: 300 },
       }}
       className={`relative overflow-hidden rounded-2xl p-5 shadow-lg ${bgColor} backdrop-blur-sm`}
-      style={{
-        background: gradient,
-      }}
+      style={{ background: gradient }}
     >
       <motion.div
-        animate={{
-          x: [0, 20, 0],
-          y: [0, -10, 0],
-        }}
+        animate={{ x: [0, 20, 0], y: [0, -10, 0] }}
         transition={{ duration: 4, repeat: Infinity, delay: delay * 0.5 }}
         className="absolute top-2 right-2 h-2 w-2 rounded-full bg-white/30"
       />
@@ -146,12 +132,10 @@ function StatCard({
               </motion.div>
             )}
           </div>
+
           <motion.div
-            animate={{
-              rotate: [0, 10, -10, 0],
-              scale: [1, 1.1, 1],
-            }}
-            transition={{ duration: 2, repeat: Infinity, delay: delay }}
+            animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
+            transition={{ duration: 2, repeat: Infinity, delay }}
             className="rounded-xl bg-white/20 p-3 backdrop-blur-sm"
           >
             {icon}
@@ -217,52 +201,6 @@ function FancyTooltip({
         <span className="font-bold text-emerald-600">active agents</span>{" "}
         {fmt.format(activeAgents)}
       </div>
-
-      <div className="mt-4 grid grid-cols-3 gap-3">
-        <motion.div
-          whileHover={{ scale: 1.08, rotateY: 10 }}
-          className="rounded-xl bg-gradient-to-br from-purple-100 to-purple-50 p-3 shadow-lg"
-        >
-          <div className="text-xs font-bold text-purple-700">Deals</div>
-          <div className="mt-1 text-lg font-black text-purple-900">
-            {fmt.format(deals)}
-          </div>
-        </motion.div>
-        <motion.div
-          whileHover={{ scale: 1.08, rotateY: 10 }}
-          className="rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 p-3 shadow-lg"
-        >
-          <div className="text-xs font-bold text-blue-700">Forms</div>
-          <div className="mt-1 text-lg font-black text-blue-900">
-            {fmt.format(forms)}
-          </div>
-        </motion.div>
-        <motion.div
-          whileHover={{ scale: 1.08, rotateY: 10 }}
-          className="rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50 p-3 shadow-lg"
-        >
-          <div className="text-xs font-bold text-emerald-700">
-            Active Agents
-          </div>
-          <div className="mt-1 text-lg font-black text-emerald-900">
-            {fmt.format(activeAgents)}
-          </div>
-        </motion.div>
-      </div>
-
-      <div className="mt-3 flex justify-center gap-1">
-        {[1, 2, 3].map((i) => (
-          <motion.div
-            key={i}
-            animate={{
-              scale: [1, 1.5, 1],
-              opacity: [0.3, 1, 0.3],
-            }}
-            transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.2 }}
-            className="h-1 w-1 rounded-full bg-gradient-to-r from-purple-400 to-blue-400"
-          />
-        ))}
-      </div>
     </motion.div>
   );
 }
@@ -276,17 +214,10 @@ export default function DealsChatCard() {
   const [loadingChart, setLoadingChart] = useState(false);
 
   const [selectedAgentId, setSelectedAgentId] = useState<string>("all");
-
   const [agents, setAgents] = useState<AgentOption[]>([]);
 
   const [timeline, setTimeline] = useState<DealsChartPoint[]>([]);
-  const [totals, setTotals] = useState<{
-    totalForms: number;
-    totalDeals: number;
-    avgDealsPerDay: number;
-    peakAgents: number;
-    activeAgentsCount: number;
-  }>({
+  const [totals, setTotals] = useState({
     totalForms: 0,
     totalDeals: 0,
     avgDealsPerDay: 0,
@@ -298,81 +229,45 @@ export default function DealsChatCard() {
     try {
       setLoadingAgents(true);
 
+      const r = await apiClient.get(`${apiClient.URLS.getDesignations}`);
+      const designations = r?.body ?? [];
+
+      const agentDesignation = designations.find((d: any) => {
+        const name = String(d?.name ?? "").toLowerCase();
+        return name === "agent";
+      });
+
       const res = await apiClient.get(
-        `${apiClient.URLS.user}/by-designation/2d0f3405-bd2f-400c-8ba0-f6d20d5efc03`
+        `${apiClient.URLS.user}/by-designation/${agentDesignation?.id}`
       );
 
       const body = res?.body?.data;
-      const safe: Array<{ id: string; name: string }> = Array.isArray(body)
+      const safe: AgentOption[] = Array.isArray(body)
         ? body
-          .map((r: any) => {
-            const id = typeof r?.id === "string" ? r.id : "";
-            const first =
-              typeof r?.firstName === "string" ? r.firstName.trim() : "";
-            const last =
-              typeof r?.lastName === "string" ? r.lastName.trim() : "";
+            .map((u: any) => {
+              const id = typeof u?.id === "string" ? u.id : "";
+              const first =
+                typeof u?.firstName === "string" ? u.firstName.trim() : "";
+              const last =
+                typeof u?.lastName === "string" ? u.lastName.trim() : "";
 
-            const name =
-              [first, last].filter(Boolean).join(" ").trim() || "Unknown";
+              const name =
+                [first, last].filter(Boolean).join(" ").trim() || "Unknown";
 
-            return { id, name };
-          })
-          .filter((a) => a.id)
+              return { id, name };
+            })
+            .filter((a) => a.id)
         : [];
-
-      console.log(safe, body, res);
 
       setAgents(safe);
     } catch {
       setAgents([]);
+      toast.error("Failed to fetch agents");
     } finally {
       setLoadingAgents(false);
     }
   };
 
-  const fetchDashboard = async () => {
-    try {
-      setLoadingChart(true);
-      const res = await apiClient.get(
-        `${apiClient.URLS.dashboard}/recent-10-days`
-      );
-
-      const body = (res?.body ?? {}) as Partial<DashboardRecent10DaysResponse>;
-      const rawTimeline = Array.isArray(body.timeline) ? body.timeline : [];
-
-      const mapped: DealsChartPoint[] = rawTimeline.map((d: any) => ({
-        date: formatToDayMonth(String(d?.date ?? "")),
-        deals: safeNum(d?.deals),
-        forms: safeNum(d?.forms),
-        activeAgents: safeNum(d?.activeAgents),
-      }));
-
-      const peakAgents = mapped.reduce(
-        (m, d) => Math.max(m, safeNum(d.activeAgents)),
-        0
-      );
-
-      setTimeline(mapped);
-      setTotals({
-        totalForms: safeNum(body.totalForms),
-        totalDeals: safeNum(body.totalDeals),
-        avgDealsPerDay: safeNum(body.avgDealsPerDay),
-        peakAgents,
-        activeAgentsCount: safeNum(body.activeAgentsCount),
-      });
-    } catch {
-      setTimeline([]);
-      setTotals({
-        totalForms: 0,
-        totalDeals: 0,
-        avgDealsPerDay: 0,
-        peakAgents: 0,
-        activeAgentsCount: 0,
-      });
-    } finally {
-      setLoadingChart(false);
-    }
-  };
   const fetchAgentDashboard = async (agentId: string) => {
     try {
       setLoadingChart(true);
@@ -409,6 +304,7 @@ export default function DealsChatCard() {
         peakAgents,
         activeAgentsCount: safeNum(body.activeAgentsCount),
       });
+      toast.success("Data fetched successfully");
     } catch {
       setTimeline([]);
       setTotals({
@@ -418,14 +314,16 @@ export default function DealsChatCard() {
         peakAgents: 0,
         activeAgentsCount: 0,
       });
-    } finally {
+      toast.error("Failed to fetch data");
+    }
+     finally {
       setLoadingChart(false);
     }
   };
 
   useEffect(() => {
     fetchAgents();
-    fetchDashboard();
+    fetchAgentDashboard("all");
   }, []);
 
   useEffect(() => {
@@ -477,7 +375,12 @@ export default function DealsChatCard() {
   );
 
   const loading = loadingAgents || loadingChart;
-  if (loading) return <Loader />
+  if (loading) return <Loader />;
+
+  const agentOptions = [
+    { label: "All Agents", value: "all" },
+    ...agents.map((a) => ({ label: a.name, value: a.id })),
+  ];
 
   return (
     <motion.section
@@ -486,7 +389,6 @@ export default function DealsChatCard() {
       transition={{ duration: 0.6 }}
       className="w-full"
     >
-
       <div
         className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white via-white to-blue-50/50 p-6 shadow-2xl"
         style={{
@@ -495,20 +397,12 @@ export default function DealsChatCard() {
         }}
       >
         <motion.div
-          animate={{
-            x: [0, 50, 0],
-            y: [0, -30, 0],
-            rotate: [0, 180, 360],
-          }}
+          animate={{ x: [0, 50, 0], y: [0, -30, 0], rotate: [0, 180, 360] }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           className="absolute top-10 right-10 h-32 w-32 rounded-full bg-gradient-to-r from-purple-200/30 to-pink-200/30 blur-xl"
         />
         <motion.div
-          animate={{
-            x: [0, -40, 0],
-            y: [0, 40, 0],
-            rotate: [360, 180, 0],
-          }}
+          animate={{ x: [0, -40, 0], y: [0, 40, 0], rotate: [360, 180, 0] }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
           className="absolute bottom-10 left-10 h-40 w-40 rounded-full bg-gradient-to-r from-blue-200/30 to-cyan-200/30 blur-xl"
         />
@@ -522,10 +416,7 @@ export default function DealsChatCard() {
           <div className="flex-1">
             <div className="flex items-center gap-3">
               <motion.div
-                animate={{
-                  scale: [1, 1.2, 1],
-                  rotate: [0, 360],
-                }}
+                animate={{ scale: [1, 1.2, 1], rotate: [0, 360] }}
                 transition={{ duration: 3, repeat: Infinity }}
                 className="rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 p-2"
               >
@@ -545,32 +436,15 @@ export default function DealsChatCard() {
             </div>
           </div>
 
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.98 }}
-            className="relative"
-          >
-            <select
+          <div className="min-w-[240px] z-40">
+            <CommonSelect
               value={selectedAgentId}
-              onChange={(e) => setSelectedAgentId(e.target.value)}
-              className="h-12 min-w-[240px] appearance-none rounded-2xl border-2 border-blue-200 bg-white px-5 pr-12 text-sm font-bold text-gray-800 shadow-lg outline-none transition-all hover:border-blue-300 focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
-            >
-              <option value="all">All Agents</option>
-              {agents.map((a: any) => (
-                <option key={a.id} value={a.id} className="py-2">
-                  {a.name}
-                </option>
-              ))}
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center">
-              <motion.div
-                animate={{ y: [0, 2, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <ChevronDown className="h-5 w-5 text-blue-500" />
-              </motion.div>
-            </div>
-          </motion.div>
+              options={agentOptions}
+              onChange={(val: string) => setSelectedAgentId(val)}
+              placeholder="Select an agent"
+              className="mb-4 z-30"
+            />
+          </div>
         </motion.div>
 
         <div className="relative z-10 mb-8 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
@@ -590,29 +464,6 @@ export default function DealsChatCard() {
               "0 15px 50px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.5)",
           }}
         >
-          <div className="absolute inset-0 overflow-hidden rounded-3xl">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <motion.div
-                key={i}
-                animate={{
-                  y: [0, -20, 0],
-                  opacity: [0.2, 0.8, 0.2],
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  delay: i * 0.4,
-                  ease: "easeInOut",
-                }}
-                className="absolute h-1 w-1 rounded-full bg-gradient-to-r from-purple-400 to-blue-400"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`,
-                }}
-              />
-            ))}
-          </div>
-
           <div className="relative h-[360px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <ComposedChart
@@ -622,27 +473,17 @@ export default function DealsChatCard() {
                 <defs>
                   <linearGradient id="dealFill" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.8} />
-                    <stop
-                      offset="90%"
-                      stopColor="#8b5cf6"
-                      stopOpacity={0.1}
-                    />
+                    <stop offset="90%" stopColor="#8b5cf6" stopOpacity={0.1} />
                   </linearGradient>
+
                   <linearGradient id="formsFill" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.9} />
-                    <stop
-                      offset="90%"
-                      stopColor="#3b82f6"
-                      stopOpacity={0.2}
-                    />
+                    <stop offset="90%" stopColor="#3b82f6" stopOpacity={0.2} />
                   </linearGradient>
+
                   <linearGradient id="agentsFill" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#10b981" stopOpacity={0.9} />
-                    <stop
-                      offset="90%"
-                      stopColor="#10b981"
-                      stopOpacity={0.2}
-                    />
+                    <stop offset="90%" stopColor="#10b981" stopOpacity={0.2} />
                   </linearGradient>
                 </defs>
 
@@ -702,44 +543,6 @@ export default function DealsChatCard() {
                 />
               </ComposedChart>
             </ResponsiveContainer>
-          </div>
-
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-            <motion.span
-              whileHover={{ scale: 1.1, y: -3 }}
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-purple-100 to-purple-50 px-5 py-2.5 text-sm font-bold text-purple-900 shadow-lg"
-            >
-              <motion.span
-                animate={{ scale: [1, 1.3, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="h-3 w-3 rounded-full bg-gradient-to-r from-purple-500 to-purple-600"
-              />
-              Deals
-            </motion.span>
-
-            <motion.span
-              whileHover={{ scale: 1.1, y: -3 }}
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-blue-100 to-blue-50 px-5 py-2.5 text-sm font-bold text-blue-900 shadow-lg"
-            >
-              <motion.span
-                animate={{ scale: [1, 1.3, 1] }}
-                transition={{ duration: 2, repeat: Infinity, delay: 0.2 }}
-                className="h-3 w-3 rounded-full bg-gradient-to-r from-blue-500 to-blue-600"
-              />
-              Forms
-            </motion.span>
-
-            <motion.span
-              whileHover={{ scale: 1.1, y: -3 }}
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-emerald-100 to-emerald-50 px-5 py-2.5 text-sm font-bold text-emerald-900 shadow-lg"
-            >
-              <motion.span
-                animate={{ scale: [1, 1.3, 1] }}
-                transition={{ duration: 2, repeat: Infinity, delay: 0.4 }}
-                className="h-3 w-3 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600"
-              />
-              Active Agents
-            </motion.span>
           </div>
         </motion.div>
       </div>

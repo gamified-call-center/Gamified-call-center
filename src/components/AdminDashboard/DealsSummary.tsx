@@ -1,11 +1,14 @@
 // component/dashboard/deals-summary-by-date/index.tsx
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Download, Calendar as CalendarIcon } from "lucide-react";
 import apiClient from "../../Utils/apiClient";
 import { SpinnerLoader } from "./spinner";
+import DateRangePickerPopover from "@/commonComponents/TwoPointerCalender";
+import SimpleFromToPicker from "@/commonComponents/TwoPointerCalender";
+import toast from "react-hot-toast";
 
 /* ----------------------------- Types ----------------------------- */
 
@@ -229,7 +232,8 @@ function RangeCalendar({
           const start = isStart(d);
           const end = isEnd(d);
 
-          const baseCls = "h-9 w-full rounded-xl text-xs font-semibold transition";
+          const baseCls =
+            "h-9 w-full rounded-xl text-xs font-semibold transition";
           const cls = range
             ? start || end
               ? "bg-slate-900 text-white"
@@ -315,21 +319,24 @@ export default function DealsSummaryByDate() {
 
       const safe: AgentRow[] = Array.isArray(body)
         ? body.map((r: any) => ({
-          agentId: typeof r?.agentId === "string" ? r.agentId : "",
-          agentName: typeof r?.agentName === "string" ? r.agentName : "Unknown",
-          data: Array.isArray(r?.data)
-            ? r.data.map((p: any) => ({
-              date: typeof p?.date === "string" ? p.date : "",
-              forms: safeNum(p?.forms),
-              deals: safeNum(p?.deals),
-            }))
-            : [],
-        }))
+            agentId: typeof r?.agentId === "string" ? r.agentId : "",
+            agentName:
+              typeof r?.agentName === "string" ? r.agentName : "Unknown",
+            data: Array.isArray(r?.data)
+              ? r.data.map((p: any) => ({
+                  date: typeof p?.date === "string" ? p.date : "",
+                  forms: safeNum(p?.forms),
+                  deals: safeNum(p?.deals),
+                }))
+              : [],
+          }))
         : [];
 
       setRows(safe);
+      toast.success("Deals summary fetched");
     } catch {
       setRows([]);
+      toast.error("Failed to fetch deals summary");
     } finally {
       setLoading(false);
     }
@@ -340,29 +347,13 @@ export default function DealsSummaryByDate() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fromISO, toISO]);
 
-  useEffect(() => {
-    const onDown = (e: MouseEvent) => {
-      if (!openCal) return;
-      const el = calWrapRef.current;
-      if (!el) return;
-      if (e.target instanceof Node && !el.contains(e.target)) setOpenCal(false);
-    };
-    const onEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpenCal(false);
-    };
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onEsc);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onEsc);
-    };
-  }, [openCal]);
-
   const dayKeyList = useMemo(() => days.map((d) => toISODateOnly(d)), [days]);
 
   const tableMatrix = useMemo(() => {
-    const map: Record<string, Record<string, { forms: number; deals: number }>> =
-      {};
+    const map: Record<
+      string,
+      Record<string, { forms: number; deals: number }>
+    > = {};
 
     for (const r of rows) {
       const perDay: Record<string, { forms: number; deals: number }> = {};
@@ -377,10 +368,12 @@ export default function DealsSummaryByDate() {
   }, [rows]);
 
   const rangeLabel = hasTwoPointers
-    ? `${fmtRange.format(draftRange.from!)} to ${fmtRange.format(draftRange.to!)}`
+    ? `${fmtRange.format(draftRange.from!)} to ${fmtRange.format(
+        draftRange.to!
+      )}`
     : draftRange.from
-      ? `${fmtRange.format(draftRange.from)} to —`
-      : "Select date range";
+    ? `${fmtRange.format(draftRange.from)} to —`
+    : "Select date range";
 
   const applyRange = () => {
     if (!draftRange.from || !draftRange.to) return;
@@ -455,7 +448,6 @@ export default function DealsSummaryByDate() {
       transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       className="w-full"
     >
-
       <motion.div
         whileHover={{ y: -2 }}
         transition={{ type: "spring", stiffness: 260, damping: 18 }}
@@ -471,53 +463,22 @@ export default function DealsSummaryByDate() {
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <div ref={calWrapRef} className="relative">
-                <button
-                  type="button"
-                  onClick={() => setOpenCal((v) => !v)}
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-800 shadow-sm hover:bg-slate-50"
-                >
-                  <CalendarIcon className="h-4 w-4 text-slate-600" />
-                  <span>{rangeLabel}</span>
-                </button>
-
-                {openCal ? (
-                  <div className="absolute right-0 top-[44px] z-30">
-                    <div className="space-y-2">
-                      <RangeCalendar value={draftRange} onChange={setDraftRange} />
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setOpenCal(false)}
-                          className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
-                        >
-                          Close
-                        </button>
-                        <button
-                          type="button"
-                          disabled={!hasTwoPointers}
-                          onClick={applyRange}
-                          className={`rounded-xl border px-3 py-2 text-xs font-semibold transition ${hasTwoPointers
-                            ? "border-slate-200 bg-slate-900 text-white hover:bg-slate-800"
-                            : "border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed"
-                            }`}
-                        >
-                          Apply
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-
+              <SimpleFromToPicker
+                value={draftRange}
+                onChange={setDraftRange}
+                canApply={hasTwoPointers}
+                onApply={applyRange}
+                label="Select date range"
+              />
               <button
                 type="button"
                 onClick={downloadPdf}
                 disabled={!showTable}
-                className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold shadow-sm transition ${showTable
-                  ? "border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                  : "border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed"
-                  }`}
+                className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold shadow-sm transition ${
+                  showTable
+                    ? "border-emerald-100 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                    : "border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed"
+                }`}
               >
                 <Download className="h-4 w-4" />
                 <span>Excel</span>
@@ -542,7 +503,7 @@ export default function DealsSummaryByDate() {
                     <tr>
                       <th
                         rowSpan={2}
-                        className="sticky left-0 z-20 w-[220px] min-w-[220px] border-b border-slate-200 bg-slate-50 px-4 py-3 text-left text-xs font-semibold text-slate-700"
+                        className="sticky left-0 z-20 w-[150px] min-w-[150px] border-b border-slate-200 bg-slate-50 px-4 py-3 text-left text-xs font-semibold text-slate-700"
                       >
                         Agent Name
                       </th>
@@ -561,14 +522,16 @@ export default function DealsSummaryByDate() {
                       {days.map((d) => {
                         const dk = toISODateOnly(d);
                         return (
-                          <span key={`${dk}-pair`} style={{ display: "contents" }}>
+                          <React.Fragment
+                            key={`${dk}-pair`}
+                          >
                             <th className="border-b border-slate-200 bg-white px-3 py-2 text-center text-[11px] font-semibold text-slate-500">
                               Forms
                             </th>
                             <th className="border-b border-slate-200 bg-white px-3 py-2 text-center text-[11px] font-semibold text-slate-500">
                               Deals
                             </th>
-                          </span>
+                          </React.Fragment>
                         );
                       })}
                     </tr>
@@ -608,17 +571,14 @@ export default function DealsSummaryByDate() {
                               const dk = toISODateOnly(d);
                               const v = perDay[dk] || { forms: 0, deals: 0 };
                               return (
-                                <span
-                                  key={`${key}-${dk}-pair`}
-                                  style={{ display: "contents" }}
-                                >
+                                <React.Fragment key={`${key}-${dk}-pair`}>
                                   <td className="border-b border-slate-200 px-3 py-3 text-center text-sm font-semibold text-slate-900">
                                     {fmt2.format(clampInt(v.forms))}
                                   </td>
                                   <td className="border-b border-slate-200 px-3 py-3 text-center text-sm font-semibold text-slate-900">
                                     {fmt2.format(clampInt(v.deals))}
                                   </td>
-                                </span>
+                                </React.Fragment>
                               );
                             })}
                           </tr>
