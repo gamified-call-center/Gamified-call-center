@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown, Sparkles, Check } from "lucide-react";
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 export type SelectOption = {
@@ -18,7 +18,7 @@ type CommonSelectProps = {
   minWidth?: number | string;
   disabled?: boolean;
   className?: string;
-  labelText?: string; // optional: "Select Agent"
+  labelText?: string;
 };
 
 type MenuPos = {
@@ -49,6 +49,7 @@ export default function CommonSelect({
     [options, value]
   );
 
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
 
   const close = () => setIsOpen(false);
@@ -140,22 +141,20 @@ export default function CommonSelect({
           shadow-md
         `}
       >
-        <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex items-center justify-between px-4 py-1">
           <div className="flex items-center gap-3">
             <div
               className={`
-                flex items-center justify-center w-8 h-8 rounded-lg
+                flex items-center justify-center w-6 h-6 rounded-lg
                 ${disabled ? "bg-gray-200" : "bg-gradient-to-br from-blue-50 to-indigo-50"}
               `}
             >
-              <Sparkles className={`w-4 h-4 ${disabled ? "text-gray-400" : "text-blue-500"}`} />
+              <Sparkles className={`w-3 h-3 ${disabled ? "text-gray-400" : "text-blue-500"}`} />
             </div>
 
             <div className="text-left">
-              <div className={`text-xs font-medium ${disabled ? "text-gray-400" : "text-gray-500"}`}>
-                {labelText}
-              </div>
-              <div className={`font-semibold ${selectedOption ? "text-gray-900" : "text-gray-400"}`}>
+
+              <div className={`font-semibold label-text ${selectedOption ? "text-gray-900" : "text-gray-400"}`}>
                 {selectedOption?.label || placeholder}
               </div>
             </div>

@@ -112,7 +112,7 @@ type ViewMode = "compact" | "cards";
 
 export default function DesignationsPermissionsPage() {
   const [designations, setDesignations] = useState<any[]>([]);
-  const [tab, setTab] = useState<"users" | "designations" |"applications">("users");
+  const [tab, setTab] = useState<"users" | "designations" | "applications">("users");
   const [view, setView] = useState<ViewMode>("compact");
 
   const [loading, setLoading] = useState(false);
@@ -144,7 +144,6 @@ export default function DesignationsPermissionsPage() {
   const [confirmType, setConfirmType] = useState<"ACTIVATE" | "DEACTIVATE">(
     "DEACTIVATE"
   );
-
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
   const [isAgent, setIsAgent] = useState(false);
@@ -200,7 +199,7 @@ export default function DesignationsPermissionsPage() {
     try {
       const res: any = await apiClient.get(
         apiClient.URLS.user,
-        { page, limit: LIMIT ,search: tableSearch || undefined,},
+        { page, limit: LIMIT, search: tableSearch || undefined, },
         true
       );
       const body = res?.body ?? res;
@@ -235,14 +234,14 @@ export default function DesignationsPermissionsPage() {
       setLoading(false);
     }
   };
-  useEffect(()=>{
-      fetchDesignations();
-  },[])
+  useEffect(() => {
+    fetchDesignations();
+  }, [])
 
   useEffect(() => {
-  
     fetchUsers();
-  }, [page,tableSearch]);
+  }, [page, tableSearch]);
+
   const filteredDesignations = useMemo(() => {
     const q = tableSearch.toLowerCase().trim();
     if (!q) return designations;
@@ -337,9 +336,7 @@ export default function DesignationsPermissionsPage() {
         const id = selectedDesignationId;
         res = await apiClient.put(
           `${apiClient.URLS.designation}/${id}`,
-
           payload,
-
           true
         );
       } else {
@@ -380,9 +377,10 @@ export default function DesignationsPermissionsPage() {
         `${apiClient.URLS.designation}/${d.id}`
       );
 
-      setDesignations((prev) => prev.filter((x) => x.id !== d.id));
+
       if (res.status === 200) {
         toast.success("Designation deleted");
+        setDesignations((prev) => prev.filter((x) => x.id !== d.id));
       }
     } catch (e: any) {
       toast.error(e?.response?.data?.message || "Delete failed");
@@ -441,11 +439,11 @@ export default function DesignationsPermissionsPage() {
   // }, [users, tableSearch]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
-const toggleSelect = (id: string, checked: boolean) => {
-  setSelectedIds(prev =>
-    checked ? [...prev, id] : prev.filter(x => x !== id)
-  );
-};
+  const toggleSelect = (id: string, checked: boolean) => {
+    setSelectedIds(prev =>
+      checked ? [...prev, id] : prev.filter(x => x !== id)
+    );
+  };
 
   const resetUserWizard = () => {
     setStep(1);
@@ -683,24 +681,24 @@ const toggleSelect = (id: string, checked: boolean) => {
     }
   };
   const hardDeleteSelected = async () => {
-  if (selectedIds.length === 0) return;
+    if (selectedIds.length === 0) return;
 
-  try {
-    const res = await apiClient.delete(
-      `${apiClient.URLS.user}/bulk/hard`,
-      { userIds: selectedIds },
-      true
-    );
+    try {
+      const res = await apiClient.delete(
+        `${apiClient.URLS.user}/bulk/hard`,
+        { userIds: selectedIds },
+        true
+      );
 
-    // Remove from UI
-    setUsers(prev => prev.filter(u => !selectedIds.includes(u.id)));
-    setSelectedIds([]);
-    await fetchUsers()
+      // Remove from UI
+      setUsers(prev => prev.filter(u => !selectedIds.includes(u.id)));
+      setSelectedIds([]);
+      await fetchUsers()
 
-  } catch (err: any) {
-    console.error("Bulk delete failed", err);
-  }
-};
+    } catch (err: any) {
+      console.error("Bulk delete failed", err);
+    }
+  };
 
 
   const deactivateUser = async (u: UserEntity) => {
@@ -742,30 +740,30 @@ const toggleSelect = (id: string, checked: boolean) => {
               label="Designations"
               onClick={() => setTab("designations")}
             />
-             <TabButton
+            <TabButton
               active={tab === "applications"}
-             icon={<ClipboardList size={16} />}
+              icon={<ClipboardList size={16} />}
               label="Applications"
               onClick={() => setTab("applications")}
             />
           </div>
         </div>
-     {tab === "applications" ? (
-  <ApplicationsView />
-) : (
-  
-  null
-)}
+        {tab === "applications" ? (
+          <ApplicationsView />
+        ) : (
+
+          null
+        )}
         {tab === "users" ? (
           <div className="md:pt-5 pt-2 md:space-y-4 space-y-2 app-card">
-            <div className="rounded-md shadow-2xl md:p-4  p-2 ">
+            <div className="rounded-md shadow-2xl md:px-4  p-2 ">
               <TableToolbar
                 search={{
                   value: tableSearch,
-                   onChange: (val) => {
-       setTableSearch(val); 
-      setPage(1);          
-    },
+                  onChange: (val) => {
+                    setTableSearch(val);
+                    setPage(1);
+                  },
                   placeholder:
                     "Search users by name, email, phone, role, designation...",
                   widthClassName: "min-w-full  rounded-xl",
@@ -821,7 +819,7 @@ const toggleSelect = (id: string, checked: boolean) => {
                 }
               />
             </div>
-           
+
 
 
             {displayedUsers.length === 0 ? (
@@ -937,7 +935,7 @@ const toggleSelect = (id: string, checked: boolean) => {
                     <table className="min-w-full w-full text-sm app-text border-collapse">
                       <thead className="app-table-head">
                         <tr>
-                          
+
                           <th className="px-4 py-1 text-left font-bold border app-border">
                             Name
                           </th>
@@ -975,7 +973,7 @@ const toggleSelect = (id: string, checked: boolean) => {
                         ) : (
                           displayedUsers.map((u) => (
                             <tr key={u.id} className="border-t app-row-hover">
-                               
+
                               <td className="px-4 py-0.5 border app-border font-medium text-nowrap">
                                 {u.firstName} {u.lastName}
                               </td>
@@ -1066,7 +1064,7 @@ const toggleSelect = (id: string, checked: boolean) => {
                 )}
               </>
             )}
-            {totalPages>1 &&  <div className="">
+            {totalPages > 1 && <div className="">
               <Pagination
                 page={page}
                 totalPages={totalPages}
@@ -1074,8 +1072,8 @@ const toggleSelect = (id: string, checked: boolean) => {
                 limit={LIMIT}
                 onPageChange={setPage}
               />
-            </div> }
-           
+            </div>}
+
           </div>
         ) : null}
 
@@ -1192,7 +1190,7 @@ const toggleSelect = (id: string, checked: boolean) => {
           <div className="md:pt-5 pt-2 md:space-y-4 space-y-2 app-card">
             <div className="">
               <div>
-                <div className="rounded-md shadow-2xl md:p-4  p-2 ">
+                <div className="rounded-md shadow-2xl md:px-4  p-2 mb-3">
                   <TableToolbar
                     search={{
                       value: tableSearch,
@@ -1407,7 +1405,7 @@ const toggleSelect = (id: string, checked: boolean) => {
                 )}
               </div>
             </div>
-            
+
           </div>
         ) : null}
       </div>
@@ -1591,21 +1589,27 @@ function DesignationPermissionsCrudModalBody({
   useEffect(() => {
     const fetchResources = async () => {
       try {
+        setLoading(true);
         const res: any = await apiClient.get(
           apiClient.URLS.resources,
           {},
           true
         );
-        const list: ResourceApi[] = Array.isArray(res?.body) ? res.body : [];
-        setResources(
-          list
-            .map((x) => x.tablename)
-            .filter(Boolean)
-            .sort((a, b) => a.localeCompare(b))
-        );
+        if (res?.status === 200) {
+          const list: ResourceApi[] = Array.isArray(res?.body) ? res.body : [];
+          setResources(
+            list
+              .map((x) => x.tablename)
+              .filter(Boolean)
+              .sort((a, b) => a.localeCompare(b))
+          );
+          toast.success("Resources loaded");
+          setLoading(false)
+        }
       } catch (e) {
         console.error(e);
         toast.error("Failed to load resources");
+        setLoading(false)
       }
     };
     fetchResources();

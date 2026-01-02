@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import apiClient from "@/Utils/apiClient";
 import { useRouter } from "next/navigation";
 import {
-  ChevronLeft,
   MessageSquare,
   Search,
   Hash,
@@ -84,10 +83,10 @@ const KindIcon = ({ kind }: { kind: ThreadKind }) => {
 };
 
 const MessageAvatar = ({ name, kind }: { name?: string; kind?: ThreadKind }) => {
-  const bgColor = kind === "channel" 
+  const bgColor = kind === "channel"
     ? "bg-gradient-to-br from-emerald-500 to-emerald-600"
     : "bg-gradient-to-br from-blue-500 to-purple-500";
-  
+
   const initials = name
     ?.split(" ")
     .map((n) => n[0])
@@ -279,15 +278,13 @@ export default function UserChatHistoryView({ userId }: { userId: string }) {
         {/* Filter bar */}
         <div className="px-4 md:px-4 pb-4">
           <div className="flex flex-col lg:flex-row gap-3">
-            {/* Tabs */}
-            <div className="flex flex-1 items-center gap-2 bg-gradient-to-r from-blue-50/50 to-purple-50/50 p-1 rounded-2xl border border-gray-200">
+            <div className="flex  max-w-[300px] items-center gap-2 bg-gradient-to-r from-blue-50/50 to-purple-50/50 p-1 rounded-2xl border border-gray-200">
               <button
                 onClick={() => setActiveTab("dm")}
-                className={`px-4 py-1 rounded-xl text-sm font-medium transition-all duration-200 ${
-                  activeTab === "dm"
-                    ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
-                }`}
+                className={`px-4 py-1 rounded-xl text-sm font-medium transition-all duration-200 ${activeTab === "dm"
+                  ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-md"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
+                  }`}
               >
                 <div className="flex items-center gap-2">
                   <User2 className="w-4 h-4" />
@@ -297,11 +294,10 @@ export default function UserChatHistoryView({ userId }: { userId: string }) {
 
               <button
                 onClick={() => setActiveTab("channel")}
-                className={`flex-1 px-4 py-1 rounded-xl text-sm font-medium transition-all duration-200 ${
-                  activeTab === "channel"
-                    ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-md"
-                    : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
-                }`}
+                className={`flex-1 px-4 py-1 rounded-xl text-sm font-medium transition-all duration-200 ${activeTab === "channel"
+                  ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-md"
+                  : "text-gray-600 hover:text-gray-900 hover:bg-white/50"
+                  }`}
               >
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4" />
@@ -310,15 +306,14 @@ export default function UserChatHistoryView({ userId }: { userId: string }) {
               </button>
             </div>
 
-            {/* Search */}
-            <div className="flex-1 relative">
+            <div className="flex-1 relative mt-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search threads..."
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 bg-white/80 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 placeholder-gray-400"
+                  className="w-full pl-10 pr-4 py-2 rounded-xl border placeholder:text-[12px] border-gray-200 bg-white/80 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 placeholder-gray-400"
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
                   <Filter className="w-4 h-4 text-gray-400" />
@@ -333,7 +328,7 @@ export default function UserChatHistoryView({ userId }: { userId: string }) {
       <div className="h-[calc(100vh-156px)] flex flex-col md:flex-row overflow-hidden">
         {/* Threads Sidebar */}
         <div className="w-full md:w-96 border-r border-gray-100 bg-white/60 flex flex-col">
-          <div className="p-4 border-b border-gray-100">
+          <div className="px-4 py-2  border-b border-gray-100">
             <div className="flex items-center justify-between">
               <h2 className="font-semibold text-gray-800">
                 {activeTab === "dm" ? "Direct Messages" : "Channels"}
@@ -375,18 +370,17 @@ export default function UserChatHistoryView({ userId }: { userId: string }) {
                   <button
                     key={t.id}
                     onClick={() => openThread(t)}
-                    className={`w-full text-left p-4 rounded-2xl transition-all duration-200 border ${
-                      isActive
-                        ? "bg-gradient-to-r from-blue-50 to-blue-100/50 border-blue-200 shadow-sm"
-                        : "bg-white border-gray-100 hover:border-blue-200 hover:shadow-sm"
-                    }`}
+                    className={`w-full text-left px-4 py-2 rounded-2xl transition-all duration-200 border ${isActive
+                      ? "bg-gradient-to-r from-blue-50 to-blue-100/50 border-blue-200 shadow-sm"
+                      : "bg-white border-gray-100 hover:border-blue-200 hover:shadow-sm"
+                      }`}
                   >
                     <div className="flex items-start gap-3">
                       <KindIcon kind={t.kind} />
 
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
-                          <h3 className="font-medium text-gray-900 truncate">
+                          <h3 className="font-medium label-text text-gray-900 truncate">
                             {t.title}
                           </h3>
                           <span className="text-xs text-gray-500 whitespace-nowrap">
@@ -419,11 +413,10 @@ export default function UserChatHistoryView({ userId }: { userId: string }) {
                           )}
 
                           <span
-                            className={`text-xs px-2 py-1 rounded-full ${
-                              isChannel
-                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                : "bg-blue-50 text-blue-700 border border-blue-200"
-                            }`}
+                            className={`text-xs px-2 py-1 rounded-full ${isChannel
+                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                              : "bg-blue-50 text-blue-700 border border-blue-200"
+                              }`}
                           >
                             {t.kind.toUpperCase()}
                           </span>
@@ -531,18 +524,16 @@ export default function UserChatHistoryView({ userId }: { userId: string }) {
                         <div className="h-10 w-10 rounded-full bg-gray-200" />
                         <div className="flex-1 space-y-2">
                           <div
-                            className={`h-4 w-24 rounded ${
-                              i % 2 === 0
-                                ? "bg-blue-200 ml-auto"
-                                : "bg-gray-200"
-                            }`}
+                            className={`h-4 w-24 rounded ${i % 2 === 0
+                              ? "bg-blue-200 ml-auto"
+                              : "bg-gray-200"
+                              }`}
                           />
                           <div
-                            className={`h-20 rounded-xl ${
-                              i % 2 === 0
-                                ? "bg-gradient-to-r from-blue-50 to-blue-100"
-                                : "bg-gradient-to-r from-gray-100 to-gray-50"
-                            }`}
+                            className={`h-20 rounded-xl ${i % 2 === 0
+                              ? "bg-gradient-to-r from-blue-50 to-blue-100"
+                              : "bg-gradient-to-r from-gray-100 to-gray-50"
+                              }`}
                           />
                         </div>
                       </div>
@@ -557,7 +548,7 @@ export default function UserChatHistoryView({ userId }: { userId: string }) {
                       No messages yet
                     </h3>
                     <p className="text-sm text-gray-500 max-w-sm">
-                      This thread doesn't contain any messages. Start a
+                      This thread does not contain any messages. Start a
                       conversation to see messages here.
                     </p>
                   </div>

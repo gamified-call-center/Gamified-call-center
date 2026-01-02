@@ -1,7 +1,6 @@
 import { deleteFile, uploadFile } from "../../Utils/uploadFile";
 import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import Button from "../Button";
 import Image from "next/image";
 
 export interface FileInputProps {
@@ -163,27 +162,27 @@ const FileInput = ({
         )}
       </div>
 
-      
-     {imagePreview && (
-  <div className="mt-4 flex items-center gap-4">
-    <div className="relative w-24 h-24 rounded-xl overflow-hidden border border-gray-300">
-      {isImage ? (
-        <Image src={imagePreview} alt="File preview" fill className="object-cover" />
-      ) : (
-        <div className="w-24 h-24 flex items-center justify-center bg-gray-200 text-gray-700 font-semibold">
-          PDF
+
+      {imagePreview && (
+        <div className="mt-4 flex items-center gap-4">
+          <div className="relative w-24 h-24 rounded-xl overflow-hidden border border-gray-300">
+            {isImage ? (
+              <Image src={imagePreview} alt="File preview" fill className="object-cover" />
+            ) : (
+              <div className="w-24 h-24 flex items-center justify-center bg-gray-200 text-gray-700 font-semibold">
+                PDF
+              </div>
+            )}
+            <button
+              onClick={handleDeleteFile}
+              disabled={uploading}
+              className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-500 text-white text-xs shadow-md"
+            >
+              ✕
+            </button>
+          </div>
         </div>
       )}
-      <button
-        onClick={handleDeleteFile}
-        disabled={uploading}
-        className="absolute top-2 right-2 w-7 h-7 rounded-full bg-red-500 text-white text-xs shadow-md"
-      >
-        ✕
-      </button>
-    </div>
-  </div>
-)}
 
 
       {errorMessage && (

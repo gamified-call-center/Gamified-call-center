@@ -396,11 +396,10 @@ export default function DealsPortfolioCard() {
       const res = await apiClient.get(
         `${apiClient.URLS.dashboard}/deals-portfolio?from=${nextFrom}&to=${nextTo}`
       );
-
-      const body = res?.body;
-
-      const rows: DealsPortfolioApiRow[] = Array.isArray(body)
-        ? body.map((r: any) => ({
+      if (res?.status === 200) {
+        const body = res?.body;
+        const rows: DealsPortfolioApiRow[] = Array.isArray(body)
+          ? body.map((r: any) => ({
             agentId: typeof r?.agentId === "string" ? r.agentId : "",
             agentName:
               typeof r?.agentName === "string" ? r.agentName : "Unknown",
@@ -413,27 +412,26 @@ export default function DealsPortfolioCard() {
                 ? r.totalForms
                 : 0,
           }))
-        : [];
+          : [];
 
-      const totalDeals = rows.reduce((s, r) => s + clampInt(r.totalDeals), 0);
-      const totalForms = rows.reduce((s, r) => s + clampInt(r.totalForms), 0);
+        const totalDeals = rows.reduce((s, r) => s + clampInt(r.totalDeals), 0);
+        const totalForms = rows.reduce((s, r) => s + clampInt(r.totalForms), 0);
 
-      const safe: DealsPortfolioResponse = {
-        from: nextFrom,
-        to: nextTo,
-        totalDeals,
-        totalForms,
-        agents: rows.map((r) => ({
-          agentId: r.agentId,
-          agentName: r.agentName,
-          deals: clampInt(r.totalDeals),
-        })),
-      };
+        const safe: DealsPortfolioResponse = {
+          from: nextFrom,
+          to: nextTo,
+          totalDeals,
+          totalForms,
+          agents: rows.map((r) => ({
+            agentId: r.agentId,
+            agentName: r.agentName,
+            deals: clampInt(r.totalDeals),
+          })),
+        };
 
-      setLoading(false);
-
-      setPortfolio(safe);
-      toast.success("Deals Portfolio updated");
+        setLoading(false);
+        setPortfolio(safe);
+      }
     } catch {
       setPortfolio((p) => p);
       setLoading(false);
@@ -522,11 +520,11 @@ export default function DealsPortfolioCard() {
 
   const rangeLabel = hasTwoPointers
     ? `${fmtRange.format(draftRange.from!)} to ${fmtRange.format(
-        draftRange.to!
-      )}`
+      draftRange.to!
+    )}`
     : draftRange.from
-    ? `${fmtRange.format(draftRange.from)} to —`
-    : "Select date range";
+      ? `${fmtRange.format(draftRange.from)} to —`
+      : "Select date range";
 
   const applyRange = () => {
     if (!draftRange.from || !draftRange.to) return;

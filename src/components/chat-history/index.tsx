@@ -129,18 +129,18 @@ export default function ChatHistory() {
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white border border-gray-200 hover:border-blue-300 hover:bg-gradient-to-r hover:from-white hover:to-blue-50 transition-all duration-300 group shadow-sm hover:shadow"
           >
             <Home className="w-4 h-4 text-gray-600 group-hover:text-blue-600 transition-colors duration-300" />
-            <span className="label-text font-medium font-medium text-gray-700 group-hover:text-blue-700 transition-colors duration-300">
+            <span className="label-text  font-medium text-gray-700 group-hover:text-blue-700 transition-colors duration-300">
               Home
             </span>
           </a>
 
           <ChevronRight className="w-4 h-4 text-gray-400 mx-1" />
 
-          <div className="flex items-center gap-3 px-5 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl shadow-sm">
+          <div className="flex items-center gap-3 px-5 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl shadow-sm">
             <div className="p-1.5 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-lg">
               <MessageSquare className="w-4 h-4 text-white" />
             </div>
-            <span className="label-text font-medium font-bold bg-gradient-to-r from-blue-700 to-indigo-800 bg-clip-text text-transparent">
+            <span className="label-text  font-bold bg-gradient-to-r from-blue-700 to-indigo-800 bg-clip-text text-transparent">
               Chat History
             </span>
           </div>

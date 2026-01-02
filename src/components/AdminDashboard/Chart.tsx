@@ -15,8 +15,6 @@ import { motion } from "framer-motion";
 import { TrendingUp, Users, FileText, Zap, BarChart3 } from "lucide-react";
 import apiClient from "../../Utils/apiClient";
 import Loader from "@/commonComponents/Loader";
-
-// ✅ use your common component (adjust path/name as per your project)
 import CommonSelect from "../../commonComponents/DropDown";
 import toast from "react-hot-toast";
 
@@ -101,7 +99,7 @@ function StatCard({
         rotateY: 2,
         transition: { type: "spring", stiffness: 300 },
       }}
-      className={`relative overflow-hidden rounded-2xl p-5 shadow-lg ${bgColor} backdrop-blur-sm`}
+      className={`relative overflow-hidden rounded-2xl px-5 py-2 shadow-lg ${bgColor} backdrop-blur-sm`}
       style={{ background: gradient }}
     >
       <motion.div
@@ -118,7 +116,7 @@ function StatCard({
             >
               {label}
             </div>
-            <div className={`mt-2 text-3xl font-bold ${textColor}`}>
+            <div className={`mt-2 text-2xl font-bold ${textColor}`}>
               {value}
             </div>
             {hint && (
@@ -244,19 +242,19 @@ export default function DealsChatCard() {
       const body = res?.body?.data;
       const safe: AgentOption[] = Array.isArray(body)
         ? body
-            .map((u: any) => {
-              const id = typeof u?.id === "string" ? u.id : "";
-              const first =
-                typeof u?.firstName === "string" ? u.firstName.trim() : "";
-              const last =
-                typeof u?.lastName === "string" ? u.lastName.trim() : "";
+          .map((u: any) => {
+            const id = typeof u?.id === "string" ? u.id : "";
+            const first =
+              typeof u?.firstName === "string" ? u.firstName.trim() : "";
+            const last =
+              typeof u?.lastName === "string" ? u.lastName.trim() : "";
 
-              const name =
-                [first, last].filter(Boolean).join(" ").trim() || "Unknown";
+            const name =
+              [first, last].filter(Boolean).join(" ").trim() || "Unknown";
 
-              return { id, name };
-            })
-            .filter((a) => a.id)
+            return { id, name };
+          })
+          .filter((a) => a.id)
         : [];
 
       setAgents(safe);
@@ -316,7 +314,7 @@ export default function DealsChatCard() {
       });
       toast.error("Failed to fetch data");
     }
-     finally {
+    finally {
       setLoadingChart(false);
     }
   };

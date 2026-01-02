@@ -16,6 +16,7 @@ import {
   UserPlus,
   Trash2,
   Search,
+  FileText,
 } from "lucide-react";
 
 import {
@@ -32,8 +33,31 @@ import {
   ChannelDetails,
 } from "../../lib/chat/types";
 
-// ✅ Emoji picker that works with React 19
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
+
+import toast from "react-hot-toast";
+import { uploadFile } from "@/Utils/uploadFile"; // ✅ adjust path
+
+type Attachment = {
+  id: string;
+  name: string;
+  url: string;
+  mimeType?: string;
+  size?: number;
+};
+
+const isImage = (mime?: string) => !!mime && mime.startsWith("image/");
+const prettyBytes = (bytes?: number) => {
+  if (!bytes) return "";
+  const units = ["B", "KB", "MB", "GB"];
+  let n = bytes;
+  let i = 0;
+  while (n >= 1024 && i < units.length - 1) {
+    n /= 1024;
+    i++;
+  }
+  return `${n.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+};
 
 export function ChatWindow({
   selectedChat,
@@ -62,9 +86,9 @@ export function ChatWindow({
   messagesByThread: MessagesByThread | null;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   newMessage: string;
-  setNewMessage: (v: any) => void; // allow functional set too
+  setNewMessage: (v: any) => void;
   handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  handleSendMessage: () => void;
+  handleSendMessage: (...args: any[]) => void; // ✅ keep compatible
   showBackButton?: boolean;
 
   channelDetails?: ChannelDetails | null;
@@ -101,6 +125,12 @@ export function ChatWindow({
   const [showEmoji, setShowEmoji] = useState(false);
   const emojiWrapRef = useRef<HTMLDivElement | null>(null);
 
+  // ✅ Attachment state
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
   const openChannelInfo = () => {
     setIsChannelInfoOpen(true);
     setIsEditingTitle(false);
@@ -132,7 +162,6 @@ export function ChatWindow({
       .filter((u: any) => {
         if (existingMemberIds.has(u.id)) return false;
         if (currentUserId && u.id === currentUserId) return false;
-
         if (!q) return true;
         return (
           (u.name ?? "").toLowerCase().includes(q) ||
@@ -191,9 +220,111 @@ export function ChatWindow({
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
+  // ✅ Reset attachments when changing thread
+  useEffect(() => {
+    setAttachments([]);
+    setUploadProgress(0);
+    setUploading(false);
+    setShowEmoji(false);
+  }, [threadKey]);
+
   // ✅ Emoji click -> append to input
   const onEmojiClick = (emojiData: EmojiClickData) => {
     setNewMessage((prev: string) => (prev ?? "") + (emojiData.emoji ?? ""));
+  };
+
+  // ✅ Attach click
+  const onPickFile = () => fileInputRef.current?.click();
+
+  // ✅ Handle upload
+  const onFilesSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = ""; // allow selecting same file again
+
+    if (!files.length) return;
+
+    const MAX_FILES = 5;
+    if (attachments.length + files.length > MAX_FILES) {
+      toast.error(`Max ${MAX_FILES} files per message.`);
+      return;
+    }
+
+    try {
+      setUploading(true);
+      setUploadProgress(0);
+
+      // upload sequentially (simple + stable)
+      for (let i = 0; i < files.length; i++) {
+        const f = files[i];
+        setUploadProgress(0);
+
+        const url = await uploadFile(
+          f,
+          "chat", // folder
+          undefined,
+          undefined,
+          (p) => setUploadProgress(p)
+        );
+
+        if (!url) continue;
+
+        setAttachments((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            name: f.name,
+            url,
+            mimeType: f.type,
+            size: f.size,
+          },
+        ]);
+      }
+    } finally {
+      setUploading(false);
+      setUploadProgress(0);
+    }
+  };
+
+  const removeAttachment = (id: string) => {
+    setAttachments((prev) => prev.filter((a) => a.id !== id));
+  };
+
+  // ✅ Send message (text + attachments)
+  const onSend = () => {
+    if (uploading) return;
+
+    const textOk = !!newMessage.trim();
+    const filesOk = attachments.length > 0;
+
+    if (!textOk && !filesOk) return;
+
+    // If parent supports payload, send it. Else fallback.
+    try {
+      handleSendMessage({
+        text: newMessage.trim(),
+        attachments,
+        threadKey,
+        channelId: selectedChannel?.id,
+        dmThreadId: (selectedChat as any)?.threadId,
+      });
+    } catch {
+      handleSendMessage();
+    }
+
+    setNewMessage("");
+    setAttachments([]);
+    setShowEmoji(false);
+  };
+
+  const onInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // keep your existing behavior
+    handleKeyDown(e);
+
+    // additionally: Enter sends (unless shift)
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      onSend();
+    }
   };
 
   return (
@@ -332,9 +463,7 @@ export function ChatWindow({
               .map((m: any) => (
                 <div
                   key={m.id}
-                  className={`flex ${
-                    m.isOwn ? "justify-end" : "justify-start"
-                  }`}
+                  className={`flex ${m.isOwn ? "justify-end" : "justify-start"}`}
                 >
                   <div
                     className={`max-w-[85%] md:max-w-[75%] relative group ${
@@ -367,9 +496,101 @@ export function ChatWindow({
                           {m.senderName}
                         </p>
                       )}
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                        {m.content}
-                      </p>
+
+                      {!!m.content && (
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                          {m.content}
+                        </p>
+                      )}
+
+                      {/* ✅ render attachments if backend sends m.attachments */}
+                      {!!m.attachments?.length && (
+                        <div className="mt-3 space-y-2">
+                          {m.attachments.map((a: any) => {
+                            const img = isImage(a.mimeType);
+                            return (
+                              <a
+                                key={a.id ?? a.url}
+                                href={a.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className={[
+                                  "block rounded-xl border overflow-hidden",
+                                  m.isOwn
+                                    ? "border-white/20 bg-white/10"
+                                    : "border-gray-200 bg-white",
+                                ].join(" ")}
+                              >
+                                {img ? (
+                                  <div className="p-2">
+                                    <img
+                                      src={a.url}
+                                      alt={a.name ?? "attachment"}
+                                      className="max-h-48 w-full object-cover rounded-lg"
+                                    />
+                                    <div
+                                      className={[
+                                        "mt-2 text-xs flex items-center justify-between",
+                                        m.isOwn
+                                          ? "text-blue-100/90"
+                                          : "text-gray-600",
+                                      ].join(" ")}
+                                    >
+                                      <span className="truncate">
+                                        {a.name ?? "Image"}
+                                      </span>
+                                      <span className="ml-2 shrink-0">
+                                        {prettyBytes(a.size)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-3 p-3">
+                                    <div
+                                      className={[
+                                        "w-9 h-9 rounded-lg flex items-center justify-center",
+                                        m.isOwn
+                                          ? "bg-white/15"
+                                          : "bg-gray-100",
+                                      ].join(" ")}
+                                    >
+                                      <FileText
+                                        className={
+                                          m.isOwn
+                                            ? "w-5 h-5 text-white"
+                                            : "w-5 h-5 text-gray-700"
+                                        }
+                                      />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <div
+                                        className={[
+                                          "text-sm font-semibold truncate",
+                                          m.isOwn
+                                            ? "text-white"
+                                            : "text-gray-900",
+                                        ].join(" ")}
+                                      >
+                                        {a.name ?? "Document"}
+                                      </div>
+                                      <div
+                                        className={[
+                                          "text-xs",
+                                          m.isOwn
+                                            ? "text-blue-100/80"
+                                            : "text-gray-500",
+                                        ].join(" ")}
+                                      >
+                                        {prettyBytes(a.size)}
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </a>
+                            );
+                          })}
+                        </div>
+                      )}
 
                       <div
                         className={`flex items-center justify-between mt-3 text-xs ${
@@ -414,14 +635,71 @@ export function ChatWindow({
 
       {hasActive && (
         <div className="border-gray-200/50 backdrop-blur-sm px-4 md:px-6 py-2 shadow-[0_-4px_20px_-6px_rgba(0,0,0,0.05)]">
+          {/* ✅ attachments preview row */}
+          {(attachments.length > 0 || uploading) && (
+            <div className="mb-2">
+              <div className="flex flex-wrap items-center gap-2">
+                {attachments.map((a) => (
+                  <div
+                    key={a.id}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-gray-200 bg-white shadow-sm"
+                  >
+                    <FileText className="w-4 h-4 text-gray-600" />
+                    <div className="text-xs font-semibold text-gray-800 max-w-[220px] truncate">
+                      {a.name}
+                      {a.size ? (
+                        <span className="ml-2 text-[10px] text-gray-500 font-medium">
+                          {prettyBytes(a.size)}
+                        </span>
+                      ) : null}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeAttachment(a.id)}
+                      className="p-1 rounded-lg hover:bg-gray-100"
+                      aria-label="Remove attachment"
+                    >
+                      <X className="w-3.5 h-3.5 text-gray-500" />
+                    </button>
+                  </div>
+                ))}
+
+                {uploading && (
+                  <div className="flex items-center gap-3 px-3 py-1.5 rounded-xl border border-blue-200 bg-blue-50">
+                    <div className="text-xs font-semibold text-blue-800">
+                      Uploading… {uploadProgress}%
+                    </div>
+                    <div className="w-28 h-2 bg-blue-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-2 bg-blue-600"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="flex items-center gap-2 md:gap-4">
             <div className="flex items-center gap-2">
               <IconBtn
                 label="Attach"
+                onClick={onPickFile}
                 className="bg-gradient-to-br from-gray-50 to-gray-100/80 border border-gray-200/60 hover:from-gray-100 hover:to-gray-200 text-gray-700 hover:shadow-md transition-all"
               >
                 <Paperclip className="w-5 h-5" />
               </IconBtn>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                multiple
+                // you can restrict formats if needed:
+                // accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
+                onChange={onFilesSelected}
+              />
 
               {/* ✅ Emoji button + picker */}
               <div className="relative" ref={emojiWrapRef}>
@@ -437,7 +715,7 @@ export function ChatWindow({
                   <div className="absolute bottom-12 left-0 z-50 shadow-2xl rounded-xl overflow-hidden border border-gray-200 bg-white">
                     <EmojiPicker
                       onEmojiClick={onEmojiClick}
-                      height={380}
+                      height={320}
                       width={320}
                       previewConfig={{ showPreview: false }}
                     />
@@ -451,21 +729,22 @@ export function ChatWindow({
               <input
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Type your message…"
-                className="relative w-full bg-white/80 placeholder:label-text backdrop-blur-sm border-2 border-gray-200/60 rounded-xl px-5 pr-14 md:py-[6px] py-1 outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 shadow-sm hover:shadow-md transition-all duration-300 text-gray-800 placeholder-gray-400"
+                onKeyDown={onInputKeyDown}
+                placeholder={uploading ? "Uploading file…" : "Type your message…"}
+                disabled={uploading}
+                className="relative w-full bg-white/80 placeholder:label-text backdrop-blur-sm border-2 border-gray-200/60 rounded-xl px-5 pr-14 md:py-[6px] py-1 outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 shadow-sm hover:shadow-md transition-all duration-300 text-gray-800 placeholder-gray-400 disabled:opacity-60"
               />
             </div>
 
             <button
               onClick={() => {
-                handleSendMessage();
+                onSend();
                 setShowEmoji(false);
               }}
-              disabled={!newMessage.trim()}
+              disabled={uploading || (!newMessage.trim() && attachments.length === 0)}
               className={[
                 "px-3.5 py-2 rounded-2xl transition-all duration-300 shadow-lg relative overflow-hidden group",
-                newMessage.trim()
+                !uploading && (newMessage.trim() || attachments.length > 0)
                   ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:shadow-xl hover:shadow-blue-500/30 hover:scale-105"
                   : "bg-gradient-to-r from-gray-200 to-gray-300 cursor-not-allowed",
               ].join(" ")}
@@ -479,6 +758,9 @@ export function ChatWindow({
         </div>
       )}
 
+      {/* your existing channel info + add members modals remain unchanged below */}
+      {/* (keep your current code from here onwards) */}
+
       {selectedChannel && isChannelInfoOpen && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center">
           <button
@@ -488,7 +770,7 @@ export function ChatWindow({
             aria-label="Close modal"
           />
 
-          <div className="relative z-10 w-[92%] max-w-xl rounded-2xl bg-white shadow-2xl border border-gray-200 p-5">
+          <div className="relative z-10 w-[92%] max-w-xl rounded-2xl bg-white shadow-2xl border border-gray-200 px-4">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 {!isEditingTitle ? (
@@ -559,20 +841,16 @@ export function ChatWindow({
               {(channelDetails?.members ?? []).map((m) => (
                 <div
                   key={m.userId}
-                  className="flex items-center justify-between px-4 py-3 border-b last:border-b-0"
+                  className="flex items-center justify-between px-4 py-2 border-b last:border-b-0"
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-gray-900 truncate">
                       {m.name}
                       {m.userId === currentUserId ? (
-                        <span className="ml-2 text-xs text-gray-500">
-                          (You)
-                        </span>
+                        <span className="ml-2 text-xs text-gray-500">(You)</span>
                       ) : null}
                     </p>
-                    <p className="text-xs text-gray-500">
-                      {m.role ?? "member"}
-                    </p>
+                    <p className="text-xs text-gray-500">{m.role ?? "member"}</p>
                   </div>
 
                   {isAdmin && m.userId !== currentUserId && onRemoveMember && (
