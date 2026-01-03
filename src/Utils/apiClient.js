@@ -4,6 +4,7 @@ import { getSession } from "next-auth/react";
 const base_url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 
+
 const URLS = {
   blogs: `${base_url}/blog`,
   otp: `${base_url}/otp`,

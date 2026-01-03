@@ -388,7 +388,7 @@ export default function DealsChatCard() {
       className="w-full"
     >
       <div
-        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white via-white to-blue-50/50 p-6 shadow-2xl"
+        className="relative overflow-hidden rounded-3xl prof-surface p-6 shadow-2xl"
         style={{
           boxShadow:
             "0 20px 60px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.5)",
@@ -421,12 +421,12 @@ export default function DealsChatCard() {
                 <BarChart3 className="h-6 w-6 text-white" />
               </motion.div>
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">
+                <h2 className="text-2xl font-bold app-text">
                   <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                     {title}
                   </span>
                 </h2>
-                <p className="mt-2 text-sm font-medium text-gray-600">
+                <p className="mt-2 text-sm font-medium app-muted">
                   Interactive performance dashboard with animated charts and
                   real-time insights
                 </p>
@@ -455,7 +455,7 @@ export default function DealsChatCard() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.5, duration: 0.7, type: "spring" }}
-          className="relative z-10 mb-8 rounded-3xl bg-gradient-to-br from-white to-blue-50/50 p-6 shadow-2xl"
+          className="relative z-10 mb-8 rounded-3xl prof-surface p-6 shadow-2xl"
           style={{
             border: "2px solid rgba(255, 255, 255, 0.8)",
             boxShadow:
