@@ -207,12 +207,11 @@ export default function CommonSelect({
                   }}
                 >
                   <div className="bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden">
-                    {/* Header */}
                     <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-gray-100">
                       <div className="flex items-center gap-2">
                         <Sparkles className="w-4 h-4 text-blue-500" />
                         <span className="text-sm font-semibold text-gray-700">
-                          Available Agents
+                          {labelText}
                         </span>
                         <span className="ml-auto text-xs text-gray-500 bg-white px-2 py-1 rounded-full">
                           {options.length} options
@@ -220,7 +219,6 @@ export default function CommonSelect({
                       </div>
                     </div>
 
-                    {/* Options */}
                     <div className="max-h-60 overflow-y-auto py-1">
                       {options.map((option) => {
                         const isSelected = option.value === value;
@@ -266,7 +264,6 @@ export default function CommonSelect({
                       })}
                     </div>
 
-                    {/* Footer */}
                     {value && (
                       <div className="border-t border-gray-100 px-4 py-2 bg-gray-50">
                         <button

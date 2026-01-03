@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageSquare, Home, ChevronRight } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { getSocket } from "@/lib/chat/socket";
 import apiClient from "@/Utils/apiClient";
 import { getTimeHour, useIsBelow1300 } from "@/lib/chat/utilFunctions";
@@ -22,6 +22,7 @@ import { SidebarContent } from "./SidebarContent";
 import { ChatWindow } from "./ChatWindow";
 import { useSession } from "next-auth/react";
 import { toast } from "react-hot-toast";
+import { BreadCrumb } from "@/commonComponents/BreadCrumb";
 
 export default function ChatPanel() {
   const [user, setUser] = useState<any>(null);
@@ -42,10 +43,13 @@ export default function ChatPanel() {
   );
   const [loading, setLoading] = useState(false);
 
+  const [onlineUserIds, setOnlineUserIds] = useState<string[]>([]);
+
   const [dmList, setDmList] = useState<DmUser[]>([] as any);
   const [channelList, setChannelList] = useState<Channel[]>([] as any);
   const [addChannelOpen, setAddChannelOpen] = useState(false);
 
+  const [availableUsers, setAvailableUsers] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
 
   const [channelDetails, setChannelDetails] = useState<ChannelDetails | null>(
@@ -63,13 +67,13 @@ export default function ChatPanel() {
     setChannelDetails(null);
   };
 
-  const filteredUsers = useMemo(
-    () =>
-      dmList.filter((u) =>
-        (u.name || "").toLowerCase().includes(searchQuery.toLowerCase())
-      ),
-    [dmList, searchQuery]
-  );
+  const filteredUsers = useMemo(() => {
+    const query = searchQuery.toLowerCase();
+
+    return [...dmList].filter((u) =>
+      (u.name || "").toLowerCase().includes(query)
+    );
+  }, [dmList, searchQuery]);
 
   const filteredChannels = useMemo(
     () =>
@@ -153,9 +157,8 @@ export default function ChatPanel() {
         }/channels/${threadId}/members?userId=${encodeURIComponent(
           safeUserId
         )}`,
-        { memberIds:selectedIds }
+        { memberIds: selectedIds }
       );
-      console.log("selectedIds", selectedIds);
 
       await refreshChannelDetails(threadId);
       toast.success("Members added");
@@ -189,6 +192,45 @@ export default function ChatPanel() {
     }
   };
 
+  const editChannelDescription = async (
+    threadId: string,
+    description: string
+  ) => {
+    if (!safeUserId) return;
+    const newDescription = description.trim();
+    if (!newDescription) {
+      toast.error("description cannot be empty");
+      return;
+    }
+
+    try {
+      await apiClient.patch(
+        `${
+          apiClient.URLS.chat
+        }/channels/${threadId}/description?userId=${encodeURIComponent(
+          safeUserId
+        )}`,
+        { description: newDescription }
+      );
+
+      const details = await fetchChannelDetails(threadId);
+      if (details) setChannelDetails(details);
+
+      setSelectedChannel((prev) =>
+        prev?.id === threadId ? { ...prev, description: newDescription } : prev
+      );
+      setChannelList((prev: any) =>
+        prev.map((c: any) =>
+          c.id === threadId ? { ...c, description: newDescription } : c
+        )
+      );
+
+      toast.success("Channel description updated");
+    } catch (err) {
+      console.error("Failed to update channel description", err);
+      toast.error("Failed to update channel description");
+    }
+  };
   const editChannelTitle = async (threadId: string, title: string) => {
     if (!safeUserId) return;
     const newTitle = title.trim();
@@ -255,11 +297,10 @@ export default function ChatPanel() {
       id: clientId,
       content: newMessage.trim(),
       senderId: safeUserId || "me",
-      senderName: session?.data?.user?.lastName || "You",
+      senderName: session?.data?.user?.name || "You",
       timestamp: getTimeHour(new Date().toISOString()),
       isOwn: true,
     };
-    console.log(session?.data?.user)
 
     setMessagesByThread((prev) => {
       const list = prev[threadKey] ?? [];
@@ -293,7 +334,6 @@ export default function ChatPanel() {
 
       let threadId = u.threadId;
 
-      // if no thread yet, create
       if (!threadId) {
         const dmRes = await apiClient.post(
           `${apiClient.URLS.chatDm}?userId=${encodeURIComponent(safeUserId)}`,
@@ -376,24 +416,23 @@ export default function ChatPanel() {
         { params: { userId: safeUserId, limit: 50 } }
       );
 
-      const history = ((msgRes.body?.data ?? msgRes.body ?? [])
-  .map((m: any) => ({
-    id: m.id,
-    content: m.content,
-    senderId: m.senderId,
-    senderName: m.senderName ?? "Unknown",
-    timestamp: m.timestamp,          // keep raw timestamp for sorting
-    isOwn: m.senderId === safeUserId,
-  }))
-  .sort(
-    (a: any, b: any) =>
-      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-  )
-  .map((m: any) => ({
-    ...m,
-    timestamp: getTimeHour(m.timestamp), // format AFTER sorting
-  })) as Message[])
-
+      const history = (msgRes.body?.data ?? msgRes.body ?? [])
+        .map((m: any) => ({
+          id: m.id,
+          content: m.content,
+          senderId: m.senderId,
+          senderName: m.senderName ?? "Unknown",
+          timestamp: m.timestamp, // keep raw timestamp for sorting
+          isOwn: m.senderId === safeUserId,
+        }))
+        .sort(
+          (a: any, b: any) =>
+            new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        )
+        .map((m: any) => ({
+          ...m,
+          timestamp: getTimeHour(m.timestamp), // format AFTER sorting
+        })) as Message[];
 
       const key = `channel:${threadId}`;
 
@@ -407,28 +446,26 @@ export default function ChatPanel() {
     }
   };
 
-  const loadThreads = async (): Promise<{ receiverIds: string[] }> => {
+  const loadThreads = async () => {
     setLoading(true);
     try {
       const id = session.data?.user?.id;
       if (!id) return { receiverIds: [] };
 
-      const url = `${apiClient.URLS.chat}/threads/?userId=${encodeURIComponent(
+      const url = `${apiClient.URLS.chat}/threads?userId=${encodeURIComponent(
         id
       )}`;
       const res = (await apiClient.get(url)) as any;
 
       const threads = res?.body ?? [];
-      if (res?.status !== 200) return { receiverIds: [] };
 
       const dms: any[] = threads
         .filter((t: any) => t.kind === "dm")
         .map((t: any) => ({
-          id: t.receiverId, // user id (other person)
-          receiverId: t.receiverId, // user id (other person)
-          threadId: t.id, // thread id
+          threadId: t.id,
           name: t.title ?? "",
           status: "offline",
+          receiverId: t.receiverId,
           unreadCount: t.unreadCount,
           lastMessage: t.lastMessage,
           timestamp: t.timestamp,
@@ -458,13 +495,6 @@ export default function ChatPanel() {
 
       setDmList(dms as any);
       setChannelList(chans);
-
-      const receiverIds = dms
-        .map((d) => d.receiverId)
-        .filter(Boolean)
-        .map(String);
-
-      return { receiverIds };
     } catch (e) {
       console.error("Failed to load threads", e);
       toast.error("Failed to load channels");
@@ -474,19 +504,30 @@ export default function ChatPanel() {
     }
   };
 
-  const loadAllUsers = async (id: string, receiverIds: string[]) => {
+  const loadAllUsers = async (id: string) => {
     if (!id) return;
     setLoading(true);
     try {
-      const res = await apiClient.get(apiClient.URLS.user);
+      const res = await apiClient.get(apiClient.URLS.users);
       const all = (res.body.data ?? []) as any[];
 
-      if (res?.status === 200) {
-        const dmReceiverIds = new Set(receiverIds.map(String));
+      const existingUsersRes = await apiClient.get(
+        `${apiClient.URLS.chatUserList}/${id}`
+      );
+      const availableUsers = (existingUsersRes.body?.available ?? []) as any[];
 
+      const dms: any[] = availableUsers.map((t: any) => ({
+        name: t.name ?? "",
+        status: "offline",
+        id: t.userId,
+        avatarColor: "bg-blue-500",
+      }));
+
+      setAvailableUsers(dms as any);
+
+      if (res?.status === 200) {
         const mapped: ChatUser[] = all
           .filter((u) => u.id !== id)
-          // .filter((u) => !dmReceiverIds.has(String(u.id)))
           .map((u) => ({
             id: u.id,
             name: `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim() || u.email,
@@ -497,7 +538,6 @@ export default function ChatPanel() {
             avatarColor: "bg-blue-500",
           }));
 
-        console.log(mapped);
         setAllUsers(mapped as any);
         toast.success("Users loaded");
       }
@@ -519,8 +559,8 @@ export default function ChatPanel() {
       const user = session.data.user;
       setUser(user);
       setToken(token);
-      const { receiverIds } = await loadThreads();
-      await loadAllUsers(user?.id as string, receiverIds as string[]);
+      await loadThreads();
+      await loadAllUsers(user?.id as string);
     };
 
     init();
@@ -632,31 +672,43 @@ export default function ChatPanel() {
 
     const onThreadUpdate = (t: ServerThreadUpdate) => {
       if (t.kind === "dm") {
-        setDmList((prev) =>
-          prev.map((u) =>
-            u.id === t.id
-              ? {
-                  ...u,
-                  lastMessage: t.lastMessage ?? u.lastMessage,
-                  timestamp: t.timestamp ?? u.timestamp,
-                  unreadCount: t.unreadCount ?? u.unreadCount,
-                }
-              : u
-          )
-        );
+        setDmList((prev: any[]) => {
+          const idx = prev.findIndex((u) => u.threadId === t.id);
+          if (idx === -1) return prev;
+
+          const item = prev[idx];
+          const updated = {
+            ...item,
+            lastMessage: t.lastMessage ?? item.lastMessage,
+            timestamp: t.timestamp ?? item.timestamp,
+            unreadCount: t.unreadCount ?? item.unreadCount,
+          };
+
+          // move to top
+          const next = [...prev];
+          next.splice(idx, 1);
+          return [updated, ...next];
+        });
       } else {
-        setChannelList((prev: any) =>
-          prev.map((c: any) =>
-            c.id === t.id
-              ? {
-                  ...c,
-                  lastMessage: t.lastMessage ?? c.lastMessage,
-                  timestamp: t.timestamp ?? c.timestamp,
-                  unreadCount: t.unreadCount ?? c.unreadCount,
-                }
-              : c
-          )
-        );
+        setChannelList((prev: any[]) => {
+          const idx = prev.findIndex((c) => c.id === t.id);
+          if (idx === -1) return prev;
+
+          const item = prev[idx];
+          const updated = {
+            ...item,
+            name: t.title ?? item.name,
+            lastMessage: t.lastMessage ?? item.lastMessage,
+            timestamp: t.timestamp ?? item.timestamp,
+            unreadCount: t.unreadCount ?? item.unreadCount,
+            memberCount: t.memberCount ?? item.memberCount,
+          };
+
+          // move to top
+          const next = [...prev];
+          next.splice(idx, 1);
+          return [updated, ...next];
+        });
       }
     };
 
@@ -664,7 +716,7 @@ export default function ChatPanel() {
     return () => {
       socket.off("thread:update", onThreadUpdate);
     };
-  }, []);
+  }, [safeUserId, token]);
 
   useEffect(() => {
     const socket = socketRef.current;
@@ -677,7 +729,7 @@ export default function ChatPanel() {
         )
       );
 
-      setAllUsers((prev: any) =>
+      setAvailableUsers((prev: any) =>
         prev.map((u: any) => (u.id === userId ? { ...u, status: "online" } : u))
       );
     };
@@ -689,7 +741,7 @@ export default function ChatPanel() {
         )
       );
 
-      setAllUsers((prev: any) =>
+      setAvailableUsers((prev: any) =>
         prev.map((u: any) =>
           u.id === userId ? { ...u, status: "offline" } : u
         )
@@ -703,7 +755,25 @@ export default function ChatPanel() {
       socket.off("user:online", onOnline);
       socket.off("user:offline", onOffline);
     };
-  }, []);
+  }, [safeUserId, token]);
+
+  useEffect(() => {
+    const online = new Set(onlineUserIds);
+
+    setDmList((prev: any) =>
+      prev.map((u: any) => ({
+        ...u,
+        status: online.has(u.receiverId) ? "online" : "offline",
+      }))
+    );
+
+    setAvailableUsers((prev: any) =>
+      prev.map((u: any) => ({
+        ...u,
+        status: online.has(u.id) ? "online" : "offline",
+      }))
+    );
+  }, [onlineUserIds, dmList.length, availableUsers.length]);
 
   useEffect(() => {
     const socket = socketRef.current;
@@ -714,28 +784,14 @@ export default function ChatPanel() {
     }: {
       onlineUserIds: string[];
     }) => {
-      const online = new Set(onlineUserIds);
-
-      setDmList((prev: any) =>
-        prev.map((u: any) => ({
-          ...u,
-          status: online.has(u.receiverId) ? "online" : "offline",
-        }))
-      );
-
-      setAllUsers((prev: any) =>
-        prev.map((u: any) => ({
-          ...u,
-          status: online.has(u.id) ? "online" : "offline",
-        }))
-      );
+      setOnlineUserIds(onlineUserIds);
     };
 
     socket.on("presence:state", onPresenceState);
     return () => {
       socket.off("presence:state", onPresenceState);
     };
-  }, []);
+  }, [safeUserId, token]);
 
   if (loading) {
     return (
@@ -768,30 +824,11 @@ export default function ChatPanel() {
           </div>
         </div>
 
-        <div className="flex items-center justify-center gap-2">
-          <a
-            href="/aca/dashboard"
-            className="flex items-center gap-2 px-4 py-1 rounded-xl hover:border-blue-200 hover:bg-gradient-to-r hover:from-white hover:to-blue-50/50 transition-all duration-300 group shadow-sm hover:shadow-md"
-          >
-            <Home className="w-4 h-4 app-text group-hover:text-blue-600 transition-colors duration-300" />
-            <span className="text-sm font-semibold app-textgroup-hover:text-blue-800 transition-colors duration-300">
-              Home
-            </span>
-          </a>
-
-          <ChevronRight className="w-4 h-4 app-muted mx-1" />
-
-          <div className="flex items-center gap-3 px-5 py-1 backdrop-blur-sm border app-border rounded-xl shadow-sm">
-            <div className="relative">
-              <MessageSquare className="w-4 h-4 text-blue-600" />
-              <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 animate-pulse shadow-[0_0_6px] shadow-blue-400" />
-            </div>
-            <span className="text-sm font-bold bg-gradient-to-r from-blue-800 to-indigo-900 bg-clip-text text-transparent">
-              Active Chat
-            </span>
-            <div className="w-2 h-2 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 animate-pulse" />
-          </div>
-        </div>
+        <BreadCrumb
+          homeHref="/aca/dashboard"
+          title="Active Chat"
+          icon={<MessageSquare className="w-4 h-4 text-blue-600" />}
+        />
       </div>
 
       <div className="flex h-[calc(100vh-theme(spacing.16)-5.5rem)] min-h-0">
@@ -813,7 +850,7 @@ export default function ChatPanel() {
                 onSelectChannel={(c) => openChannel(c)}
                 isAdmin={user?.systemRole === "ADMIN"}
                 onClickCreateChannel={() => setAddChannelOpen(true)}
-                allUsers={allUsers}
+                availableUsers={availableUsers}
               />
             </div>
           </div>
@@ -842,6 +879,7 @@ export default function ChatPanel() {
               onRemoveMember={removeMemberFromChannel}
               onDeleteChannel={deleteChannel}
               allUsers={allUsers}
+              onEditChannelDescription={editChannelDescription}
             />
           </div>
         </div>
@@ -894,6 +932,7 @@ export default function ChatPanel() {
                     onRemoveMember={removeMemberFromChannel}
                     onDeleteChannel={deleteChannel}
                     allUsers={allUsers}
+                    onEditChannelDescription={editChannelDescription}
                   />
                 </div>
               </motion.div>
@@ -905,14 +944,14 @@ export default function ChatPanel() {
           <AddChannel
             open={addChannelOpen}
             onClose={() => setAddChannelOpen(false)}
-            users={allUsers.filter((u:any) => u.id !== safeUserId)}
+            users={allUsers.filter((u: any) => u.id !== safeUserId)}
             currentUserId={safeUserId}
-            onCreated={({ threadId, title }) => {
+            onCreated={({ threadId, title, memberIds }) => {
               setChannelList((prev: any) => [
                 {
                   id: threadId,
                   name: title,
-                  memberCount: 0,
+                  memberCount: memberIds.length,
                   unreadCount: 0,
                   lastMessage: "",
                   timestamp: "",

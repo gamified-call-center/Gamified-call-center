@@ -23,46 +23,24 @@ import {
 import { motion } from "framer-motion";
 import Link from "next/link";
 import apiClient from "../../Utils/apiClient";
-import { useAuthStore } from "../../store/user";
 import toast from "react-hot-toast";
 import Loader from "@/commonComponents/Loader";
-
-type TrainingType = "video" | "image" | "pdf";
-
-type TrainingItem = {
-  id: string | number;
-  title: string;
-  type: TrainingType;
-  src: string;
-  completed?: boolean;
-  viewedTime?: number;
-  lastAccessed?: Date | string;
-  createdAt?: Date | string;
-  updatedAt?: Date | string;
-};
-
-// Mock user progress
-type UserProgress = {
-  userId: string;
-  completedChapters: number;
-  totalTimeSpent: number;
-  streakDays: number;
-  lastActive: Date;
-};
-
-/** ---------------- RBAC ---------------- */
-type Role = "ceo" | "manager" | "agent_lead" | "agent" | string;
-
-const normalizeTrainingItem = (item: any): TrainingItem => ({
-  ...item,
-  lastAccessed: item?.lastAccessed ? new Date(item.lastAccessed) : undefined,
-  createdAt: item?.createdAt ? new Date(item.createdAt) : item?.createdAt,
-  updatedAt: item?.updatedAt ? new Date(item.updatedAt) : item?.updatedAt,
-});
+import { useSession } from "next-auth/react";
+import {
+  normalizeTrainingItem,
+  fetchChapters,
+  createChapter,
+  updateChapter,
+  deleteChapterApi,
+  updateProgress,
+} from "@/lib/training/utilFunctions";
+import { TrainingItem, TrainingType, UserProgress } from "@/lib/training/Types";
+import SearchBar from "@/commonComponents/SearchBar";
+import { BreadCrumb } from "@/commonComponents/BreadCrumb";
 
 export default function TrainingPage() {
-  const user = useAuthStore((st) => st.user);
-  const isAdmin = user?.systemRole === "ADMIN";
+  const user = useSession().data?.user;
+  let isAdmin = user?.designation === "CEO";
 
   const [data, setData] = useState<TrainingItem[]>([]);
   const [openId, setOpenId] = useState<string | number | null>(null);
@@ -84,7 +62,6 @@ export default function TrainingPage() {
     src: "",
   });
 
-  // User progress state (UI-only; backend can supply later if needed)
   const [userProgress, setUserProgress] = useState<UserProgress>({
     userId: "user_001",
     completedChapters: 0,
@@ -92,100 +69,6 @@ export default function TrainingPage() {
     streakDays: 7,
     lastActive: new Date(),
   });
-
-  /** ---------------- API wrappers ---------------- */
-  const fetchChapters = async () => {
-    try {
-      const res = await apiClient.get(apiClient.URLS.training, {}, true);
-      if (res.status === 200) {
-        toast.success("Chapters fetched");
-        return res.body;
-      }
-    } catch (e) {
-      toast.error("Failed to fetch chapters");
-      console.log("Failed to fetch chapters", e);
-    }
-  };
-
-  const createChapter = async (payload: {
-    title: string;
-    type: TrainingType;
-    src: string;
-  }) => {
-    try {
-      const res = await apiClient.post(apiClient.URLS.training, payload, true);
-
-      if (res.status === 201 || res.status === 200) {
-        toast.success("Chapter created");
-        return res.body;
-      }
-    } catch (e: any) {
-      toast.error(e?.message || "Failed to create chapter");
-      throw e;
-    }
-  };
-
-  const updateChapter = async (
-    id: TrainingItem["id"],
-    payload: { title: string; type: TrainingType; src: string }
-  ) => {
-    try {
-      const res = await apiClient.put(
-        `${apiClient.URLS.training}/${id}`,
-        payload,
-        true
-      );
-
-      if (res.status === 200) {
-        toast.success("Chapter updated");
-        return res.body;
-      }
-    } catch (e: any) {
-      toast.error(e?.message || "Failed to update chapter");
-      throw e;
-    }
-  };
-
-  const deleteChapterApi = async (id: TrainingItem["id"]) => {
-    try {
-      const res = await apiClient.delete(
-        `${apiClient.URLS.training}/${id}`,
-        {},
-        true
-      );
-
-      if (res.status === 200) {
-        toast.success("Chapter deleted");
-        return res.body;
-      }
-    } catch (e: any) {
-      toast.error(e?.message || "Failed to delete chapter");
-      throw e;
-    }
-  };
-
-  const updateProgress = async (
-    id: TrainingItem["id"],
-    payload: { completed?: boolean; viewedTime?: number; lastAccessed?: string }
-  ) => {
-    try {
-      const res = await apiClient.patch(
-        `${apiClient.URLS.training}/${id}/progress`,
-        payload,
-        true
-      );
-
-      if (res.status === 200) {
-        toast.success(
-          payload.completed ? "Marked as completed" : "Marked as incomplete"
-        );
-        return res.body;
-      }
-    } catch (e: any) {
-      toast.error(e?.message || "Failed to update progress");
-      throw e;
-    }
-  };
 
   useEffect(() => {
     const load = async () => {
@@ -214,11 +97,11 @@ export default function TrainingPage() {
     load();
   }, []);
 
-  /** ---------------- Derived values ---------------- */
   const completedChapters = useMemo(
     () => data.filter((item) => item.completed).length,
     [data]
   );
+
   const totalChapters = data.length;
   const completionPercentage =
     totalChapters > 0
@@ -236,9 +119,9 @@ export default function TrainingPage() {
     });
   }, [data, searchQuery, showCompleted]);
 
-  /** ---------------- Actions ---------------- */
   const toggle = (id: string | number) => {
     setOpenId((prev) => (prev === id ? null : id));
+    markAsWatched(id as any);
   };
 
   const toggleCompletion = async (id: TrainingItem["id"]) => {
@@ -249,7 +132,6 @@ export default function TrainingPage() {
 
     const nextCompleted = !current.completed;
 
-    // optimistic update
     setData((prev) =>
       prev.map((item) =>
         item.id === id ? { ...item, completed: nextCompleted } : item
@@ -257,10 +139,15 @@ export default function TrainingPage() {
     );
 
     try {
-      await updateProgress(id, {
-        completed: nextCompleted,
-        lastAccessed: new Date().toISOString(),
-      });
+      await updateProgress(
+        id,
+        {
+          completed: nextCompleted,
+          lastAccessed: new Date().toISOString(),
+        },
+        isAdmin,
+        user
+      );
 
       setUserProgress((prevProgress) => ({
         ...prevProgress,
@@ -270,7 +157,6 @@ export default function TrainingPage() {
         lastActive: new Date(),
       }));
     } catch (e: any) {
-      // rollback
       setData((prev) =>
         prev.map((item) =>
           item.id === id ? { ...item, completed: current.completed } : item
@@ -299,13 +185,10 @@ export default function TrainingPage() {
   };
 
   const markAsWatched = async (id: TrainingItem["id"]) => {
-    // if (!canUpdateProgress(role)) return;
-
     const current = data.find((x) => x.id === id);
     if (!current) return;
     if (current.completed) return;
 
-    // optimistic
     setData((prev) =>
       prev.map((item) =>
         item.id === id
@@ -315,10 +198,15 @@ export default function TrainingPage() {
     );
 
     try {
-      await updateProgress(id, {
-        completed: true,
-        lastAccessed: new Date().toISOString(),
-      });
+      await updateProgress(
+        id,
+        {
+          completed: true,
+          lastAccessed: new Date().toISOString(),
+        },
+        isAdmin,
+        user
+      );
 
       setUserProgress((prevProgress) => ({
         ...prevProgress,
@@ -330,15 +218,6 @@ export default function TrainingPage() {
     }
   };
 
-  const handleCompleteAll = () => {
-    if (allChaptersCompleted) {
-      alert(
-        "🎉 Congratulations! You've completed all chapters! Your certificate will be generated shortly."
-      );
-    }
-  };
-
-  /** ---------------- CRUD modal ---------------- */
   const openAddModal = () => {
     if (!isAdmin) return;
 
@@ -350,7 +229,6 @@ export default function TrainingPage() {
     });
     setShowModal(true);
   };
-
 
   const openEditModal = (item: TrainingItem) => {
     if (!isAdmin) return;
@@ -366,7 +244,10 @@ export default function TrainingPage() {
 
   const handleSave = async () => {
     if (!isAdmin) return;
-    if (!form.title) return;
+    if (!form.title || !form.src || !form.type) {
+      setError("Please fill out all fields before saving.");
+      return;
+    }
 
     try {
       setError(null);
@@ -382,14 +263,16 @@ export default function TrainingPage() {
 
       if (editingItem) {
         const updated = normalizeTrainingItem(
-          await updateChapter(editingItem.id, payload)
+          await updateChapter(editingItem.id, payload, setLoading)
         );
         setData((prev) =>
           prev.map((it) => (it.id === editingItem.id ? updated : it))
         );
         setOpenId(updated.id as any);
       } else {
-        const created = normalizeTrainingItem(await createChapter(payload));
+        const created = normalizeTrainingItem(
+          await createChapter(payload, setLoading)
+        );
         setData((prev) => [...prev, created]);
         setOpenId(created.id as any);
       }
@@ -409,13 +292,11 @@ export default function TrainingPage() {
     const target = deleteTarget;
     setDeleteTarget(null);
 
-    // optimistic remove
     setData((prev) => prev.filter((it) => it.id !== target.id));
 
     try {
-      await deleteChapterApi(target.id);
+      await deleteChapterApi(target.id, setLoading);
     } catch (e: any) {
-      // rollback
       setData((prev) => [...prev, target]);
       setError(e?.body?.error || e?.message || "Failed to delete chapter");
     }
@@ -429,21 +310,20 @@ export default function TrainingPage() {
     );
 
   return (
-    <div className="min-h-screen bg-slate-50 px-3 sm:px-4 md:px-6 py-4">
+    <div className="min-h-screen bg-slate-50 p-4">
       {error && (
-        <div className="max-w-8xl mx-auto mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700">
+        <div className=" label-text max-w-8xl mx-auto mb-4 p-1 rounded-xl bg-red-50 border border-red-200 text-red-700">
           {error}
         </div>
       )}
-
 
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="max-w-8xl mx-auto mb-4 sm:mb-6"
+        className="max-w-8xl mx-auto mb-4 "
       >
-        <div className="app-card rounded-xl sm:rounded-2xl shadow-lg shadow-blue-100/30 p-4 sm:p-6">
+        <div className="app-card rounded-xl sm:rounded-2xl shadow-lg shadow-blue-100/30 p-4 ">
           {/* Top Row */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             {/* Left Section */}
@@ -457,11 +337,11 @@ export default function TrainingPage() {
 
               <div>
                 <div className="flex items-center gap-2">
-                  <h1 className="text-lg sm:text-xl md:text-2xl  font-bold app-text">
+                  <h1 className="heading-text sm:text-xl md:text-2xl  font-bold app-text">
                     Training Portal
                   </h1>
                   <div className="px-2 py-1 bg-linear-to-r from-purple-100 to-pink-100 rounded-lg">
-                    <span className="text-xs  font-bold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    <span className="label-text font-bold bg-linear-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                       TRAINING
                     </span>
                   </div>
@@ -472,44 +352,25 @@ export default function TrainingPage() {
               </div>
             </div>
 
-            {/* Breadcrumb Navigation - Hidden on mobile */}
-            <div className="hidden sm:flex items-center gap-2 app-card px-4 py-3 rounded-xl border app-border">
-              <Link
-                href="/aca/dashboard"
-                className="flex items-center gap-2 app-text hover:text-purple-600 transition-colors duration-100 group"
-              >
-                <Home className="w-4 h-4 group-hover:scale-110 transition-transform duration-100" />
-                <span className="label-text  font-medium group-hover:text-purple-600 transition-colors duration-100">
-                  Home
-                </span>
-              </Link>
-
-              <ChevronRight className="w-4 h-4 app-text mx-1" />
-
-              <div className="flex items-center gap-2 text-purple-600">
-                <BookOpen className="w-4 h-4" />
-                <span className="label-text  font-bold">Training</span>
-              </div>
-            </div>
+            <BreadCrumb
+              homeHref="/aca/dashboard"
+              title="Training"
+              icon={<BookOpen className="w-4 h-4 text-blue-600" />}
+            />
           </div>
 
           {/* Progress Bar Section */}
-          <div className="mt-6 sm:mt-8">
+          <div className="mt-3 sm:mt-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
               <div className="flex items-center gap-2">
                 <Target className="w-5 h-5 text-purple-600" />
-                <h3 className=" font-bold app-text">
-                  Learning Progress
-                </h3>
+                <h3 className=" font-bold app-text">Learning Progress</h3>
               </div>
               <div className="label-text app-text">
                 <span className=" font-bold text-purple-600">
                   {completedChapters}
                 </span>{" "}
-                of{" "}
-                <span className=" font-bold app-text">
-                  {totalChapters}
-                </span>{" "}
+                of <span className=" font-bold app-text">{totalChapters}</span>{" "}
                 chapters
               </div>
             </div>
@@ -530,10 +391,11 @@ export default function TrainingPage() {
                 {[0, 25, 50, 75, 100].map((percent) => (
                   <div
                     key={percent}
-                    className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${completionPercentage >= percent
-                      ? "bg-white shadow-lg"
-                      : "bg-slate-300"
-                      }`}
+                    className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
+                      completionPercentage >= percent
+                        ? "bg-white shadow-lg"
+                        : "bg-slate-300"
+                    }`}
                   />
                 ))}
               </div>
@@ -567,8 +429,8 @@ export default function TrainingPage() {
           </div>
 
           {/* Training Stats Row - Responsive Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mt-4 sm:mt-6">
-            <div className="bg-linear-to-br from-blue-50 to-cyan-50 p-3 sm:p-4 rounded-xl border border-blue-100">
+          <div className="grid grid-cols-2  gap-2  mt-4 sm:mt-3">
+            <div className="bg-linear-to-br from-blue-50 to-cyan-50 py-2 px-4 rounded-xl border border-blue-100">
               <div className="flex items-center justify-between">
                 <div className="text-xs text-slate-500">Total</div>
                 <BookOpen className="w-4 h-4 text-blue-500" />
@@ -577,31 +439,13 @@ export default function TrainingPage() {
                 {data.length}
               </div>
             </div>
-            <div className="bg-linear-to-br from-purple-50 to-pink-50 p-3 sm:p-4 rounded-xl border border-purple-100">
+            <div className="bg-linear-to-br from-purple-50 to-pink-50 py-2 px-4  rounded-xl border border-purple-100">
               <div className="flex items-center justify-between">
                 <div className="text-xs text-slate-500">Completed</div>
                 <CheckCircle className="w-4 h-4 text-purple-500" />
               </div>
               <div className="text-xl sm:text-2xl  font-bold text-slate-900 mt-1 sm:mt-2">
                 {completedChapters}
-              </div>
-            </div>
-            <div className="bg-linear-to-br from-emerald-50 to-teal-50 p-3 sm:p-4 rounded-xl border border-emerald-100">
-              <div className="flex items-center justify-between">
-                <div className="text-xs text-slate-500">Time Spent</div>
-                <Clock className="w-4 h-4 text-emerald-500" />
-              </div>
-              <div className="text-xl sm:text-2xl  font-bold text-slate-900 mt-1 sm:mt-2">
-                {userProgress.totalTimeSpent}m
-              </div>
-            </div>
-            <div className="bg-linear-to-br from-amber-50 to-orange-50 p-3 sm:p-4 rounded-xl border border-amber-100">
-              <div className="flex items-center justify-between">
-                <div className="text-xs text-slate-500">Streak</div>
-                <Award className="w-4 h-4 text-amber-500" />
-              </div>
-              <div className="text-xl sm:text-2xl  font-bold text-slate-900 mt-1 sm:mt-2">
-                {userProgress.streakDays} days
               </div>
             </div>
           </div>
@@ -617,13 +461,13 @@ export default function TrainingPage() {
       >
         <div className="app-card rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl shadow-blue-100/50 p-4 sm:p-6 md:p-8">
           {/* Header with Controls */}
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6 sm:mb-8 gap-4">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-4 sm:mb-6 gap-2">
+            <div className="flex items-center gap-2">
               <div className="bg-linear-to-br from-purple-500 to-pink-500 p-2 sm:p-2.5 rounded-xl sm:rounded-2xl">
                 <BookOpen className="w-5 sm:w-6 h-5 sm:h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-lg sm:text-xl md:text-2xl  font-bold app-text">
+                <h2 className="text-[16px] sm:text-xl   font-bold app-text">
                   Training Materials
                 </h2>
                 <p className="text-xs sm:label-text app-text mt-1">
@@ -632,32 +476,30 @@ export default function TrainingPage() {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+            <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto items-center justify-center">
               <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2  h-3 w-3 app-muted" />
-                <input
-                  type="text"
-                  placeholder="Search chapters..."
+                <SearchBar
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4 py-1.5 border app-border rounded-xl placeholder:text-[14px] focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all duration-100 w-full"
+                  onChange={setSearchQuery}
+                  placeholder="Search chapters"
                 />
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                 <button
                   onClick={() => setShowCompleted(!showCompleted)}
-                  className={`px-3 sm:px-4 py-[6px] label-text rounded-xl font-medium transition-all duration-100 flex items-center gap-2 flex-1 sm:flex-none justify-center ${showCompleted
-                    ? "bg-linear-to-r from-purple-50 to-pink-50 text-purple-700 border border-purple-200"
-                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                    }`}
+                  className={`w-full sm:w-auto px-2 sm:px-4 py-1 label-text rounded-xl font-medium transition-all duration-100 flex items-center gap-2 justify-center ${
+                    showCompleted
+                      ? "bg-linear-to-r from-purple-50 to-pink-50 text-purple-700 border border-purple-200"
+                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                  }`}
                 >
                   {showCompleted ? (
                     <Eye className="w-4 h-4" />
                   ) : (
                     <EyeOff className="w-4 h-4" />
                   )}
-                  <span className="hidden sm:inline">Completed</span>
+                  <span className="hidden lg:inline">Completed</span>
                 </button>
 
                 {isAdmin && (
@@ -665,11 +507,13 @@ export default function TrainingPage() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={openAddModal}
-                    className="px-4 sm:px-6 py-2.5 rounded-xl  font-medium bg-linear-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-200 transition-all duration-100 flex items-center gap-2 flex-1 sm:flex-none justify-center"
+                    className="w-full sm:w-auto px-2 sm:px-4 py-1 rounded-xl label-text bg-linear-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-200 transition-all duration-100 flex items-center gap-2 justify-center"
                   >
-                    <Plus size={18} />
-                    <span className="hidden sm:inline">Add Chapter</span>
-                    <span className="sm:hidden">Add</span>
+                    <Plus className="w-3 h-3" />
+                    <span className="hidden sm:inline text-xs whitespace-nowrap">
+                      Add Chapter
+                    </span>
+                    <span className="sm:hidden  ">Add</span>
                   </motion.button>
                 )}
               </div>
@@ -681,7 +525,7 @@ export default function TrainingPage() {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="mb-4 sm:mb-6 p-3 sm:p-4 bg-linear-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl sm:rounded-2xl"
+              className="mb-4 sm:mb-3 p-2 bg-linear-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl sm:rounded-2xl"
             >
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -697,21 +541,12 @@ export default function TrainingPage() {
                     </p>
                   </div>
                 </div>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleCompleteAll}
-                  className="px-4 sm:px-6 py-2 sm:py-3 bg-linear-to-r from-emerald-600 to-teal-600 text-white rounded-xl  font-medium hover:shadow-lg hover:shadow-emerald-200 transition-all duration-100 flex items-center gap-2 w-full sm:w-auto justify-center"
-                >
-                  <Download className="w-4 sm:w-5 h-4 sm:h-5" />
-                  <span className="label-text">Get Certificate</span>
-                </motion.button>
               </div>
             </motion.div>
           )}
 
           {/* Training Materials List */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             {filteredData.length > 0 ? (
               filteredData.map((item, index) => {
                 const isOpen = openId === item.id;
@@ -728,45 +563,49 @@ export default function TrainingPage() {
                       boxShadow: "0 10px 30px rgba(0, 0, 0, 0.05)",
                     }}
                     className={`group relative bg-white border rounded-xl sm:rounded-2xl transition-all duration-150 hover:border-purple-200
-                      ${isOpen
-                        ? "border-purple-300 bg-linear-to-r from-purple-50/30 via-white to-white"
-                        : "border border-slate-200"
+                      ${
+                        isOpen
+                          ? "border-purple-300 bg-linear-to-r from-purple-50/30 via-white to-white"
+                          : "border border-slate-200"
                       }
-                      ${item.completed ? "border-l-4 border-l-emerald-500" : ""
+                      ${
+                        item.completed ? "border-l-4 border-l-emerald-500" : ""
                       }`}
                   >
                     {/* Header */}
                     <div
-                      className={`flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 sm:px-6
-                      ${isOpen
+                      className={`flex flex-col sm:flex-row sm:items-center justify-between p-2  sm:px-6
+                      ${
+                        isOpen
                           ? "bg-linear-to-r from-purple-50/50 to-transparent"
                           : "bg-white"
-                        }`}
+                      }`}
                     >
                       <div className="flex items-center gap-3 flex-1">
                         {/* Completion Checkbox */}
-                        <motion.button
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                          onClick={() => toggleCompletion(item.id)}
-                          className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-100 ${item.completed
-                            ? "bg-linear-to-br from-emerald-500 to-teal-500"
-                            : "bg-slate-100 hover:bg-slate-200"
+                        {!isAdmin && (
+                          <motion.button
+                            whileHover={{ scale: 1.1 }}
+                            whileTap={{ scale: 0.9 }}
+                            onClick={() => toggleCompletion(item.id)}
+                            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-100 ${
+                              item.completed
+                                ? "bg-linear-to-br from-emerald-500 to-teal-500"
+                                : "bg-slate-100 hover:bg-slate-200"
                             }`}
-                          title={
-                            !isAdmin ? "Toggle completion" : "Login required"
-                          }
-                        >
-                          {item.completed && (
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              transition={{ type: "spring" }}
-                            >
-                              <CheckCircle className="w-5 h-5 text-white" />
-                            </motion.div>
-                          )}
-                        </motion.button>
+                            title={"Toggle completion"}
+                          >
+                            {item.completed && (
+                              <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                transition={{ type: "spring" }}
+                              >
+                                <CheckCircle className="w-5 h-5 text-white" />
+                              </motion.div>
+                            )}
+                          </motion.button>
+                        )}
 
                         <button
                           onClick={() => toggle(item.id)}
@@ -791,10 +630,11 @@ export default function TrainingPage() {
 
                           <div className="flex items-center gap-3 sm:gap-4 flex-1">
                             <div
-                              className={`hidden xs:flex w-8 h-8 sm:w-10 sm:h-10 items-center justify-center rounded-xl font-bold shadow-sm ${item.completed
-                                ? "bg-linear-to-br from-emerald-100 to-teal-100 text-emerald-700"
-                                : "bg-linear-to-br from-purple-100 to-pink-100 text-purple-700"
-                                }`}
+                              className={`hidden xs:flex w-8 h-8 sm:w-10 sm:h-10 items-center justify-center rounded-xl font-bold shadow-sm ${
+                                item.completed
+                                  ? "bg-linear-to-br from-emerald-100 to-teal-100 text-emerald-700"
+                                  : "bg-linear-to-br from-purple-100 to-pink-100 text-purple-700"
+                              }`}
                             >
                               {index + 1}
                             </div>
@@ -812,12 +652,13 @@ export default function TrainingPage() {
                               </div>
                               <div className="flex items-center gap-2 mt-1">
                                 <div
-                                  className={`px-2 py-0.5 rounded-lg text-xs font-medium ${item.type === "video"
-                                    ? "bg-red-50 text-red-700"
-                                    : item.type === "pdf"
+                                  className={`px-2 py-0.5 rounded-lg text-xs font-medium ${
+                                    item.type === "video"
+                                      ? "bg-red-50 text-red-700"
+                                      : item.type === "pdf"
                                       ? "bg-blue-50 text-blue-700"
                                       : "bg-emerald-50 text-emerald-700"
-                                    }`}
+                                  }`}
                                 >
                                   {item.type.toUpperCase()}
                                 </div>
@@ -834,21 +675,21 @@ export default function TrainingPage() {
 
                       {/* Actions */}
                       <div className="flex gap-2 ml-0 sm:ml-4 mt-3 sm:mt-0">
-                        {item.type === "video" && !item.completed && (
-                          <motion.button
-                            whileHover={{ scale: 1.1 }}
-                            whileTap={{ scale: 0.9 }}
-                            onClick={() => markAsWatched(item.id)}
-                            className="px-3 py-2 rounded-lg bg-linear-to-r from-blue-50 to-cyan-50 text-blue-700 hover:shadow transition-all duration-100 label-text  font-medium flex-1 sm:flex-none"
-                          >
-                            <span className="hidden sm:inline">
-                              Mark as Watched
-                            </span>
-                            <span className="sm:hidden">Watched</span>
-                          </motion.button>
-                        )}
-
-                        {/* ✅ CEO only edit/delete */}
+                        {item.type === "video" &&
+                          !item.completed &&
+                          !isAdmin && (
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => markAsWatched(item.id)}
+                              className="px-3 py-2 rounded-lg bg-linear-to-r from-blue-50 to-cyan-50 text-blue-700 hover:shadow transition-all duration-100 label-text  font-medium flex-1 sm:flex-none"
+                            >
+                              <span className="hidden sm:inline">
+                                Mark as Watched
+                              </span>
+                              <span className="sm:hidden">Watched</span>
+                            </motion.button>
+                          )}
                         {isAdmin && (
                           <motion.button
                             whileHover={{ scale: 1.1 }}
@@ -965,17 +806,6 @@ export default function TrainingPage() {
                   <span className="label-text app-text">In Progress</span>
                 </div>
               </div>
-
-              <div className="label-text app-text text-center sm:text-right">
-                <span className=" font-bold app-text">
-                  {userProgress.totalTimeSpent}m
-                </span>{" "}
-                total •
-                <span className=" font-bold app-text ml-2">
-                  {userProgress.streakDays} day
-                </span>{" "}
-                streak
-              </div>
             </div>
           </div>
         </div>
@@ -1015,6 +845,12 @@ export default function TrainingPage() {
               </button>
             </div>
 
+            {error && (
+              <div className="max-w-8xl mx-auto mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700">
+                {error}
+              </div>
+            )}
+
             <div className="space-y-4 sm:space-y-5">
               <div>
                 <label className="block label-text  font-medium app-text mb-2">
@@ -1023,7 +859,10 @@ export default function TrainingPage() {
                 <input
                   placeholder="Enter chapter title"
                   value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  onChange={(e) => {
+                    setError("");
+                    setForm({ ...form, title: e.target.value });
+                  }}
                   className="w-full border border-slate-300 rounded-xl px-4 py-3 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition-all duration-100"
                 />
               </div>
@@ -1070,7 +909,13 @@ export default function TrainingPage() {
                   onClick={handleSave}
                   className="flex-1 px-4 py-3 label-text rounded-xl  font-medium bg-linear-to-r from-purple-600 to-pink-600 text-white hover:shadow-lg hover:shadow-purple-200 transition-all duration-100"
                 >
-                  {editingItem ? "Update" : "Add"}
+                  {editingItem
+                    ? loading
+                      ? "Updating..."
+                      : "Update"
+                    : loading
+                    ? "Adding..."
+                    : "Add"}
                 </button>
               </div>
             </div>

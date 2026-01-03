@@ -1,15 +1,13 @@
 import Button from "@/commonComponents/Button";
-import { Channel, ChatUser,  } from "../../lib/chat/types";
+import { Channel, ChatUser } from "../../lib/chat/types";
 import { motion } from "framer-motion";
+import { Users, Lock, MessageSquare, Search } from "lucide-react";
 import {
-  Users,
-  Lock,
-  MessageSquare,
-  Search,
-} from "lucide-react";
-import { getStatusColor, getStatusText, initials } from "@/lib/chat/utilFunctions";
-
-
+  getStatusColor,
+  getStatusText,
+  initials,
+} from "@/lib/chat/utilFunctions";
+import SearchBar from "@/commonComponents/SearchBar";
 
 export function SidebarContent({
   activeTab,
@@ -25,7 +23,7 @@ export function SidebarContent({
   onSelectChat,
   onSelectChannel,
   onClickCreateChannel,
-  allUsers
+  availableUsers,
 }: {
   activeTab: "chats" | "channels";
   setActiveTab: (v: "chats" | "channels") => void;
@@ -42,9 +40,8 @@ export function SidebarContent({
   showProfileFooter?: boolean;
   isAdmin?: boolean;
   onClickCreateChannel?: () => void;
-  allUsers: any[]
+  availableUsers: any[];
 }) {
-
   return (
     <div className="flex flex-col h-full min-h-0">
       <div className="px-5 py-4 border-b border-gray-200/60 prof-surface  backdrop-blur-sm">
@@ -53,19 +50,19 @@ export function SidebarContent({
           <div className="relative">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
               <Search
-                className={`w-5 h-5 transition-all duration-300 ${isSearchFocused
-                  ? "text-blue-600 transform scale-110"
-                  : "app-text group-hover:text-gray-600"
-                  }`}
+                className={`w-5 h-5 transition-all duration-300 ${
+                  isSearchFocused
+                    ? "text-blue-600 transform scale-110"
+                    : "app-text group-hover:text-gray-600"
+                }`}
               />
             </div>
-            <input
-              placeholder="Search conversations..."
+            <SearchBar
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={setSearchQuery}
+              placeholder="Search conversations..."
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setIsSearchFocused(false)}
-              className="w-full pl-12 pr-4 py-2 btn-text bg-white/80 backdrop-blur-sm border-2 border-gray-200/60 rounded-2xl outline-none focus:ring-3 focus:ring-blue-500/20 focus:border-blue-400/60 shadow-sm hover:shadow transition-all duration-300 app-text placeholder-gray-400"
             />
             {searchQuery && (
               <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium px-2.5 py-1 bg-gradient-to-r from-blue-50 to-purple-50 text-blue-700 rounded-lg border border-blue-200/50">
@@ -83,10 +80,9 @@ export function SidebarContent({
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`flex-1 py-3 flex items-center justify-center gap-2.5 relative overflow-hidden group ${activeTab === tab
-              ? "text-blue-700 font-semibold"
-              : "app-text"
-              }`}
+            className={`flex-1 py-3 flex items-center justify-center gap-2.5 relative overflow-hidden group ${
+              activeTab === tab ? "text-blue-700 font-semibold" : "app-text"
+            }`}
             type="button"
           >
             {activeTab === tab && (
@@ -108,10 +104,11 @@ export function SidebarContent({
             )}
 
             <div
-              className={`relative z-10 transition-transform duration-300 ${activeTab === tab
-                ? "transform scale-110"
-                : "group-hover:scale-105"
-                }`}
+              className={`relative z-10 transition-transform duration-300 ${
+                activeTab === tab
+                  ? "transform scale-110"
+                  : "group-hover:scale-105"
+              }`}
             >
               {tab === "chats" ? (
                 <MessageSquare className="w-5 h-5" />
@@ -148,7 +145,7 @@ export function SidebarContent({
                   onClick={onClickCreateChannel}
                   className="px-4 py-2 rounded-xl text-label text-nowrap bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold hover:shadow-lg transition"
                 >
-                  +  Channel
+                  + Channel
                 </button>
               )}
             </div>
@@ -164,14 +161,16 @@ export function SidebarContent({
             {activeTab === "chats"
               ? `${filteredUsers.length} contacts`
               : `${filteredChannels.reduce(
-                (acc, c) => acc + c.memberCount,
-                0
-              )} total members`}
+                  (acc, c) => acc + c.memberCount,
+                  0
+                )} total members`}
           </div>
         </div>
 
         <div className="p-3">
-          <h2 className="text-white px-6  py-1 bg-gradient-to-r text-[10px] from-blue-500 to-purple-500 w-20 rounded-sm mb-2">Recent</h2>
+          <h2 className="text-white px-6  py-1 bg-gradient-to-r text-[10px] from-blue-500 to-purple-500 w-20 rounded-sm mb-2">
+            Recent
+          </h2>
           {activeTab === "chats" ? (
             <div className="space-y-2">
               {filteredUsers.map((user) => {
@@ -183,10 +182,11 @@ export function SidebarContent({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.2 }}
                     onClick={() => onSelectChat(user)}
-                    className={`relative p-3 rounded-2xl cursor-pointer transition-all duration-300 group ${selected
-                      ? "bg-gradient-to-r from-blue-50/80 to-purple-50/80 shadow-md shadow-blue-100/50 border-2 border-blue-100/50"
-                      : "bg-white/80 backdrop-blur-sm hover:bg-gradient-to-r hover:from-gray-50/50 hover:to-gray-50/30 hover:shadow-sm border-2 border-transparent hover:border-gray-200/60"
-                      }`}
+                    className={`relative p-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                      selected
+                        ? "bg-gradient-to-r from-blue-50/80 to-purple-50/80 shadow-md shadow-blue-100/50 border-2 border-blue-100/50"
+                        : "bg-white/80 backdrop-blur-sm hover:bg-gradient-to-r hover:from-gray-50/50 hover:to-gray-50/30 hover:shadow-sm border-2 border-transparent hover:border-gray-200/60"
+                    }`}
                   >
                     {selected && (
                       <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full" />
@@ -238,26 +238,27 @@ export function SidebarContent({
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <span
-                              className={`text-[10px] px-2 py-[2px] rounded-full font-medium ${user.status === "online"
-                                ? "bg-gradient-to-r from-green-100 to-emerald-100 text-emerald-700 border border-emerald-200/50"
-                                : user.status === "away"
+                              className={`text-[10px] px-2 py-[2px] rounded-full font-medium ${
+                                user.status === "online"
+                                  ? "bg-gradient-to-r from-green-100 to-emerald-100 text-emerald-700 border border-emerald-200/50"
+                                  : user.status === "away"
                                   ? "bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-700 border border-amber-200/50"
                                   : "bg-gradient-to-r from-gray-100 to-gray-200 text-gray-600 border border-gray-200/50"
-                                }`}
+                              }`}
                             >
                               {getStatusText(user.status)}
                             </span>
                           </div>
-
-                          
                         </div>
                       </div>
                     </div>
                   </motion.div>
                 );
               })}
-              <h2 className="text-white px-6  py-1 bg-gradient-to-r text-[10px] from-blue-500 to-purple-500 w-20 rounded-sm">+New</h2>
-              {allUsers.map((user) => {
+              <h2 className="text-white px-6  py-1 bg-gradient-to-r text-[10px] from-blue-500 to-purple-500 w-20 rounded-sm">
+                +New
+              </h2>
+              {availableUsers.map((user) => {
                 const selected = selectedChat?.id === user.id;
                 return (
                   <motion.div
@@ -266,10 +267,11 @@ export function SidebarContent({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.2 }}
                     onClick={() => onSelectChat(user)}
-                    className={`relative p-3 rounded-2xl cursor-pointer transition-all duration-300 group ${selected
-                      ? "bg-gradient-to-r from-blue-50/80 to-purple-50/80 shadow-md shadow-blue-100/50 border-2 border-blue-100/50"
-                      : "bg-white/80 backdrop-blur-sm hover:bg-gradient-to-r hover:from-gray-50/50 hover:to-gray-50/30 hover:shadow-sm border-2 border-transparent hover:border-gray-200/60"
-                      }`}
+                    className={`relative p-3 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                      selected
+                        ? "bg-gradient-to-r from-blue-50/80 to-purple-50/80 shadow-md shadow-blue-100/50 border-2 border-blue-100/50"
+                        : "bg-white/80 backdrop-blur-sm hover:bg-gradient-to-r hover:from-gray-50/50 hover:to-gray-50/30 hover:shadow-sm border-2 border-transparent hover:border-gray-200/60"
+                    }`}
                   >
                     {selected && (
                       <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-1.5 h-12 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full" />
@@ -326,18 +328,17 @@ export function SidebarContent({
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <span
-                              className={`text-[10px] px-2 py-[2px] rounded-full font-medium ${user.status === "online"
-                                ? "bg-gradient-to-r from-green-100 to-emerald-100 text-emerald-700 border border-emerald-200/50"
-                                : user.status === "away"
+                              className={`text-[10px] px-2 py-[2px] rounded-full font-medium ${
+                                user.status === "online"
+                                  ? "bg-gradient-to-r from-green-100 to-emerald-100 text-emerald-700 border border-emerald-200/50"
+                                  : user.status === "away"
                                   ? "bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-700 border border-amber-200/50"
                                   : "bg-gradient-to-r from-gray-100 to-gray-200 text-gray-600 border border-gray-200/50"
-                                }`}
+                              }`}
                             >
                               {getStatusText(user.status)}
                             </span>
                           </div>
-
-                   
                         </div>
                       </div>
                     </div>
@@ -356,10 +357,11 @@ export function SidebarContent({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.2 }}
                     onClick={() => onSelectChannel(channel)}
-                    className={`relative p-4 rounded-2xl cursor-pointer transition-all duration-300 group ${selected
-                      ? "bg-gradient-to-r from-blue-50/80 to-purple-50/80 shadow-md shadow-blue-100/50 border-2 border-blue-100/50"
-                      : "bg-white/80 backdrop-blur-sm hover:bg-gradient-to-r hover:from-gray-50/50 hover:to-gray-50/30 hover:shadow-sm border-2 border-transparent hover:border-gray-200/60"
-                      }`}
+                    className={`relative p-4 rounded-2xl cursor-pointer transition-all duration-300 group ${
+                      selected
+                        ? "bg-gradient-to-r from-blue-50/80 to-purple-50/80 shadow-md shadow-blue-100/50 border-2 border-blue-100/50"
+                        : "bg-white/80 backdrop-blur-sm hover:bg-gradient-to-r hover:from-gray-50/50 hover:to-gray-50/30 hover:shadow-sm border-2 border-transparent hover:border-gray-200/60"
+                    }`}
                   >
                     {selected && (
                       <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-1.5 h-14 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full" />

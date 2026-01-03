@@ -8,13 +8,14 @@ import toast from "react-hot-toast";
 
 type UserPick = {
   id: string;
-  name:string,
+  name: string;
   email?: string;
 };
 
 type CreateChannelResponse = {
   id: string;
   title: string;
+  description?: string;
   kind: "channel";
 };
 
@@ -29,20 +30,25 @@ export function AddChannel({
   onClose: () => void;
   users: UserPick[];
   currentUserId: string;
-  onCreated: (payload: { threadId: string; title: string; memberIds: string[] }) => void;
+  onCreated: (payload: {
+    threadId: string;
+    title: string;
+    description?: string;
+    memberIds: string[];
+  }) => void;
 }) {
   const [query, setQuery] = useState("");
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState(""); // ✅ NEW
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
-  
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return users;
 
     return users.filter((u) => {
-      const name = ` ${u.name ?? ""}`.trim().toLowerCase();
+      const name = `${u.name ?? ""}`.trim().toLowerCase();
       const email = (u.email ?? "").toLowerCase();
       return name.includes(q) || email.includes(q);
     });
@@ -59,43 +65,54 @@ export function AddChannel({
 
   const selectedCount = selected.size;
 
-   const createChannel = async () => {
-    const trimmed = title.trim();
-    if (!trimmed) {
-      alert("Please enter channel name");
+  const createChannel = async () => {
+    const trimmedTitle = title.trim();
+    const trimmedDesc = description.trim();
+
+    if (!trimmedTitle) {
+      toast.error("Please enter channel name");
       return;
     }
     if (selected.size < 1) {
-      alert("Select at least 1 user");
+      toast.error("Select at least 1 user");
       return;
     }
 
     // Include admin himself always
-    const memberIds = Array.from(new Set([currentUserId, ...Array.from(selected)]));
+    const memberIds = Array.from(
+      new Set([currentUserId, ...Array.from(selected)])
+    );
 
     try {
       setLoading(true);
       const res = await apiClient.post(
         `${apiClient.URLS.chatChannels}?userId=${currentUserId}`,
         {
-          title: trimmed,
+          title: trimmedTitle,
+          description: trimmedDesc,
           memberIds,
         }
       );
-      console.log("created channal",res)
-      const data: CreateChannelResponse = (res.data ?? res.body) as any;
 
+      const data: CreateChannelResponse = (res.data ?? res.body) as any;
       if (!data?.id) throw new Error("threadId missing");
 
-      onCreated({ threadId: data.id, title: data.title, memberIds });
+      onCreated({
+        threadId: data.id,
+        title: data.title ?? trimmedTitle,
+        description: data.description ?? trimmedDesc,
+        memberIds,
+      });
+
       onClose();
 
       // reset UI
       setTitle("");
+      setDescription(""); // ✅ NEW
       setQuery("");
       setSelected(new Set());
     } catch (e: any) {
-      toast.error(e);
+      console.error(e);
       toast.error(e?.message ?? "Failed to create channel");
     } finally {
       setLoading(false);
@@ -119,10 +136,12 @@ export function AddChannel({
 
           {/* Modal */}
           <motion.div
-            className="fixed z-[90] left-1/2 top-1/2  w-[95vw] max-w-2xl -translate-x-1/2  rounded-2xl bg-white shadow-2xl border border-gray-200 overflow-hidden"
-            initial={{ opacity: 0, scale: 0.98, y: "-48%" }}
-            animate={{ opacity: 1, scale: 1, y: "-50%" }}
-            exit={{ opacity: 0, scale: 0.98, y: "-48%" }}
+            className="fixed z-[90] left-1/2 top-1/2 w-[95vw] max-w-2xl -translate-x-1/2 -translate-y-1/2
+rounded-2xl bg-white shadow-2xl border border-gray-200 overflow-hidden
+max-h-[90vh] flex flex-col"
+            initial={{ opacity: 0, scale: 0.98, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.98, y: 10 }}
             transition={{ type: "spring", stiffness: 420, damping: 35 }}
           >
             {/* Header */}
@@ -132,8 +151,12 @@ export function AddChannel({
                   <Users className="w-5 h-5 text-white" />
                 </div>
                 <div className="leading-tight">
-                  <h2 className="text-lg font-extrabold text-gray-900">Create Channel</h2>
-                  <p className="text-xs text-gray-500">Select members and start realtime chat</p>
+                  <h2 className="text-lg font-extrabold text-gray-900">
+                    Create Channel
+                  </h2>
+                  <p className="text-xs text-gray-500">
+                    Select members and start realtime chat
+                  </p>
                 </div>
               </div>
 
@@ -147,14 +170,30 @@ export function AddChannel({
               </button>
             </div>
 
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 flex-1 overflow-y-auto">
               <div>
-                <label className="text-xs font-semibold text-gray-700">Channel name</label>
+                <label className="text-xs font-semibold text-gray-700">
+                  Channel name
+                </label>
                 <input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. Sales Team"
                   className="mt-1 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 md:py-[6px] py-1 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                />
+              </div>
+
+              {/* ✅ NEW: Description */}
+              <div>
+                <label className="text-xs font-semibold text-gray-700">
+                  Description
+                </label>
+                <textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="e.g. Updates and discussions for the Sales Team"
+                  rows={3}
+                  className="mt-1 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none"
                 />
               </div>
 
@@ -175,13 +214,15 @@ export function AddChannel({
                 <p className="text-gray-700">
                   Selected: <span className="font-bold">{selectedCount}</span>
                 </p>
-                <p className="text-gray-400 text-xs">Admin will be added automatically</p>
+                <p className="text-gray-400 text-xs">
+                  Admin will be added automatically
+                </p>
               </div>
 
               {/* User list */}
-              <div className="max-h-[380px] overflow-auto rounded-xl border border-gray-200">
-                {users.map((u) => {
-                  const name = u?.name ?? "name"
+              <div className="max-h-[40vh] overflow-auto rounded-xl border border-gray-200">
+                {filtered.map((u) => {
+                  const name = u?.name ?? "name";
                   const checked = selected.has(u.id);
 
                   return (
@@ -192,14 +233,20 @@ export function AddChannel({
                       className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 border-b border-gray-100 last:border-b-0"
                     >
                       <div className="min-w-0 text-left">
-                        <p className="font-semibold text-gray-900 truncate">{name}</p>
-                        <p className="text-xs text-gray-500 truncate">{u.email ?? ""}</p>
+                        <p className="font-semibold text-gray-900 truncate">
+                          {name}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">
+                          {u.email ?? ""}
+                        </p>
                       </div>
 
                       <div
                         className={[
                           "w-6 h-6 rounded-lg border flex items-center justify-center",
-                          checked ? "bg-blue-600 border-blue-600" : "bg-white border-gray-300",
+                          checked
+                            ? "bg-blue-600 border-blue-600"
+                            : "bg-white border-gray-300",
                         ].join(" ")}
                       >
                         {checked && <Check className="w-4 h-4 text-white" />}
@@ -209,7 +256,9 @@ export function AddChannel({
                 })}
 
                 {filtered.length === 0 && (
-                  <div className="p-6 text-center text-gray-500">No users found</div>
+                  <div className="p-6 text-center text-gray-500">
+                    No users found
+                  </div>
                 )}
               </div>
             </div>
@@ -230,7 +279,9 @@ export function AddChannel({
                 disabled={loading}
                 className={[
                   "px-5 py-2 rounded-xl font-semibold text-white",
-                  loading ? "bg-gray-300 cursor-not-allowed" : "bg-gradient-to-r from-blue-500 to-purple-600 hover:shadow-lg",
+                  loading
+                    ? "bg-gray-300 cursor-not-allowed"
+                    : "bg-gradient-to-r from-blue-500 to-purple-600 hover:shadow-lg",
                 ].join(" ")}
               >
                 {loading ? "Creating..." : "Create Channel"}

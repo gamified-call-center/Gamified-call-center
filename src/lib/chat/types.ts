@@ -18,6 +18,7 @@ export interface ChatUser {
 export interface Channel {
   id: string;
   name: string;
+  description:string,
   memberCount: number;
   lastMessage?: string;
   timestamp?: string;
@@ -69,10 +70,12 @@ export type ServerThreadUpdate =
     }
   | {
       kind: "channel";
+      title?: string;
       id: string;
       lastMessage?: string;
       timestamp?: string;
       unreadCount?: number;
+      memberCount?: number;
     };
 
 export type ThreadApiItem = {
