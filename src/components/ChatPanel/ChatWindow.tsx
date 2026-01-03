@@ -17,6 +17,7 @@ import {
   Trash2,
   Search,
   FileText,
+  Upload,
 } from "lucide-react";
 
 import {
@@ -34,9 +35,8 @@ import {
 } from "../../lib/chat/types";
 
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react";
-
 import toast from "react-hot-toast";
-import { uploadFile } from "@/Utils/uploadFile"; // ✅ adjust path
+import { uploadFile } from "@/Utils/uploadFile";
 
 type Attachment = {
   id: string;
@@ -74,6 +74,10 @@ export function ChatWindow({
   channelDetails,
   currentUserId,
   onEditChannelTitle,
+
+  
+  onEditChannelDescription,
+
   onAddMembers,
   onRemoveMember,
   onDeleteChannel,
@@ -88,14 +92,18 @@ export function ChatWindow({
   newMessage: string;
   setNewMessage: (v: any) => void;
   handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  handleSendMessage: (...args: any[]) => void; // ✅ keep compatible
+  handleSendMessage: (...args: any[]) => void;
   showBackButton?: boolean;
 
-  channelDetails?: ChannelDetails | null;
+  channelDetails?: (ChannelDetails & { description?: string | null }) | null;
   currentUserId?: string;
-  onEditChannelTitle?: (
+
+  onEditChannelTitle?: (threadId: string, title: string) => Promise<void> | void;
+
+  
+  onEditChannelDescription?: (
     threadId: string,
-    title: string
+    description: string
   ) => Promise<void> | void;
 
   onAddMembers?: (threadId: string, ids: string[]) => void;
@@ -107,6 +115,10 @@ export function ChatWindow({
 
   const [isChannelInfoOpen, setIsChannelInfoOpen] = useState(false);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+
+  
+  const [descDraft, setDescDraft] = useState("");
+  const [savingDesc, setSavingDesc] = useState(false);
 
   const [showAddMembers, setShowAddMembers] = useState(false);
   const [memberSearch, setMemberSearch] = useState("");
@@ -121,20 +133,27 @@ export function ChatWindow({
   const memberCount =
     channelDetails?.members?.length ?? selectedChannel?.memberCount ?? 0;
 
-  // ✅ Emoji picker state + refs
   const [showEmoji, setShowEmoji] = useState(false);
   const emojiWrapRef = useRef<HTMLDivElement | null>(null);
 
-  // ✅ Attachment state
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
+  const [showAttachMenu, setShowAttachMenu] = useState(false);
+
+  const onPickFile = () => {
+    setShowAttachMenu(false);
+    fileInputRef.current?.click();
+  };
+
   const openChannelInfo = () => {
     setIsChannelInfoOpen(true);
     setIsEditingTitle(false);
     setTitleDraft(channelDetails?.title ?? selectedChannel?.name ?? "");
+    // ✅ NEW: init description draft when opening channel info
+    setDescDraft((channelDetails as any)?.description ?? "");
   };
 
   const closeChannelInfo = () => {
@@ -177,6 +196,22 @@ export function ChatWindow({
     );
   };
 
+  const saveDescription = async () => {
+    if (!selectedChannel) return;
+    if (!onEditChannelDescription) return;
+
+    try {
+      setSavingDesc(true);
+      await onEditChannelDescription(selectedChannel.id, descDraft.trim());
+      toast.success("Description updated");
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message ?? "Failed to update description");
+    } finally {
+      setSavingDesc(false);
+    }
+  };
+
   const submitAddMembers = async () => {
     if (!selectedChannel) return;
     if (!selectedIds.length) return;
@@ -184,6 +219,15 @@ export function ChatWindow({
 
     try {
       setSavingMembers(true);
+
+      // ✅ NEW: if admin edited description here, save it before adding members
+      const currentDesc = ((channelDetails as any)?.description ?? "").trim();
+      const nextDesc = descDraft.trim();
+
+      if (isAdmin && onEditChannelDescription && currentDesc !== nextDesc) {
+        await onEditChannelDescription(selectedChannel.id, nextDesc);
+      }
+
       await onAddMembers(selectedChannel.id, selectedIds);
       setShowAddMembers(false);
       setSelectedIds([]);
@@ -195,7 +239,8 @@ export function ChatWindow({
   useEffect(() => {
     if (!isChannelInfoOpen) return;
     setTitleDraft(channelDetails?.title ?? selectedChannel?.name ?? "");
-  }, [isChannelInfoOpen, channelDetails?.title, selectedChannel?.name]);
+    setDescDraft((channelDetails as any)?.description ?? "");
+  }, [isChannelInfoOpen, channelDetails?.title, (channelDetails as any)?.description, selectedChannel?.name]);
 
   // ✅ Close emoji picker on outside click
   useEffect(() => {
@@ -233,13 +278,10 @@ export function ChatWindow({
     setNewMessage((prev: string) => (prev ?? "") + (emojiData.emoji ?? ""));
   };
 
-  // ✅ Attach click
-  const onPickFile = () => fileInputRef.current?.click();
-
   // ✅ Handle upload
   const onFilesSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
-    e.target.value = ""; // allow selecting same file again
+    e.target.value = "";
 
     if (!files.length) return;
 
@@ -253,14 +295,13 @@ export function ChatWindow({
       setUploading(true);
       setUploadProgress(0);
 
-      // upload sequentially (simple + stable)
       for (let i = 0; i < files.length; i++) {
         const f = files[i];
         setUploadProgress(0);
 
         const url = await uploadFile(
           f,
-          "chat", // folder
+          "chat",
           undefined,
           undefined,
           (p) => setUploadProgress(p)
@@ -298,7 +339,6 @@ export function ChatWindow({
 
     if (!textOk && !filesOk) return;
 
-    // If parent supports payload, send it. Else fallback.
     try {
       handleSendMessage({
         text: newMessage.trim(),
@@ -317,14 +357,7 @@ export function ChatWindow({
   };
 
   const onInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // keep your existing behavior
     handleKeyDown(e);
-
-    // additionally: Enter sends (unless shift)
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      onSend();
-    }
   };
 
   return (
@@ -503,7 +536,6 @@ export function ChatWindow({
                         </p>
                       )}
 
-                      {/* ✅ render attachments if backend sends m.attachments */}
                       {!!m.attachments?.length && (
                         <div className="mt-3 space-y-2">
                           {m.attachments.map((a: any) => {
@@ -635,7 +667,6 @@ export function ChatWindow({
 
       {hasActive && (
         <div className="border-gray-200/50 backdrop-blur-sm px-4 md:px-6 py-2 shadow-[0_-4px_20px_-6px_rgba(0,0,0,0.05)]">
-          {/* ✅ attachments preview row */}
           {(attachments.length > 0 || uploading) && (
             <div className="mb-2">
               <div className="flex flex-wrap items-center gap-2">
@@ -684,9 +715,11 @@ export function ChatWindow({
           <div className="flex items-center gap-2 md:gap-4">
             <div className="flex items-center gap-2">
               <IconBtn
-                label="Attach"
-                onClick={onPickFile}
-                className="bg-gradient-to-br from-gray-50 to-gray-100/80 border border-gray-200/60 hover:from-gray-100 hover:to-gray-200 text-gray-700 hover:shadow-md transition-all"
+                label={uploading ? `Uploading ${uploadProgress}%` : "Attach"}
+                onClick={() => setShowAttachMenu(!showAttachMenu)}
+                className={`bg-gradient-to-br from-gray-50 to-gray-100/80 border border-gray-200/60 hover:from-gray-100 hover:to-gray-200 text-gray-700 hover:shadow-md transition-all ${
+                  uploading ? "opacity-60 cursor-not-allowed" : ""
+                }`}
               >
                 <Paperclip className="w-5 h-5" />
               </IconBtn>
@@ -696,12 +729,28 @@ export function ChatWindow({
                 type="file"
                 className="hidden"
                 multiple
-                // you can restrict formats if needed:
-                // accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt"
                 onChange={onFilesSelected}
               />
 
-              {/* ✅ Emoji button + picker */}
+              {showAttachMenu && (
+                <div className="absolute bottom-12 left-0 z-50 w-56 rounded-xl border border-gray-200 bg-white shadow-2xl p-[2px]">
+                  <button
+                    type="button"
+                    onClick={onPickFile}
+                    className="w-full flex items-center gap-3 px-2 py-1 rounded-lg hover:bg-gray-50 transition text-left"
+                  >
+                    <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
+                      <Upload className="w-3 h-3 text-blue-600" />
+                    </div>
+                    <div>
+                      <div className="label-text font-semibold text-gray-800">
+                        Upload from this device
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              )}
+
               <div className="relative" ref={emojiWrapRef}>
                 <IconBtn
                   label="Emoji"
@@ -718,6 +767,9 @@ export function ChatWindow({
                       height={320}
                       width={320}
                       previewConfig={{ showPreview: false }}
+                      skinTonesDisabled
+                      searchDisabled={false}
+                      lazyLoadEmojis
                     />
                   </div>
                 )}
@@ -758,9 +810,7 @@ export function ChatWindow({
         </div>
       )}
 
-      {/* your existing channel info + add members modals remain unchanged below */}
-      {/* (keep your current code from here onwards) */}
-
+      {/* ===================== CHANNEL INFO MODAL ===================== */}
       {selectedChannel && isChannelInfoOpen && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center">
           <button
@@ -770,15 +820,13 @@ export function ChatWindow({
             aria-label="Close modal"
           />
 
-          <div className="relative z-10 w-[92%] max-w-xl rounded-2xl bg-white shadow-2xl border border-gray-200 px-4">
+          <div className="relative z-10 w-[92%] max-w-xl rounded-2xl bg-white shadow-2xl border border-gray-200 p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 {!isEditingTitle ? (
                   <>
                     <h3 className="text-lg font-bold text-gray-900 truncate">
-                      {channelDetails?.title ??
-                        selectedChannel.name ??
-                        "Channel"}
+                      {channelDetails?.title ?? selectedChannel.name ?? "Channel"}
                     </h3>
                     <p className="text-sm text-gray-600 mt-1">
                       {memberCount} members
@@ -788,6 +836,18 @@ export function ChatWindow({
                         </span>
                       ) : null}
                     </p>
+
+                    {/* ✅ NEW: Display description */}
+                    <div className="mt-3 rounded-xl border border-gray-200 bg-gray-50 p-3">
+                      <div className="text-xs font-semibold text-gray-700 mb-1">
+                        Description
+                      </div>
+                      <div className="text-sm text-gray-800 whitespace-pre-wrap">
+                        {(channelDetails as any)?.description?.trim()
+                          ? (channelDetails as any)?.description
+                          : "No description"}
+                      </div>
+                    </div>
                   </>
                 ) : (
                   <div className="space-y-2">
@@ -797,27 +857,51 @@ export function ChatWindow({
                       className="w-full border-2 border-gray-200 rounded-xl px-3 py-2 outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50"
                       placeholder="Channel title"
                     />
+
+                    {/* ✅ NEW: Edit description here too */}
+                    <textarea
+                      value={descDraft}
+                      onChange={(e) => setDescDraft(e.target.value)}
+                      rows={3}
+                      className="w-full border-2 border-gray-200 rounded-xl px-3 py-2 outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500/50 resize-none"
+                      placeholder="Channel description..."
+                    />
+
                     <div className="flex gap-2">
                       <button
                         type="button"
                         className="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700"
                         onClick={async () => {
                           const threadId = selectedChannel.id;
-                          if (!onEditChannelTitle) return;
-                          await onEditChannelTitle(threadId, titleDraft);
-                          setIsEditingTitle(false);
+
+                          try {
+                            if (onEditChannelTitle) {
+                              await onEditChannelTitle(threadId, titleDraft);
+                            }
+                            if (onEditChannelDescription) {
+                              await onEditChannelDescription(
+                                threadId,
+                                descDraft.trim()
+                              );
+                            }
+                            toast.success("Channel updated");
+                            setIsEditingTitle(false);
+                          } catch (e: any) {
+                            console.error(e);
+                            toast.error(e?.message ?? "Failed to update channel");
+                          }
                         }}
                       >
                         Save
                       </button>
+
                       <button
                         type="button"
                         className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-semibold hover:bg-gray-50"
                         onClick={() => {
                           setIsEditingTitle(false);
-                          setTitleDraft(
-                            channelDetails?.title ?? selectedChannel?.name ?? ""
-                          );
+                          setTitleDraft(channelDetails?.title ?? selectedChannel?.name ?? "");
+                          setDescDraft((channelDetails as any)?.description ?? "");
                         }}
                       >
                         Cancel
@@ -857,9 +941,7 @@ export function ChatWindow({
                     <button
                       type="button"
                       className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-red-200 text-red-700 hover:bg-red-50"
-                      onClick={() =>
-                        onRemoveMember(selectedChannel.id, m.userId)
-                      }
+                      onClick={() => onRemoveMember(selectedChannel.id, m.userId)}
                     >
                       Remove
                     </button>
@@ -880,7 +962,11 @@ export function ChatWindow({
                   <button
                     type="button"
                     className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700"
-                    onClick={() => setShowAddMembers(true)}
+                    onClick={() => {
+                      setShowAddMembers(true);
+                      // ✅ init description when opening add members modal
+                      setDescDraft(((channelDetails as any)?.description ?? "").trim());
+                    }}
                   >
                     <UserPlus className="w-4 h-4" /> Add members
                   </button>
@@ -892,12 +978,11 @@ export function ChatWindow({
                     className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-gray-200 text-sm font-semibold hover:bg-gray-50"
                     onClick={() => {
                       setIsEditingTitle(true);
-                      setTitleDraft(
-                        channelDetails?.title ?? selectedChannel?.name ?? ""
-                      );
+                      setTitleDraft(channelDetails?.title ?? selectedChannel?.name ?? "");
+                      setDescDraft((channelDetails as any)?.description ?? "");
                     }}
                   >
-                    <Pencil className="w-4 h-4" /> Edit title
+                    <Pencil className="w-4 h-4" /> Edit title & description
                   </button>
                 )}
 
@@ -916,6 +1001,7 @@ export function ChatWindow({
         </div>
       )}
 
+      {/* ===================== ADD MEMBERS MODAL (WITH DESCRIPTION EDIT) ===================== */}
       {showAddMembers && selectedChannel && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl border border-gray-200">
@@ -937,8 +1023,40 @@ export function ChatWindow({
               </button>
             </div>
 
-            <div className="px-5 py-4">
-              <div className="relative mb-3">
+            <div className="px-5 py-4 space-y-4">
+              {/* ✅ NEW: edit description inside Add Members modal */}
+              {isAdmin && onEditChannelDescription && (
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="text-xs font-semibold text-gray-700">
+                      Channel description
+                    </div>
+                    <button
+                      type="button"
+                      onClick={saveDescription}
+                      disabled={savingDesc}
+                      className={[
+                        "px-3 py-1.5 rounded-lg text-xs font-semibold",
+                        savingDesc
+                          ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                          : "bg-blue-600 text-white hover:bg-blue-700",
+                      ].join(" ")}
+                    >
+                      {savingDesc ? "Saving..." : "Save description"}
+                    </button>
+                  </div>
+
+                  <textarea
+                    value={descDraft}
+                    onChange={(e) => setDescDraft(e.target.value)}
+                    rows={3}
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 outline-none focus:ring-2 focus:ring-blue-200 resize-none"
+                    placeholder="Write a short channel description..."
+                  />
+                </div>
+              )}
+
+              <div className="relative">
                 <Search className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   value={memberSearch}
@@ -988,9 +1106,7 @@ export function ChatWindow({
                           ].join(" ")}
                         >
                           {checked && (
-                            <span className="text-white text-xs font-bold">
-                              ✓
-                            </span>
+                            <span className="text-white text-xs font-bold">✓</span>
                           )}
                         </div>
                       </button>
@@ -999,7 +1115,7 @@ export function ChatWindow({
                 )}
               </div>
 
-              <div className="mt-3 text-xs text-gray-600">
+              <div className="text-xs text-gray-600">
                 Selected:{" "}
                 <span className="font-semibold">{selectedIds.length}</span>
               </div>

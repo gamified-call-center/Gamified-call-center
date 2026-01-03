@@ -21,8 +21,7 @@ export function getSocket(params: { userId?: string; token?: string }) {
   // NEXT_PUBLIC_AUTH_ENABLED=true/false
   const authEnabled = process.env.NEXT_PUBLIC_AUTH_ENABLED === "true";
 
-  // If auth is enabled -> token required
-  // If auth is disabled -> userId required
+  
   const authPayload = authEnabled
     ? { token: params.token }
     : { userId: params.userId };

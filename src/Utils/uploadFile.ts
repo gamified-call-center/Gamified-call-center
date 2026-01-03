@@ -18,32 +18,22 @@ export const uploadFile = async (
   const fileName = folderName
     ? `${folderName}/${cleanedFileName}`
     : cleanedFileName;
-  const fileType = file.type;
+
+  const fileType = file.type || "application/octet-stream";
 
   try {
+    // 1️⃣ Get presigned upload URL
     const { body } = await apiClient.post(
       `${apiClient.URLS.s3bucket}/generate-upload-url`,
-      {
-        fileName,
-        fileType,
-      }
+      { fileName, fileType }
     );
+
     const uploadURL = body?.uploadURL;
     if (!uploadURL) {
       throw new Error("Upload URL not generated");
     }
-    const upload = await fetch(uploadURL, {
-      method: "PUT",
-      headers: {
-        "Content-Type": fileType,
-      },
-      body: file,
-    });
 
-    if (!upload.ok) {
-      toast.error("File upload failed to S3");
-      throw new Error("File upload failed to S3");
-    }
+    // 2️⃣ Upload using XHR (single upload, progress supported)
     await new Promise<void>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.open("PUT", uploadURL);
@@ -59,10 +49,12 @@ export const uploadFile = async (
       };
 
       xhr.onload = () => {
-        if (xhr.status === 200) {
+        if (xhr.status >= 200 && xhr.status < 300) {
           resolve();
         } else {
-          reject(new Error("File upload failed to S3"));
+          reject(
+            new Error(`File upload failed to S3 (status ${xhr.status})`)
+          );
         }
       };
 
@@ -78,6 +70,7 @@ export const uploadFile = async (
     if (handleFormChange && name) {
       handleFormChange(name, publicURL);
     }
+
     toast.success("File uploaded successfully!");
     return publicURL;
   } catch (error) {
@@ -92,7 +85,9 @@ export const deleteFile = async (fileUrl: string): Promise<boolean> => {
     const url = new URL(fileUrl);
     const fileName = url.pathname.substring(1);
 
-    await apiClient.delete(`${apiClient.URLS.s3bucket}/delete`, { fileName });
+    await apiClient.delete(`${apiClient.URLS.s3bucket}/delete`, {
+      fileName,
+    });
 
     toast.success("File deleted successfully!");
     return true;

@@ -7,7 +7,6 @@ const base_url = process.env.NEXT_PUBLIC_BACKEND_URL;
 const URLS = {
   blogs: `${base_url}/blog`,
   otp: `${base_url}/otp`,
-  user: `${base_url}/users`,
   s3bucket:`${base_url}/s3bucket`,
   training: `${base_url}/api/training`,
   leaderboard: `${base_url}/leaderboard`,
@@ -19,16 +18,18 @@ const URLS = {
   designationPermissions: `${base_url}/admin/designations`,
   login: `${base_url}/auth/login`,
   forgotPassword: `${base_url}/auth`,
+
   chat: `${base_url}/chat`,
   chatDm: `${base_url}/chat/dm`,
   chatChannels: `${base_url}/chat/channels`,
-  resources: `${base_url}/admin/resources`,
-  addresses: `${base_url}/addresses`,
   chatHistory: `${base_url}/chat/admin/chat-history`,
   chatHistoryDelete: `${base_url}/chat/admin/chat-history/delete`,
   resourcesadmin: `${base_url}/chat/admin/resources`,
   deleteChatMessage: `${base_url}/chat/messages`,
   chatUserList: `${base_url}/chat/sidebar`,
+  
+  addresses: `${base_url}/addresses`,
+  resources: `${base_url}/admin/resources`,
   users: `${base_url}/users`,
   applications: `${base_url}/public/applications`,
   adminapplications: `${base_url}/admin/applications`,
