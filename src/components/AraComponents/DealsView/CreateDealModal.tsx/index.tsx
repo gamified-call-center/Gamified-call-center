@@ -24,6 +24,7 @@ import Drawer from "@/commonComponents/Drawers";
 import Button from "@/commonComponents/Button";
 import toast from "react-hot-toast";
 import { Checkbox } from "@/commonComponents/form/Checkbox";
+import MultiFileInput from "@/commonComponents/MultiFileInput/input";
 /** ========= Types (same file, as you asked) ========= */
 export type SelectOption = { label: string; value: string; disabled?: boolean };
 export type DealStatus = "OPEN" | "CLOSED" | "REJECTED";
@@ -272,14 +273,12 @@ export default function CreateDealModal({
             </Field>
 
             <Field label="FFM">
-             
-                 <TextInput
+              <TextInput
                 value={form.ffm}
                 placeholder="Enter ffm"
                 onChange={(e) => update("ffm", e.target.value)}
                 leftIcon={<User size={16} />}
               />
-            
             </Field>
           </TwoCol>
         </Section>
@@ -384,18 +383,13 @@ export default function CreateDealModal({
           </Field>
 
           <Field label="Documents">
-            <FileInput
-              type="file"
+            <MultiFileInput
               folderName="deals"
-              initialFileUrl={form.documents?.[0]}
-              requiredClass="app-border"
-              onFileChange={(url: string) => {
-                if (!url) return;
-                setForm((prev) => ({
-                  ...prev,
-                  documents: [...prev.documents, url],
-                }));
-                toast.success("Document uploaded successfully!");
+              value={form.documents ?? []}
+              maxFiles={10}
+              acceptedFormats={["application/pdf", "image/png", "image/jpeg"]}
+              onChange={(urls) => {
+                setForm((prev) => ({ ...prev, documents: urls }));
               }}
             />
           </Field>

@@ -451,13 +451,13 @@ export default function DealsSummaryByDate() {
       <motion.div
         whileHover={{ y: -2 }}
         transition={{ type: "spring", stiffness: 260, damping: 18 }}
-        className="relative overflow-hidden rounded-[26px] border border-slate-200 bg-white text-slate-900 shadow-[0_20px_60px_-30px_rgba(0,0,0,0.6)]"
+        className="relative overflow-hidden rounded-[26px] border app-border app-card app-text shadow-[0_20px_60px_-30px_rgba(0,0,0,0.6)]"
       >
         <div className="relative p-5 sm:p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-base font-semibold">Deals Summary By Date</h2>
-              <div className="mt-1 text-sm text-slate-500">
+              <div className="mt-1 text-sm app-muted">
                 Forms and deals per agent for each day in the selected range.
               </div>
             </div>
@@ -487,23 +487,23 @@ export default function DealsSummaryByDate() {
           </div>
 
           {!showTable ? (
-            <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center">
-              <div className="text-sm font-semibold text-slate-800">
+            <div className="mt-6 rounded-2xl border app-border app-surface p-6 text-center">
+              <div className="text-sm font-semibold app-text">
                 Select both From and To dates to view the table.
               </div>
-              <div className="mt-2 text-xs text-slate-500">
+              <div className="mt-2 text-xs app-muted">
                 The table will render only after the second pointer is selected.
               </div>
             </div>
           ) : (
             <div className="mt-5 min-w-0">
-              <div className="overflow-x-auto rounded-2xl border border-slate-200">
+              <div className="overflow-x-auto rounded-2xl border app-border">
                 <table className="min-w-[980px] w-full border-separate border-spacing-0">
                   <thead className="sticky top-0 z-10">
                     <tr>
                       <th
                         rowSpan={2}
-                        className="sticky left-0 z-20 w-[150px] min-w-[150px] border-b border-slate-200 bg-slate-50 px-4 py-3 text-left text-xs font-semibold text-slate-700"
+                        className="sticky left-0 z-20 w-[150px] min-w-[150px] border-b app-border app-surface px-4 py-3 text-left text-xs font-semibold app-text"
                       >
                         Agent Name
                       </th>
@@ -511,7 +511,7 @@ export default function DealsSummaryByDate() {
                         <th
                           key={toISODateOnly(d)}
                           colSpan={2}
-                          className="border-b border-slate-200 bg-slate-50 px-3 py-3 text-center text-xs font-semibold text-slate-700"
+                          className="border-b app-border app-surface px-3 py-3 text-center text-xs font-semibold app-text"
                         >
                           {formatDayMonth(d)}
                         </th>
@@ -525,10 +525,10 @@ export default function DealsSummaryByDate() {
                           <React.Fragment
                             key={`${dk}-pair`}
                           >
-                            <th className="border-b border-slate-200 bg-white px-3 py-2 text-center text-[11px] font-semibold text-slate-500">
+                            <th className="border-b app-border app-card px-3 py-2 text-center text-[11px] font-semibold app-muted">
                               Forms
                             </th>
-                            <th className="border-b border-slate-200 bg-white px-3 py-2 text-center text-[11px] font-semibold text-slate-500">
+                            <th className="border-b app-border app-card px-3 py-2 text-center text-[11px] font-semibold app-muted">
                               Deals
                             </th>
                           </React.Fragment>
@@ -542,7 +542,7 @@ export default function DealsSummaryByDate() {
                       <tr>
                         <td
                           colSpan={1 + days.length * 2}
-                          className="px-4 py-10 text-center text-sm font-semibold text-slate-600"
+                          className="px-4 py-10 text-center text-sm font-semibold app-muted"
                         >
                           Loading…
                         </td>
@@ -551,7 +551,7 @@ export default function DealsSummaryByDate() {
                       <tr>
                         <td
                           colSpan={1 + days.length * 2}
-                          className="px-4 py-10 text-center text-sm font-semibold text-slate-600"
+                          className="px-4 py-10 text-center text-sm font-semibold app-muted"
                         >
                           No data for selected range.
                         </td>
@@ -563,7 +563,7 @@ export default function DealsSummaryByDate() {
 
                         return (
                           <tr key={key} className="hover:bg-slate-50/60">
-                            <td className="sticky left-0 z-10 border-b border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900">
+                            <td className="sticky left-0 z-10 border-b app-border app-card px-4 py-3 text-sm font-medium app-text">
                               {r.agentName}
                             </td>
 
@@ -572,10 +572,10 @@ export default function DealsSummaryByDate() {
                               const v = perDay[dk] || { forms: 0, deals: 0 };
                               return (
                                 <React.Fragment key={`${key}-${dk}-pair`}>
-                                  <td className="border-b border-slate-200 px-3 py-3 text-center text-sm font-semibold text-slate-900">
+                                  <td className="border-b app-border px-3 py-3 text-center text-sm font-semibold app-text">
                                     {fmt2.format(clampInt(v.forms))}
                                   </td>
-                                  <td className="border-b border-slate-200 px-3 py-3 text-center text-sm font-semibold text-slate-900">
+                                  <td className="border-b app-border px-3 py-3 text-center text-sm font-semibold app-text">
                                     {fmt2.format(clampInt(v.deals))}
                                   </td>
                                 </React.Fragment>
@@ -589,7 +589,7 @@ export default function DealsSummaryByDate() {
                 </table>
               </div>
 
-              <div className="mt-3 text-xs text-slate-500">
+              <div className="mt-3 text-xs app-muted">
                 Tip: Scroll horizontally on smaller screens to view all dates.
               </div>
             </div>

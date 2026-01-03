@@ -43,10 +43,10 @@ export default function SimpleFromToPicker({
   return (
     <div className="flex flex-wrap items-end gap-2">
       {label ? (
-        <div className="w-full text-xs font-semibold text-slate-600">{label}</div>
+        <div className="w-full text-xs font-semibold app-muted">{label}</div>
       ) : null}
 
-      <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
+      <div className="flex items-center gap-2 rounded-xl border app-border bg-white px-3 py-2 shadow-sm">
         <CalendarIcon className="h-4 w-4 text-slate-600" />
         <div className="flex flex-col">
           <span className="text-[10px] font-semibold text-slate-500">From</span>

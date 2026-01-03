@@ -232,7 +232,7 @@ export default function AcaAgentsView() {
 
   useEffect(() => {
     fetchAgents();
-  }, [page,designationId]);
+  }, [page]);
 
   const openCreate = () => {
     setEditing(null);
@@ -419,11 +419,11 @@ export default function AcaAgentsView() {
   const fetchAgents = async () => {
     setLoading(true);
     try {
-      const url = designationId
-        ? `${apiClient.URLS.user}/by-designation/${designationId}`
-        : apiClient.URLS.user;
+      // const url = designationId
+      //   ? `${apiClient.URLS.user}/by-designation/${designationId}`
+      //   : apiClient.URLS.user;
 
-      const res: any = await apiClient.get(url, { page, limit: LIMIT ,  search: q.trim() || undefined }, true);
+      const res: any = await apiClient.get(apiClient.URLS.user, { page, limit: LIMIT ,  search: q.trim() || undefined }, true);
       const body = res?.body ?? res;
 
       const list = Array.isArray(body?.data) ? body.data : [];
@@ -684,12 +684,12 @@ export default function AcaAgentsView() {
     }
 
     setIsAgentsLoading(true);
-    setUploadProgress(20);
+   
 
     try {
       const res = await uploadCsvFile(selectedFile);
 
-      setUploadProgress(100);
+     
 
       const { success = [], failed = [] } = res.body || {};
 
@@ -784,21 +784,21 @@ export default function AcaAgentsView() {
               placeholder: "Search...",
               debounceMs: 350,
             }}
-            filtersSlot={
-              <div className="md:min-w-[220px]  w-full">
-                <SingleSelect
-                  value={designationId}
-                  onChange={(v) => {
-                    setDesignationId(v);
-                    setPage(1);
-                    setQ("");
-                  }}
-                  options={designationOptions}
-                  placeholder="Filter by designation"
-                  searchable
-                />
-              </div>
-            }
+            // filtersSlot={
+            //   <div className="md:min-w-[220px]  w-full">
+            //     <SingleSelect
+            //       value={designationId}
+            //       onChange={(v) => {
+            //         setDesignationId(v);
+            //         setPage(1);
+            //         setQ("");
+            //       }}
+            //       options={designationOptions}
+            //       placeholder="Filter by designation"
+            //       searchable
+            //     />
+            //   </div>
+            // }
             middleSlot={
               <div className="flex items-center  md:gap-2 gap-1">
                 <div className="flex items-center gap-1">

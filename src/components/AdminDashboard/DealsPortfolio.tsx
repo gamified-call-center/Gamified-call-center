@@ -17,6 +17,7 @@ import apiClient from "../../Utils/apiClient";
 import { SpinnerLoader } from "./spinner";
 import SimpleFromToPicker from "@/commonComponents/TwoPointerCalender";
 import toast from "react-hot-toast";
+import Button from "@/commonComponents/Button";
 
 /* ----------------------------- Types ----------------------------- */
 
@@ -269,7 +270,7 @@ function RangeCalendar({
   return (
     <div className="w-[320px] rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
       <div className="flex items-center justify-between">
-        <button
+        <Button
           type="button"
           onClick={() => {
             const prev = new Date(cursor);
@@ -279,7 +280,7 @@ function RangeCalendar({
           className="rounded-xl border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
         >
           ←
-        </button>
+        </Button>
 
         <div className="text-sm font-semibold text-slate-900">{monthLabel}</div>
 
@@ -547,13 +548,13 @@ export default function DealsPortfolioCard() {
       <motion.div
         whileHover={{ y: -2 }}
         transition={{ type: "spring", stiffness: 260, damping: 18 }}
-        className="relative overflow-hidden rounded-[26px] border border-slate-200 bg-white text-slate-900 shadow-[0_20px_60px_-30px_rgba(0,0,0,0.6)]"
+        className="relative overflow-hidden rounded-[26px] border border-slate-200 app-card app-text shadow-[0_20px_60px_-30px_rgba(0,0,0,0.6)]"
       >
         <div className="relative p-5 sm:p-6">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-base font-semibold">Deals Portfolio</h2>
-              <div className="mt-1 text-sm text-slate-500">
+              <h2 className="text-base font-semibold app-text">Deals Portfolio</h2>
+              <div className="mt-1 text-sm app-muted">
                 Top 10 agents + Others (hover a segment to inspect).
               </div>
             </div>
@@ -630,26 +631,26 @@ export default function DealsPortfolioCard() {
                 </ResponsiveContainer>
               </div>
 
-              <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-xs app-text">
                 <span className="inline-flex items-center gap-2">
-                  <span className="h-2 w-2 rounded-full bg-slate-400" />
+                  <span className="h-2 w-2 rounded-full app-surface" />
                   Hover changes center + tooltip
                 </span>
-                <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-slate-700">
+                <span className="rounded-full border app-border app-card px-2 py-0.5 app-text">
                   {fmt.format(totalDeals)} total
                 </span>
               </div>
             </div>
 
-            <div className="rounded-[22px] border border-slate-200 p-4 sm:p-5">
+            <div className="rounded-[22px] border app-border p-4 sm:p-5">
               <div className="flex items-center justify-between">
                 <div>
                   <div className="text-sm font-semibold">Top Agents</div>
-                  <div className="mt-1 text-xs text-slate-500">
+                  <div className="mt-1 text-xs app-muted">
                     Showing top 5 by deals
                   </div>
                 </div>
-                <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold text-slate-700">
+                <div className="rounded-full border app-border app-surface px-3 py-1 text-xs font-semibold app-text">
                   Period: {portfolio.from} → {portfolio.to}
                 </div>
               </div>
@@ -680,7 +681,7 @@ export default function DealsPortfolioCard() {
                 })}
               </div>
 
-              <div className="mt-4 text-xs text-slate-500">
+              <div className="mt-4 text-xs app-muted">
                 Note: Donut shows <span className="font-semibold">Top 10</span>{" "}
                 + <span className="font-semibold">Others</span>. This list shows{" "}
                 <span className="font-semibold">Top 5</span>.

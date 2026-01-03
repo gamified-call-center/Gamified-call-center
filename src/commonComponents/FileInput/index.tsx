@@ -170,7 +170,7 @@ const FileInput = ({
               <Image src={imagePreview} alt="File preview" fill className="object-cover" />
             ) : (
               <div className="w-24 h-24 flex items-center justify-center bg-gray-200 text-gray-700 font-semibold">
-                PDF
+               file
               </div>
             )}
             <button

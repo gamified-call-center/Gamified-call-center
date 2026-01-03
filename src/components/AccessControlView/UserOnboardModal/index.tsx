@@ -1097,10 +1097,11 @@ export default function UserOnboardModal({
                     type="file"
                     folderName="users/profile"
                     requiredClass="app-border"
+                    name="profileImage"
                     initialFileUrl={userCore.profileImage || ""}
                     onFileChange={(url: any) => {
                       setUserCore((p) => ({ ...p, profileImage: url }));
-                      toast.success("Profile picture uploaded!");
+                      
                     }}
                   />
                 </Field>

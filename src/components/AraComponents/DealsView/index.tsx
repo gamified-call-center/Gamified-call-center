@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Download, Eye, FileSpreadsheet, LayoutGrid, Pencil, Rows, Trash2 } from "lucide-react";
 import apiClient from "@/Utils/apiClient";
 import TableToolbar from "@/commonComponents/TableSearchBar";
@@ -12,6 +12,7 @@ import Button from "@/commonComponents/Button";
 import Modal from "@/commonComponents/Modal";
 import {DealType} from "../../../../src/Utils/constants/ara/constants"
 import CSVUploadModal from "../AgentsView/CsvUploadModal";
+import { useSession } from "next-auth/react";
 
 type DealRow = {
   id: string | number;
@@ -93,11 +94,14 @@ const AraDealsView = () => {
   // const [to, setTo] = useState(toDateOnly(new Date()));
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [view, setView] = useState<ViewMode>("compact");
+  const { data: session, status } = useSession();
 
   const [selecteddeleteDeal, setSelecteddeleteDeal] = useState<any | null>(
     null
   );
   const [selectedDeal, setSelectedDeal] = useState(null);
+   const [visibleUsers, setVisibleUsers] = useState<any[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState<string | undefined>();
   const [viewOpen, setViewOpen] = useState(false);
 
   const handleView = (deal: any) => {
@@ -123,29 +127,82 @@ const AraDealsView = () => {
   );
 
   /** ---- API calls (swap endpoints to yours) ---- */
-  const fetchDeals = async () => {
+  
+  // const fetchDeals = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const res: any = await apiClient.get(
+  //       apiClient.URLS.deals,
+  //       { page, limit: LIMIT, search: q || undefined, 
+  //       from: from || undefined,
+  //       to: to || undefined, },
+  //       true
+  //     );
+
+  //     const list = Array.isArray(res.body.data) ? res.body.data : [];
+
+  //     setItems(list);
+  //     setTotal(list.meta?.total);
+  //   } catch (e) {
+  //     console.error(e);
+  //     setItems([]);
+  //     setTotal(0);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  const rootUserId = useMemo(() => {
+    const id = session?.user?.id;
+    const role = session?.user?.systemRole;
+
+    if (!id) return undefined;
+    if (role === "ADMIN") return undefined; // CEO view: no rootUserId
+    return id; // normal user: restrict by own hierarchy
+  }, [session?.user?.id, session?.user?.systemRole]);
+  const fetchDeals = useCallback(async () => {
+    if (status !== "authenticated") return; // wait for session
+
     setLoading(true);
     try {
-      const res: any = await apiClient.get(
-        apiClient.URLS.deals,
-        { page, limit: LIMIT, search: q || undefined, 
+      const params: any = {
+        ...(rootUserId ? { rootUserId } : {}),
+        ...(selectedUserId ? { selectedUserId } : {}),
+
+      
+        page,
+        limit: LIMIT,
+        search: q || undefined,
         from: from || undefined,
-        to: to || undefined, },
+        to: to || undefined,
+      };
+
+      const res: any = await apiClient.get(`
+        ${apiClient.URLS.deals}/hierarchy`, 
+        params,
         true
       );
 
-      const list = Array.isArray(res.body.data) ? res.body.data : [];
+      const body = res?.body;
 
-      setItems(list);
-      setTotal(list.meta?.total);
+      setVisibleUsers(Array.isArray(body?.visibleUsers) ? body.visibleUsers : []);
+      setItems(Array.isArray(body?.deals) ? body.deals : []);
+
+      
+      setTotal(Array.isArray(body?.deals) ? body.deals.length : 0);
     } catch (e) {
       console.error(e);
+      setVisibleUsers([]);
       setItems([]);
       setTotal(0);
     } finally {
       setLoading(false);
     }
+  }, [status, rootUserId, selectedUserId , page, q]);
+  const onSelectHierarchyUser = (id?: string) => {
+    setSelectedUserId(id);
+    setPage(1);
   };
+
 
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");

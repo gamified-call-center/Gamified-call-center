@@ -250,14 +250,14 @@ export default function JobApplicationWizard() {
   };
 
   const next = () => {
-    if (!validateStep(step)) return;
+    // if (!validateStep(step)) return;
     setStep((p) => Math.min(p + 1, STEPS.length - 1));
   };
 
   const back = () => setStep((p) => Math.max(p - 1, 0));
 
   const onSubmit = async () => {
-    if (!validateStep(3)) return;
+    // if (!validateStep(3)) return;
     setLoading(true);
 
     const payload = {
@@ -604,7 +604,7 @@ export default function JobApplicationWizard() {
                           />
                         </Field>
 
-                        {/* ✅ Proof only when true */}
+                       
                         {form.ahipCertified && (
                           <Field
                             label="AHIP Proof"
@@ -614,11 +614,12 @@ export default function JobApplicationWizard() {
                             <FileInput
                               type="file"
                               folderName="job-applications"
+                              name="ahipProofUrl"
                               initialFileUrl={form.ahipProofUrl}
                               requiredClass="app-border"
                               onFileChange={(url: string) => {
                                 update("ahipProofUrl", url as any);
-                                toast.success("AHIP proof uploaded!");
+                                
                               }}
                             />
                           </Field>
@@ -675,7 +676,7 @@ export default function JobApplicationWizard() {
                               requiredClass="app-border"
                               onFileChange={(url: string) => {
                                 updateStateLicenseFile(state, url);
-                                toast.success(`${state} license uploaded!`);
+                               
                               }}
                             />
                           </Field>
@@ -759,11 +760,12 @@ export default function JobApplicationWizard() {
                         <FileInput
                           type="file"
                           folderName="job-applications"
+                          name="driversLicenseOrPassportUrl"
                           initialFileUrl={form.driversLicenseOrPassportUrl}
                           requiredClass="app-border"
                           onFileChange={(url: string) => {
                             update("driversLicenseOrPassportUrl", url as any);
-                            toast.success("Document uploaded!");
+                           
                           }}
                         />
                       </Field>
@@ -776,11 +778,12 @@ export default function JobApplicationWizard() {
                         <FileInput
                           type="file"
                           folderName="job-applications"
+                          name="assignmentOfCommissionUrl"
                           initialFileUrl={form.assignmentOfCommissionUrl}
                           requiredClass="app-border"
                           onFileChange={(url: string) => {
                             update("assignmentOfCommissionUrl", url as any);
-                            toast.success("Document uploaded!");
+                          
                           }}
                         />
                       </Field>
@@ -793,11 +796,12 @@ export default function JobApplicationWizard() {
                         <FileInput
                           type="file"
                           folderName="job-applications"
+                          name="enoCertificateUrl"
                           initialFileUrl={form.enoCertificateUrl}
                           requiredClass="app-border"
                           onFileChange={(url: string) => {
                             update("enoCertificateUrl", url as any);
-                            toast.success("Document uploaded!");
+                            
                           }}
                         />
                       </Field>
