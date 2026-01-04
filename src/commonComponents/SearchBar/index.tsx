@@ -49,9 +49,9 @@ export default function SearchBar({
         onFocus={onFocus}
         onBlur={onBlur}
         className={[
-          "w-full pl-12 pr-4 py-2 bg-white/80 backdrop-blur-sm",
-          "border-2 border-gray-200/60 rounded-2xl outline-none",
-          "focus:ring-3 focus:ring-blue-500/20 focus:border-blue-400/60",
+          "w-full pl-12 pr-4 py-1 bg-white/80 backdrop-blur-sm",
+          "border-2 border-gray-200/60 rounded-xl outline-none",
+          "focus:ring-3 focus:ring-blue-500/20 placeholder:text-[14px] focus:border-blue-400/60",
           "shadow-sm hover:shadow transition-all duration-300",
           "text-gray-800 placeholder-gray-400",
           inputClassName,

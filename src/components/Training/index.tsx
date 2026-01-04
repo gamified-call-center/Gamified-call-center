@@ -8,22 +8,15 @@ import {
   Trash2,
   Plus,
   X,
-  Home,
   BookOpen,
   GraduationCap,
   CheckCircle,
-  Clock,
   Award,
   Target,
-  Search,
   Eye,
   EyeOff,
-  Download,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import Link from "next/link";
-import apiClient from "../../Utils/apiClient";
-import toast from "react-hot-toast";
 import Loader from "@/commonComponents/Loader";
 import { useSession } from "next-auth/react";
 import {
@@ -40,7 +33,7 @@ import { BreadCrumb } from "@/commonComponents/BreadCrumb";
 
 export default function TrainingPage() {
   const user = useSession().data?.user;
-  let isAdmin = user?.designation === "CEO";
+  const isAdmin = user?.designation === "CEO";
 
   const [data, setData] = useState<TrainingItem[]>([]);
   const [openId, setOpenId] = useState<string | number | null>(null);
@@ -391,11 +384,10 @@ export default function TrainingPage() {
                 {[0, 25, 50, 75, 100].map((percent) => (
                   <div
                     key={percent}
-                    className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
-                      completionPercentage >= percent
-                        ? "bg-white shadow-lg"
-                        : "bg-slate-300"
-                    }`}
+                    className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${completionPercentage >= percent
+                      ? "bg-white shadow-lg"
+                      : "bg-slate-300"
+                      }`}
                   />
                 ))}
               </div>
@@ -488,11 +480,10 @@ export default function TrainingPage() {
               <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                 <button
                   onClick={() => setShowCompleted(!showCompleted)}
-                  className={`w-full sm:w-auto px-2 sm:px-4 py-1 label-text rounded-xl font-medium transition-all duration-100 flex items-center gap-2 justify-center ${
-                    showCompleted
-                      ? "bg-linear-to-r from-purple-50 to-pink-50 text-purple-700 border border-purple-200"
-                      : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                  }`}
+                  className={`w-full sm:w-auto px-2 sm:px-4 py-1 label-text rounded-xl font-medium transition-all duration-100 flex items-center gap-2 justify-center ${showCompleted
+                    ? "bg-linear-to-r from-purple-50 to-pink-50 text-purple-700 border border-purple-200"
+                    : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    }`}
                 >
                   {showCompleted ? (
                     <Eye className="w-4 h-4" />
@@ -563,23 +554,20 @@ export default function TrainingPage() {
                       boxShadow: "0 10px 30px rgba(0, 0, 0, 0.05)",
                     }}
                     className={`group relative bg-white border rounded-xl sm:rounded-2xl transition-all duration-150 hover:border-purple-200
-                      ${
-                        isOpen
-                          ? "border-purple-300 bg-linear-to-r from-purple-50/30 via-white to-white"
-                          : "border border-slate-200"
+                      ${isOpen
+                        ? "border-purple-300 bg-linear-to-r from-purple-50/30 via-white to-white"
+                        : "border border-slate-200"
                       }
-                      ${
-                        item.completed ? "border-l-4 border-l-emerald-500" : ""
+                      ${item.completed ? "border-l-4 border-l-emerald-500" : ""
                       }`}
                   >
                     {/* Header */}
                     <div
                       className={`flex flex-col sm:flex-row sm:items-center justify-between p-2  sm:px-6
-                      ${
-                        isOpen
+                      ${isOpen
                           ? "bg-linear-to-r from-purple-50/50 to-transparent"
                           : "bg-white"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center gap-3 flex-1">
                         {/* Completion Checkbox */}
@@ -588,11 +576,10 @@ export default function TrainingPage() {
                             whileHover={{ scale: 1.1 }}
                             whileTap={{ scale: 0.9 }}
                             onClick={() => toggleCompletion(item.id)}
-                            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-100 ${
-                              item.completed
-                                ? "bg-linear-to-br from-emerald-500 to-teal-500"
-                                : "bg-slate-100 hover:bg-slate-200"
-                            }`}
+                            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-100 ${item.completed
+                              ? "bg-linear-to-br from-emerald-500 to-teal-500"
+                              : "bg-slate-100 hover:bg-slate-200"
+                              }`}
                             title={"Toggle completion"}
                           >
                             {item.completed && (
@@ -630,11 +617,10 @@ export default function TrainingPage() {
 
                           <div className="flex items-center gap-3 sm:gap-4 flex-1">
                             <div
-                              className={`hidden xs:flex w-8 h-8 sm:w-10 sm:h-10 items-center justify-center rounded-xl font-bold shadow-sm ${
-                                item.completed
-                                  ? "bg-linear-to-br from-emerald-100 to-teal-100 text-emerald-700"
-                                  : "bg-linear-to-br from-purple-100 to-pink-100 text-purple-700"
-                              }`}
+                              className={`hidden xs:flex w-8 h-8 sm:w-10 sm:h-10 items-center justify-center rounded-xl font-bold shadow-sm ${item.completed
+                                ? "bg-linear-to-br from-emerald-100 to-teal-100 text-emerald-700"
+                                : "bg-linear-to-br from-purple-100 to-pink-100 text-purple-700"
+                                }`}
                             >
                               {index + 1}
                             </div>
@@ -652,13 +638,12 @@ export default function TrainingPage() {
                               </div>
                               <div className="flex items-center gap-2 mt-1">
                                 <div
-                                  className={`px-2 py-0.5 rounded-lg text-xs font-medium ${
-                                    item.type === "video"
-                                      ? "bg-red-50 text-red-700"
-                                      : item.type === "pdf"
+                                  className={`px-2 py-0.5 rounded-lg text-xs font-medium ${item.type === "video"
+                                    ? "bg-red-50 text-red-700"
+                                    : item.type === "pdf"
                                       ? "bg-blue-50 text-blue-700"
                                       : "bg-emerald-50 text-emerald-700"
-                                  }`}
+                                    }`}
                                 >
                                   {item.type.toUpperCase()}
                                 </div>
@@ -914,8 +899,8 @@ export default function TrainingPage() {
                       ? "Updating..."
                       : "Update"
                     : loading
-                    ? "Adding..."
-                    : "Add"}
+                      ? "Adding..."
+                      : "Add"}
                 </button>
               </div>
             </div>
