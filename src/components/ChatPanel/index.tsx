@@ -508,7 +508,7 @@ export default function ChatPanel() {
     if (!id) return;
     setLoading(true);
     try {
-      const res = await apiClient.get(apiClient.URLS.users);
+      const res = await apiClient.get(apiClient.URLS.user);
       const all = (res.body.data ?? []) as any[];
 
       const existingUsersRes = await apiClient.get(
