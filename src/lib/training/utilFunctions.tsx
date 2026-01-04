@@ -6,7 +6,7 @@ export const getAgentId = async (id: string): Promise<string | null> => {
   try {
     if (!id) return null;
 
-    const url = `${apiClient.URLS.users}/${id}`;
+    const url = `${apiClient.URLS.user}/${id}`;
     const res = await apiClient.get(url);
     console.log(res);
     return res?.body?.agentProfile?.id ?? null;

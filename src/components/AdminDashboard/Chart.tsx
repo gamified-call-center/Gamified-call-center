@@ -236,7 +236,7 @@ export default function DealsChatCard() {
       });
 
       const res = await apiClient.get(
-        `${apiClient.URLS.users}/by-designation/${agentDesignation?.id}`
+        `${apiClient.URLS.user}/by-designation/${agentDesignation?.id}`
       );
 
       const body = res?.body?.data;

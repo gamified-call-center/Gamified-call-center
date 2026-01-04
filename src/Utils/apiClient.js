@@ -30,7 +30,7 @@ const URLS = {
   
   addresses: `${base_url}/addresses`,
   resources: `${base_url}/admin/resources`,
-  users: `${base_url}/users`,
+  user: `${base_url}/users`,
   applications: `${base_url}/public/applications`,
   adminapplications: `${base_url}/admin/applications`,
   dashboard: `${base_url}/dashboard`,

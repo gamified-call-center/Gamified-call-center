@@ -1,5 +1,4 @@
-import { ChatUser,Channel,Message } from "./types";
-
+import { ChatUser, Channel, Message } from "./types";
 
 export const DIRECT_MESSAGES: ChatUser[] = [
   {
@@ -98,56 +97,7 @@ export const DIRECT_MESSAGES: ChatUser[] = [
   },
 ];
 
-export const CHANNELS: Channel[] = [
-  {
-    id: "c1",
-    name: "Team Alpha",
-    memberCount: 12,
-    lastMessage: "Anna: Deadline extended",
-    timestamp: "10:25 AM",
-    unreadCount: 3,
-  },
-  {
-    id: "c2",
-    name: "Client Updates",
-    memberCount: 8,
-    lastMessage: "New case assigned",
-    timestamp: "09:45 AM",
-    isPrivate: true,
-  },
-  {
-    id: "c3",
-    name: "Policy Reviews",
-    memberCount: 15,
-    lastMessage: "5 policies pending",
-    timestamp: "Yesterday",
-    isPinned: true,
-  },
-  {
-    id: "c4",
-    name: "Sales Team",
-    memberCount: 20,
-    lastMessage: "Monthly target achieved! 🎉",
-    timestamp: "10:10 AM",
-    unreadCount: 12,
-  },
-  {
-    id: "c5",
-    name: "Support",
-    memberCount: 6,
-    lastMessage: "System maintenance at 2 AM",
-    timestamp: "Monday",
-  },
-  {
-    id: "c6",
-    name: "Managers",
-    memberCount: 5,
-    lastMessage: "Budget meeting tomorrow",
-    timestamp: "Tuesday",
-    isPrivate: true,
-    isPinned: true,
-  },
-];
+
 
 export const INITIAL_MESSAGES: Message[] = [
   {
